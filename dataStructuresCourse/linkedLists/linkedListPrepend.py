@@ -31,8 +31,8 @@ class LinkedList:
             self.head = prepended_node
             self.tail = prepended_node
         else:
-            prepended_node.next = self.head # Point the prepended node equal to head of current linked list
-            self.head = prepended_node # Move head back by pointing it at the new prepended node
+            prepended_node.next = self.head # Link the new node to the linked list
+            self.head = prepended_node # Point the head to the correct node (the new prepended node)
         self.length +=1 # Increment the length of the linked list
         return True # Return true to use prepend as a boolean
     

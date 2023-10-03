@@ -36,7 +36,7 @@ class LinkedList:
     
     def pop_first(self):
         if self.length == 0:
-            return None
+            return None # Stop the rest of the code from running
         temp = self.head # In order to remove a node, we have to have something point at it
         self.head = self.head.next # Move head over one
         temp.next = None # Remove the first node from the list
@@ -44,6 +44,23 @@ class LinkedList:
         if self.length == 0: # Edge Case #2: If the length is zero after decrementing,
             self.tail = None # Lines 38 - 41 run if there is one node in the list, head gets set = to None, must set tail to None
         return temp.value
+    
+# Another way to write pop first
+    def popfirst(self):
+        if self.length == 0:
+            return None
+        
+        first_value = self.head
+        second_value = self.head.next
+
+        first_value.next = None
+        self.head = second_value
+        
+        self.length -= 1
+        if self.length == 0:
+            self.tail = None
+        
+        return first_value
 
     def print_list(self):
         temp = self.head

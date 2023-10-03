@@ -35,9 +35,9 @@ class LinkedList:
         # We return true for another method that calls on append method (requires true or false)
         return True
 
-    def pop(self):          # Remove an item from the end of the list
+    def pop(self): # Remove an item from the end of the list
         if self.length == 0:
-            return None
+            return None # Stop the rest of the code from running
         else:
             temp = self.head # Set two variables, pre and temp equal to the head
             pre = self.head
