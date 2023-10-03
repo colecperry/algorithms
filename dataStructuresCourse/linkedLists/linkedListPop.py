@@ -1,4 +1,5 @@
 # Pop removes the last item in the linked list
+# Time complexity is O(n)
 # What makes this more complicated is that the tail is moving to the left, and the arrows are pointing right
 # The only way to move the tail is to get to the node before it, and use .next 
 # 2 Edge Cases:
@@ -40,16 +41,16 @@ class LinkedList:
         else:
             temp = self.head # Set two variables, pre and temp equal to the head
             pre = self.head
-            while(temp.next): # Loop through the linked list, and while the next node is True,
+            while(temp.next): # Loop through the linked list, and while the next node is not none,
                 pre = temp    # Set pre to temp
                 temp = temp.next # Set temp to the next node after pre
             self.tail = pre   # Once loop finishes, set pre (node before last node) to self.tail
             self.tail.next = None # Set self.tail.next to None to pop the last node off the linked list
             self.length -= 1
-            if self.length == 0: # Edge Case #2: If the length is zero after decrementing, set head and tail to None, and 
-                self.head = None # return the node, which should be None
+            if self.length == 0: # Edge Case #2: If the length is zero after decrementing,
+                self.head = None  # set head and tail to None to accurately represent the state of an empty LL
                 self.tail = None
-            return temp.value
+            return temp.value # return the node, which should be None
 
     def print_list(self):
         temp = self.head

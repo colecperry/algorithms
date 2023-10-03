@@ -1,4 +1,6 @@
 # Pop First removes the first item in the linked list
+# Time complexity is O(1)
+# Time complexity is faster than regular list - O(n)
 # 2 Edge Cases:
 #      1. If we have an empty linked list
 #      2. If we only have one node in the list

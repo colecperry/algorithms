@@ -1,5 +1,4 @@
-# Get - We pass in an index, and it returns the node at that index
-# Time complexity is O(n)
+# Set - We pass in an index and a value and we will change that value
 # Whatever the index is, that's the number of times we have to move temp over
 
 class Node:
@@ -37,7 +36,24 @@ class LinkedList:
         temp = self.head # Point a variable temp at the head of the linked list
         for _ in range(index): # Create a loop that runs the number of times in the index passed in
             temp = temp.next # Move the temp over one to the right
-        return temp.value
+        return temp
+
+    
+    def set_value(self, index, value):
+        temp = self.get(index) # Return the node at the index we passed in
+        if temp: # If temp is not None, or if temp is True
+            temp.value = value # Reassign the returned node with the value passed in
+            return True # Return true if valid index passed in
+        return False # Return false if invalid index passed in
+    
+    # def set_value(self, index, value):
+    #     if index < 0 or index >= self.length: # It is possible someone could pass in an index outside of our Linked List
+    #         return None
+    #     temp = self.head # Point a variable temp at the head of the linked list
+    #     for _ in range(index): # Create a loop that runs the number of times in the index passed in
+    #         temp = temp.next # Move the temp over one to the right
+    #         temp.value = value  # Reassign temp's value
+    #     return temp.value
 
     
     def print_list(self):
@@ -48,10 +64,15 @@ class LinkedList:
 
     
     
-my_linked_list = LinkedList(0)
-my_linked_list.append(1)
-my_linked_list.append(2)
+my_linked_list = LinkedList(11)
 my_linked_list.append(3)
+my_linked_list.append(23)
+my_linked_list.append(7)
 
-print(my_linked_list.get(1))
+print('LL before set_value():')
+my_linked_list.print_list()
 
+my_linked_list.set_value(1,4)
+
+print('\nLL after set_value():')
+my_linked_list.print_list()

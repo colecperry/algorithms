@@ -1,4 +1,5 @@
 # Add a node to the beginning of the list
+# Time complexity is O(1)
 # For linkedlist big O is faster than regular lists! 0(1) vs 0(n)
 
 class Node:

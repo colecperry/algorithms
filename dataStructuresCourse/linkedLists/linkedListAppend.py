@@ -1,4 +1,5 @@
 # Append is adding a node to the end of the list
+# Time complexity is 0(1)
 # Edge case is when we do not have any items in the linked list
 # In this case, there is no exisiting list to connect to new node to, so we won't be able to use "next" to connect them
 
