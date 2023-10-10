@@ -1,4 +1,11 @@
-# Add a node to the beginning of the list
+# PREPEND - Add a node to the beginning of the list
+
+# How to Solve:
+    # Create a new node
+    # Link new node to the head of the linked list
+    # Set head to the new node
+    # Solve for edge cases
+
 # Time complexity is O(1)
 # For linkedlist big O is faster than regular lists! 0(1) vs 0(n)
 

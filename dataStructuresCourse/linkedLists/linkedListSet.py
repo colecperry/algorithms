@@ -1,5 +1,12 @@
-# Set - We pass in an index and a value and we will change that value
+# SET - Pass in an index and a value to change the node's value
+
+# How to Solve:
+    # Return the node and set to a variable using the GET method
+    # If you return a node, reassign it's value
+    # Don't need to solve for edge cases - that is done through GET method
+
 # Whatever the index is, that's the number of times we have to move temp over
+# Remember to remove ".value" on the return statement of GET or it will not work b/c you are returning the value when using .GET on set_value method
 
 class Node:
     def __init__(self, value):
@@ -39,9 +46,9 @@ class LinkedList:
         return temp
 
     
-    def set_value(self, index, value):
+    def set_value(self, index, value): # You can't use set in Python as it is a keyword
         temp = self.get(index) # Return the node at the index we passed in
-        if temp: # If temp is not None, or if temp is True
+        if temp: # Test to see if temp is pointing to a node, or None
             temp.value = value # Reassign the returned node with the value passed in
             return True # Return true if valid index passed in
         return False # Return false if invalid index passed in

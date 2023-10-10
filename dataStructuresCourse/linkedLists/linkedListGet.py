@@ -1,4 +1,10 @@
-# Get - We pass in an index, and it returns the node at that index
+# GET - Pass in an index and return the node at that index
+
+# How to Solve
+    # Point a variable to the head of the linked list
+    # Create a loop that runs # of times of the index
+    # Solve for edge cases
+
 # Time complexity is O(n)
 # Whatever the index is, that's the number of times we have to move temp over
 

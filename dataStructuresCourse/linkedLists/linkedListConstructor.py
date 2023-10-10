@@ -1,3 +1,7 @@
+# How to Solve:
+# Create the Node class
+# Create the LinkedList class, which calls on the Node class via composition
+
 # Node class's sole responsibility is to create a new node so you can call the class to append, prepend, etc
 # "Self" variables are variables that apply to a specific instance
 class Node:
@@ -18,9 +22,9 @@ class LinkedList:
         temp = self.head
         while temp is not None:
             print(temp.value)
-            temp = temp.next
+            temp = temp.next # Move temp to the next node in the linkedList
         
-
+    
 
 # This is what you call to create the linked list with a single node with a value of 4
 my_linked_list = LinkedList(4)

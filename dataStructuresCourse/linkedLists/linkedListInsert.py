@@ -1,8 +1,17 @@
-# Insert a new node at a particular index that has a particular value
+# INSERT: Insert a new node at a particular index that has a particular value
+
+# How to Solve:
+    # Check if index passed in is out of range
+    # If index is 0, prepend
+    # If index is last, append
+    # If index is neither, 
+        # Create a new node
+        # Get the index one before the index passed in to help connect it to the LL
+
 # Time complexity is O(n)
 # Edge Cases:
-# If the index we are inserting at is zero
-# If the index we are inserting at is the last index of the list
+    # If the index we are inserting at is zero
+    # If the index we are inserting at is the last index of the list
 
 class Node:
     def __init__(self, value):
@@ -56,15 +65,15 @@ class LinkedList:
         if index < 0 or index > self.length:
             return False
         if index == 0: # If the index is zero, prepend the node to the front of the list
-            return self.prepend(value)
+            return self.prepend(value) # End the code here
         if index == self.length: # If the index is equal to the last index, append the node to the end of the list
-            return self.append(value)
+            return self.append(value) # End the code here
         inserted_node = Node(value) # Create a new node
-        temp = self.get(index - 1) # Get the index before the one passed in to the parameters
-        inserted_node.next = temp.next # Pointed newly created node to the node right of temp, which is one index after insertion
-        temp.next = inserted_node # Take temp's arrow, one left of insertion and point it to the newly created node
+        temp = self.get(index - 1) # Get the node one before the index passed in
+        inserted_node.next = temp.next # Point the newly created node to the node right insertion (temp.next is pointing there)
+        temp.next = inserted_node # Point temp to the newly created node
         self.length += 1
-        return True
+        return True # Return True if successful
             
     def print_list(self):
         temp = self.head

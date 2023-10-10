@@ -1,4 +1,11 @@
-# Append is adding a node to the end of the list
+# APPEND - adding a node to the end of the list
+
+# How to Solve
+    # Create a node
+    # Connect current tail to the new node
+    # Point Linked List to new tail
+    # Solve for edge cases
+
 # Time complexity is 0(1)
 # Edge case is when we do not have any items in the linked list
 # In this case, there is no exisiting list to connect to new node to, so we won't be able to use "next" to connect them
@@ -17,7 +24,7 @@ class LinkedList:
 
 # Step 1: Create a new node by calling on the Node class
     def append(self,value):
-        appended_node = Node(value)
+        appended_node = Node(value) # Create a new node floating in space
         # If the dataset is empty, point both head and tail to the new appended node 
         if self.length == 0:
             self.head = appended_node
@@ -28,7 +35,7 @@ class LinkedList:
             self.tail.next = appended_node
             # Since the node is added to the end, point the tail to the new node
             self.tail = appended_node  
-        self.length +=1
+        self.length +=1 # Add one to the length regardless of the length of the list
         # We return true for another method that calls on append method (requires true or false)
         return True
     

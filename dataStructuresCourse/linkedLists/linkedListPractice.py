@@ -6,8 +6,8 @@ class Node:
 class LinkedList:
     def __init__(self, value):
         new_node = Node(value)
-        self.head = new_node
         self.tail = new_node
+        self.head = new_node
         self.length = 1
 
     def print_list(self):
@@ -25,24 +25,25 @@ class LinkedList:
             self.tail.next = appended_node
             self.tail = appended_node
         self.length += 1
-
+        return appended_node
+    
     def pop(self):
         if self.length == 0:
             return None
-        else: 
+        else:
             pre = self.head
             temp = self.head
-            while temp.next:
+            while (temp.next):
                 pre = temp
                 temp = temp.next
             self.tail = pre
             self.tail.next = None
-            self.length =- 1
+            self.length -= 1
             if self.length == 0:
                 self.head = None
                 self.tail = None
-        return temp
-    
+            return temp.value
+        
     def prepend(self, value):
         prepended_node = Node(value)
         if self.length == 0:
@@ -54,36 +55,45 @@ class LinkedList:
         self.length += 1
         return True
     
-    def pop_first(self):
-        if self.length == 0:
-            return None
-        else:
-            first_value = self.head
-            second_value = self.head.next
-            first_value.next = None
-            self.head = second_value
-            self.length =- 1
-            if self.length == 0:
-                self.head = None
-                self.tail = None
-            return first_value
-        
     def get(self, index):
         if index < 0 or index >= self.length:
             return None
         temp = self.head
         for _ in range(index):
             temp = temp.next
-        return temp.value
+        return temp
 
-            
+    def set_value(self, index, value):
+        temp = self.get(index)
+        if temp:
+            temp.value = value
+            return True
+        return False
+    
+    def insert_value(self, index, value):
+        if index < 0  or index >= self.length:
+            return False
+        if index == 0:
+            return self.prepend(value)
+        if index == self.length:
+            return self.append(value)
+        inserted_node = Node(value)
+        temp = self.get(index - 1)
+        inserted_node.next = temp.next
+        temp.next = inserted_node
+        self.length += 1
+        return True
 
+
+    
 
 
 
 my_linked_list = LinkedList(1)
 my_linked_list.append(2)
-my_linked_list.append(3)
-print(my_linked_list.get(0))
-# my_linked_list.print_list()
-
+my_linked_list.prepend(0)
+print('LL before set_value():')
+my_linked_list.print_list()
+my_linked_list.insert_value(0, 2)
+print('\nLL after set_value():')
+my_linked_list.print_list()
