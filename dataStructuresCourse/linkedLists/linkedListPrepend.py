@@ -1,6 +1,6 @@
 # PREPEND - Add a node to the beginning of the list
 
-# How to Solve:
+# How to Solve: Use the head node
     # Create a new node
     # Link new node to the head of the linked list
     # Set head to the new node

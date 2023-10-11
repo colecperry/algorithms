@@ -1,6 +1,6 @@
 # APPEND - adding a node to the end of the list
 
-# How to Solve
+# How to Solve : Get to the tail node
     # Create a node
     # Connect current tail to the new node
     # Point Linked List to new tail

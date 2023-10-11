@@ -1,4 +1,16 @@
-# Linked List Remove - remove a node at a specific index
+# Linked List REMOVE - remove a node at a specific index
+
+# How to Solve:
+    # Check if index is out of range
+    # If index is 0, pop first
+    # If index is last, pop
+    # If neither, 
+        # Set variable to node one to the left
+        # Set another variable to the node you are removing
+        # Connect the node to the left to the one to the right of where you are removing
+        # Break off the node
+    # Decrement
+
 # Time complexity is O(n)
 # Three Edge Cases:
 # 1. Node at index passed in is out of range
@@ -81,10 +93,10 @@ class LinkedList:
             return None # If we are successful we return a node, if unsuccessful we return None (opposite of a node)       
         if index == 0:
             return self.pop_first()
-        if index == self.length - 1:
+        if index == self.length - 1: # Subtract one to get last index 
             return self.pop()
-        prev = self.get(index - 1) # Need to have a variable to the left of the one we need to remove
-        temp = prev.next # This is the O(1) way of assigning the temp variable vs get method is 0(n)
+        prev = self.get(index - 1) # Get node to the left of the one we need to remove
+        temp = prev.next # Get node one to the right of prev (to be removed)
         prev.next = temp.next # Point the node before index passed in to the node after the index passed in
         temp.next = None # Break the node at the index passed in off of the list
         self.length -= 1

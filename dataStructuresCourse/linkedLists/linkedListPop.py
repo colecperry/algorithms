@@ -1,6 +1,6 @@
 # POP - removes the last item in the linked list
 
-# How to Solve
+# How to Solve : Get to second to last node
     # Set two variables, temp and pre
     # Loop through linked list, setting temp to one node after pre
     # Once loop finishes, set pre to tail, pop off the last node using .next
@@ -57,7 +57,6 @@ class LinkedList:
             if self.length == 0: # Edge Case #2: If the length is zero after decrementing,
                 self.head = None  # set head and tail to None to accurately represent the state of an empty LL
                 self.tail = None
-            print(pre)
             return temp.value # return the node, which should be None
 
     def print_list(self):
