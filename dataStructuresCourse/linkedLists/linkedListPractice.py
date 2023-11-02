@@ -92,6 +92,38 @@ class LinkedList:
         self.length -= 1
         return True
         
+    def remove_value(self, index):
+        if index < 0 or index > self.length:
+            return None
+        if index == 0:
+            return self.pop_first()
+        if index == self.length:
+            return self.pop()
+        prev = self.get_value(index - 1)
+        temp = prev.next
+        prev.next = None
+        prev.next = temp.next
+        temp.next = None
+        self.length -= 1
+        return temp
+
+    def reverse(self):
+        node1 = self.head
+        node2 = self.tail
+        self.head = node2
+        self.tail = node1
+        before = None
+        current = self.tail
+        after = current.next
+        for _ in range(self.length):
+            after = current.next
+            current.next = before
+            before = current
+            current = after
+        return True
+
+
+
 
 
 
@@ -99,8 +131,8 @@ class LinkedList:
 my_linked_list = LinkedList(1)
 my_linked_list.append(2)
 my_linked_list.append(3)
-my_linked_list.append(5)
+my_linked_list.append(4)
 my_linked_list.print_list()
 print(" ")
-my_linked_list.insert_value(3, 4)
+my_linked_list.reverse()
 my_linked_list.print_list()

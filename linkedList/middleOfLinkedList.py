@@ -1,44 +1,61 @@
-# Given the head of a singly linked list, return the middle node of the linked list.
-# If there are two middle nodes, return the second middle node.
+# How to solve (without using the length attribute)
+    # Use the two pointer approach
+    # One pointer (slow) moves one node at a time,
+    # The other pointer (fast) moves two nodes at a time
+    # When the fast pointer reaches the end of the list, the slow pointer should be in the middle
+    # For an even number of nodes, return the second half of the middle
 
-# Example 1:
-# Input: head = [1,2,3,4,5]
-# Output: [3,4,5]
-# Explanation: The middle node of the list is node 3.
+class Node:
+    def __init__(self, value):
+        self.value = value
+        self.next = None
+        
 
-# Example 2:
-# Input: head = [1,2,3,4,5,6]
-# Output: [4,5,6]
-# Explanation: Since the list has two middle nodes with values 3 and 4, we return the second one.
+class LinkedList:
+    def __init__(self, value):
+        new_node = Node(value)
+        self.head = new_node
+        self.tail = new_node
 
-class ListNode(object):
-    def init(self, val=0, next=None):
-        self.val = val
-        self.next = next
+        
+    def append(self, value):
+        new_node = Node(value)
+        if self.head == None:
+            self.head = new_node
+            self.tail = new_node
+        else:
+            self.tail.next = new_node
+            self.tail = new_node
+        return True
+        
 
-class Solution(object):
-    def middleNode(self, head):
-        length = 0
-        current = head
-        while current:
-            length += 1
-            current = current.next
-
-            found = head
-            counter = int(counter/2)
-            while counter > 0:
-                found = found.next
-                counter -=1
-
-            return found
+    def find_middle_node(self):
+        slow = self.head # Set 2 pointers, slow and fast to the head
+        fast = self.head
+        # We must include "while fast" because if fast gets pointed outside the list, it will become None.
+        # We cannot access "None.next" so we just check the node itself
+        while fast and fast.next: # Check if there is a node, and then check if there's a next node 
+            slow = slow.next # Advance the slow variable to the next node
+            fast = fast.next.next # Advance the fast variable two nodes forward
+        return slow
 
 
-list1 = ListNode(1)
-list1.next = ListNode(2)
-list1.next.next = ListNode(4)
 
-list2 = ListNode(1)
-list2.next = ListNode(3)
-list2.next.next = ListNode(4)
 
-print(solution.middleNode([1,2,3,4,5]))
+
+my_linked_list = LinkedList(1)
+my_linked_list.append(2)
+my_linked_list.append(3)
+my_linked_list.append(4)
+my_linked_list.append(5)
+
+print(my_linked_list.find_middle_node().value)
+
+
+
+"""
+    EXPECTED OUTPUT:
+    ----------------
+    3
+    
+"""
