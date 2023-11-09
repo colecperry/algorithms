@@ -3,7 +3,7 @@
 # How to Solve
     # Point a variable to the head of the linked list
     # Create a loop that runs # of times of the index
-    # Solve for edge cases
+    # Solve for edge cases - if index passed in is out of range
 
 # Time complexity is O(n)
 # Whatever the index is, that's the number of times we have to move temp over

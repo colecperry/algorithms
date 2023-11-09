@@ -1,9 +1,9 @@
 # INSERT: Insert a new node at a particular index that has a particular value
 
 # How to Solve:
-    # Check if index passed in is out of range
+    # Check if the index passed in is out of range
     # If index is 0, prepend
-    # If index is last, append
+    # If index is equal to the length, append
     # If index is neither, 
         # Create a new node
         # Get the index one before the index passed in to help connect it to the LL
