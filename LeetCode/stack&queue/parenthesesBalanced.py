@@ -21,6 +21,15 @@
     # Push for Stack That Uses Lists
     # Pop for Stack That Uses Lists
 
+# How to Solve:
+    # Create a stack
+    # Iterate over each character in the string
+    # If it's an opening parentheses, push it onto the stack
+    # If it's a closing parentheses, 
+        # Pop the top element off the stack to see if it matches a corresponding opening parentheses
+        # Return False if they don't match
+    # If you get through the whole loop, return the is_empty function 
+
 class Stack:
     def __init__(self):
         self.stack_list = []
@@ -58,9 +67,9 @@ def is_balanced_parentheses(string):
         if s == '(': # If the current character is an opening parentheses,
             stack.push(s) # push it onto the stack using the push method
         elif s == ')': # If the character is a closing parentheses,
-            if stack.is_empty() or stack.pop() != '(': # Check if the stack is empty or if the next item in the
-                return False # stack is not an open parentheses. If either of these conditions are true, return
-                            # False because the parentheses are not balanced. 
+            if stack.is_empty() or stack.pop() != '(': # Check if the stack is empty or pop the next item off to 
+                return False # check if the stack is not an open parentheses. If either of these conditions are
+                            # true, return False because the parentheses are not balanced. 
     return stack.is_empty() # If the stack is empty, the run the 'is_empty' function which returns True if
                             # the length is zero, and false if not
 
