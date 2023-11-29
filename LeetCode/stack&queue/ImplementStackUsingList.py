@@ -6,3 +6,6 @@
 class Stack:
     def __init__(self): # Create an instance variable named 'stack_list' and
         self.stack_list = [] # assign it to an empty list to store the stack
+                                # both "[]" and "list()" initalize an empty list in python
+
+

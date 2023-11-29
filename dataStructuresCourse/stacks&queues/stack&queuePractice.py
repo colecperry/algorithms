@@ -19,8 +19,9 @@ class Stack:
         new_node = Node(value)
         if self.height == 0:
             self.top = new_node
-        new_node.next = self.top
-        self.top = new_node
+        else:
+            new_node.next = self.top
+            self.top = new_node
         self.height += 1
 
     def pop(self):
@@ -28,9 +29,9 @@ class Stack:
             return None
         else:
             temp = self.top
-            self.top = temp.next
+            self.top = self.top.next
             temp.next = None
-        self.height -= 1
+            self.height -= 1
         return temp
     
 class Queue:
@@ -39,13 +40,13 @@ class Queue:
         self.first = new_node
         self.last = new_node
         self.length = 1
-    
-    def print_queue(self):
-        temp = self.first # Start the pointer at "first"
-        while temp: # While the current node is True
-            print(temp.value) 
-            temp = temp.next # Move to the next node
 
+    def print_queue(self):
+        temp = self.first
+        while temp:
+            print(temp.value)
+            temp = temp.next
+    
     def enqueue(self, value):
         new_node = Node(value)
         if self.length == 0:
@@ -56,21 +57,9 @@ class Queue:
             self.last = new_node
         self.length += 1
 
-    def dequeue(self):
-        if self.length == 0:
-            return None
-        temp = self.first
-        if self.length == 1:
-            self.first = None
-            self.last == None
-        else:
-            self.first = self.first.next
-            temp.next = None
-        self.length -= 1
-        return temp
+
 
 
 my_stack = Stack(1)
-my_stack.push(0)
-my_stack.pop()
+my_stack.push(2)
 my_stack.print_list()

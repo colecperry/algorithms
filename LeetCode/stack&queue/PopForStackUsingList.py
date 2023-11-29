@@ -8,7 +8,8 @@ class Stack:
         self.stack_list = [] # assign it to an empty list to store the stack
         
     def print_stack(self): # Create a loop the length of the list, starting from the last index, ending at an
-        for i in range(len(self.stack_list)-1, -1, -1): # index of -1, with a step of -1 (decrementing by 1)
+        for i in range(len(self.stack_list)-1, -1, -1): # starting at the index of (len(self.stack_list)-1), 
+            # ending at -1 (goes up to but does not include the index -1 (loop down to zero), with a step of -1
             print(self.stack_list[i]) # access the element of stack_list at the current index 'i' and print
 
     def is_empty(self):

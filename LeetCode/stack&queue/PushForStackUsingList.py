@@ -10,6 +10,10 @@ class Stack:
     def print_stack(self): # Create a loop the length of the list, starting from the last index, ending at an
         for i in range(len(self.stack_list)-1, -1, -1): # index of -1, with a step of -1 (decrementing by 1)
             print(self.stack_list[i]) # access the element of stack_list at the current index 'i' and print
+    
+    # def print_list(self): # Another option for printing the stack in reversed order
+    #     for s in reversed(self.stack_list):
+    #         print(s)
 
     def push(self, value): # Create a method, push, that takes two parameters
         self.stack_list.append(value) # Using the stack_list attribute, append the value to the end of the list

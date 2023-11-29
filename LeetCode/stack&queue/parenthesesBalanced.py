@@ -67,15 +67,16 @@ def is_balanced_parentheses(string):
         if s == '(': # If the current character is an opening parentheses,
             stack.push(s) # push it onto the stack using the push method
         elif s == ')': # If the character is a closing parentheses,
-            if stack.is_empty() or stack.pop() != '(': # Check if the stack is empty or pop the next item off to 
-                return False # check if the stack is not an open parentheses. If either of these conditions are
-                            # true, return False because the parentheses are not balanced. 
+            if stack.is_empty() or stack.pop() != '(': # Check if the stack is empty (more closing parentheses 
+                return False # than opening) or pop the next item off to check if the stack is not an open 
+                            # parentheses. If either of these conditions are true, return False because the
+                            # parentheses are not balanced. 
     return stack.is_empty() # If the stack is empty, the run the 'is_empty' function which returns True if
                             # the length is zero, and false if not
 
 
 
-
+print(is_balanced_parentheses(''))
 
 def test_is_balanced_parentheses():
     try:
@@ -83,6 +84,7 @@ def test_is_balanced_parentheses():
         print('Test case 1 passed')
     except AssertionError:
         print('Test case 1 failed')
+
 
     try:
         assert is_balanced_parentheses('()') == True
