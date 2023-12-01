@@ -34,6 +34,19 @@ class MyQueue:
             # stack2 to stack1 in their original order, ensuring the queue is 
             # maintained in a First-In-First-Out ordering
 
+        # Notes to Understand:
+            # We want to implement a queue using two stacks
+            # The primary operations in a queue are enqueue and dequeue
+            # We reverse stack1 to make it easier to add a new element at the end
+            # Think of stack1 as representing the front of the queue
+            # By reversing, we can efficiently move elements to stack2 while 
+            # maintaining their order
+            # After reversing, we add the new element to the end of stack1 to 
+            # simulate adding to the back of the queue
+            # Finally, we reverse the elements back from stack2 to stack1 to
+            # restore the order, now stack1 represents the front of the queue
+            # with the newly enqueue'd element
+
         # Notes for each loop:
         # Enqueue(1) - Initially, stack1 is empty, and stack2 is also empty. The first
             # while loop doesn't execute because len(self.stack1) is initially 0.
@@ -50,6 +63,7 @@ class MyQueue:
             # The element 3 is added to the end of stack1.
             # The second while loop moves elements back from stack2 to stack1
             # (restoring their original order).
+        
 
     def peek(self):
         return self.stack1[-1]
