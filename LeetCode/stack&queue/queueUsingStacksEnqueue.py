@@ -35,17 +35,15 @@ class MyQueue:
             # maintained in a First-In-First-Out ordering
 
         # Notes to Understand:
-            # We want to implement a queue using two stacks
-            # The primary operations in a queue are enqueue and dequeue
-            # We reverse stack1 to make it easier to add a new element at the end
-            # Think of stack1 as representing the front of the queue
-            # By reversing, we can efficiently move elements to stack2 while 
-            # maintaining their order
-            # After reversing, we add the new element to the end of stack1 to 
-            # simulate adding to the back of the queue
-            # Finally, we reverse the elements back from stack2 to stack1 to
-            # restore the order, now stack1 represents the front of the queue
-            # with the newly enqueue'd element
+            # We want to implement a queue using the stack data structure
+            # We need to implement the "enqueue" method using basic stack operations 
+            # like push and pop
+            # Since we can only use a stack, if we "enqueue", we need to add our value
+            # to the bottom of the stack because a stack because since a stack is LIFO
+            # and a queue is FIFO, any new values added to our stack need to be added
+            # to the bottom since we are solving for a queue. This is also why stack1
+            # appears reversed
+
 
         # Notes for each loop:
         # Enqueue(1) - Initially, stack1 is empty, and stack2 is also empty. The first
@@ -54,14 +52,20 @@ class MyQueue:
             # The second while loop doesn't execute because len(self.stack2) is still
             # 0.
         # Enqueue(2) - The first while loop reverses the order of elements in
-            # stack1 by moving 1 to stack2.
+            # stack1 by:
+            # Popping 1 off stack1 and pushing onto stack2.
             # The element 2 is added to the end of stack1.
-            # The second while loop moves elements back from stack2 to stack1 
+            # The second while loop moves elements back from stack2 to stack1 by:
+            # Popping 1 off stack2 and adding to stack1
             # (restoring their original order).
         # Enqueue(3) - The first while loop reverses the order of elements in stack1
-            # by moving 2 and 1 to stack2.
+            # by:
+            # Popping 1 off stack1 and pushing onto stack2.
+            # Popping 2 off stack1 and pushing onto stack2
             # The element 3 is added to the end of stack1.
-            # The second while loop moves elements back from stack2 to stack1
+            # The second while loop moves elements back from stack2 to stack1 by:
+            # Popping 2 off stack2 and adding to stack1
+            # Popping 1 off stack2 and adding to stack1
             # (restoring their original order).
         
 
