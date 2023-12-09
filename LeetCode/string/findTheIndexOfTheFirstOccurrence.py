@@ -1,64 +1,72 @@
-import ipdb;
+# Given two strings needle and haystack, return the index of the first occurrence of 
+# needle in haystack, or -1 if needle is not part of haystack.
 
-# Given two strings needle and haystack, return the index of the first occurrence of needle in haystack, or -1 if needle is not part of haystack.
-
-# Example 1: Input: haystack = "sadbutsad", needle = "sad"
+# Example 1:
+# Input: haystack = "sadbutsad", needle = "sad"
 # Output: 0
 # Explanation: "sad" occurs at index 0 and 6.
 # The first occurrence is at index 0, so we return 0.
 
-# Example 2: 
+# Example 2:
 # Input: haystack = "leetcode", needle = "leeto"
 # Output: -1
 # Explanation: "leeto" did not occur in "leetcode", so we return -1.
 
-# Class Definition: class Solution(object):
-
-# This line defines a class named Solution.
-# Method Definition: def strStr(self, haystack, needle):
-
-# This line defines a method named strStr within the Solution class.
-# The method takes three parameters: self, haystack, and needle.
-# The self parameter is used in object-oriented programming to refer to the instance of the class.
-# The haystack parameter represents the string in which we want to search for the needle.
-# The needle parameter represents the substring that we want to find in the haystack.
-# Looping through the Haystack: for i in range(len(haystack) - len(needle) + 1):
-
-# This line starts a for loop that iterates over the indices of the haystack string.
-# The loop is set up to iterate up to len(haystack) - len(needle) + 1 to ensure that we don't go beyond the length of the haystack while checking for the needle.
-# For example, if haystack is "hello" and needle is "ll", the loop will iterate over indices 0, 1, 2.
-# Checking for Needle: if haystack[i:i + len(needle)] == needle:
-
-# This if statement checks if the substring of haystack from index i to i + len(needle) matches the needle string.
-# The expression haystack[i:i + len(needle)] retrieves a slice of the haystack string that has the same length as the needle string, starting from index i.
-# If the slice is equal to the needle, it means we have found a match.
-# Returning the Index: return i
-
-# If a match is found, the method immediately returns the index i, which represents the starting position of the needle in the haystack.
-# Returning -1: return -1
-
-# If the loop completes without finding a match, the method returns -1 to indicate that the needle is not present in the haystack.
-
-# Solution with Jen
-# We only iterate through the length of the haystack minus the length of the needle plus one because if we iterated any longer we would go out of bounds - if we know that needle is 3 characters long and haystack is 9, we would stop at 7th index
-# We are going to loop through haystack, and for each loop, we are going to use slice haystack to compare the index [i:(i+len(needle) to needle]
-
+# How to Solve:
+    # Need to use a nested for loop:
+    # Iterate X times for haystack (how many is optimal?), and create a nested for
+    # that iterates X times (to go through each character in the needle)
+    # If the first character of needle does not equal the current character iteration
+    # of haystack, break, and move on to the next iteration of haystack
+    # If it does, continue the nested for loop and check if the current iteration of 
+    # "j" equals the length of the last index of needle
+    # Return the index or -1
 
 class Solution(object):
     def strStr(self, haystack, needle):
-        for i in range(len(haystack) - len(needle) + 1): 
-            if haystack[i:(i + len(needle))] == needle:
-                return i
-        return -1
-    
+        if needle == "": #If our needle is an empty string, they want us to 
+            return 0 # return zero (Only sais this in neetcode video not leetcode problem)
+        
+        for i in range(len(haystack) + 1 - len(needle)): # We only need to iterate
+            # to the last possible index the needle could start in the haystack,
+            # in example 1, we would only iterate to the second "s" since needle
+            # is three characters long and couldn't start at the second to last index
+            for j in range(len(needle)): # Iterate through each character in needle
+                if haystack [i + j] != needle[j]: # "i" is the index we start at in
+                # the haystack, and "j" is the incrementer (0, 1, 2).
+                    break # If the index we are at on the haystack is not equal to the
+                    # first character of needle, break out of the for loop and return
+                    # to the top to look at the next i position in our haystack. 
+                if j == len(needle) - 1: # If they are equal, we want to continue to
+                    # the next iteration of our j loop until we have seen every
+                    # character and confirmed they're equal. We will know this when
+                    # "j" (# of loops) is equal to the length of last index of needle
+                        return i # Return i because we know that we didn't break out
+                        # of the loop and we reached the last character and were all ==
+            return -1 # Return -1 if not
+            
+
+# Other way to write it
+
+    def strStr2(self, haystack, needle):
+        for i in range(len(haystack) - len(needle) + 1): # We only need to iterate
+            # to the last possible index the needle could start in the haystack,
+            # in example 1, we would only iterate to the second "s" since needle
+            # is three characters long and couldn't start at the second to last index
+            if haystack[i:(i + len(needle))] == needle: # Compare the characters
+                # beginning on the index of each iteration of haystack through 
+                # the index of the iteration plus the length of needle to the "needle"
+                # string
+                return i # If they are equal, return the index you are currently on.
+                # If not, move to the next iteration of haystack
+        return -1 # If you iterate through haystack and find no matches, return -1
+
 
 solution = Solution()
+print("example 1")
 print(solution.strStr("sadbutsad", "sad"))
-
-
-# OTHER SOLUTION
-# def strStr(haystack, needle):
-#     return haystack.find(needle)
+print("example 2")
+print(solution.strStr("leetcode", "leeto"))
 
 
 
