@@ -1,0 +1,22 @@
+# Binary Tree - How it Works
+    # Each node has children nodes
+    # When you insert a node, you look at the first node and determine if it less or
+    # greater. If it is less, and there is an open spot, add it left. If it is greater,
+    # look to the right, if there is a node already there, determine if it is less or
+    # greater. Continue and add the node at the first open spot.
+    # "Full tree" - each node either points to zero nodes or two nodes
+    # "Complete tree" - the tree is filled left to right with no gaps
+    # "Perfect tree" - any level in the tree that has  nodes is completely filled all the
+    # way across
+
+
+# Big O Notes
+    # Number of nodes in the tree - 2^(x) - 1 
+        # "x" represents the # of steps it could take to find something
+    # "0(log n)"" - This is the big O of binary trees -  it takes 0(log n) steps to find,
+    # insert, or remove a node. This is achieved by doing divide and conquer. Each steps
+    # gets rid of 1/2 of the nodes
+    # "0(n)"" - This is technically the worst case scenario for Big O of binary search
+    # trees. This would happen if every time we inserted a node, it  was greater than the
+    # first node, second, third, and so on. If the tree never forks, it is essentially a
+    # linked list.
