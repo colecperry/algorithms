@@ -50,11 +50,11 @@ class DoublyLinkedList:
 my_doubly_linked_list = DoublyLinkedList(1)
 my_doubly_linked_list.append(2)
 
-# 2 Items - Returns 2 Nodes
+# 2 Items in list
 print(my_doubly_linked_list.pop())
-# 1 Item - Returns 1 Node
+# 1 Item in list
 print(my_doubly_linked_list.pop())
-# 0 Items - Returns None
+# 0 Items in list
 print(my_doubly_linked_list.pop())
 
 my_doubly_linked_list.print_list()

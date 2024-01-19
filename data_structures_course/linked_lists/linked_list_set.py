@@ -47,9 +47,10 @@ class LinkedList:
         return temp
 
     
-    def set_value(self, index, value): # You can't use set in Python as it is a keyword
+    def set_value(self, index, value): # You can't use "set" in Python as it is a keyword
         temp = self.get(index) # Return the node at the index we passed in
         if temp: # Test to see if temp is pointing to a node, or None
+            # Must add this line because via the "get" function, if the index passed in is out of bounds, you return None. Can not assign "None.value = value", so must return False
             temp.value = value # Reassign the returned node with the value passed in
             return True # Return true if valid index passed in
         return False # Return false if invalid index passed in

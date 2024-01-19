@@ -38,8 +38,8 @@ class LinkedList:
         return True
     
     def get(self, index):
-        if index < 0 or index >= self.length: # It is possible someone could pass in an index outside of our Linked List
-            return None
+        if index < 0 or index >= self.length: # It is possible someone could pass in 
+            return None # an index outside of our Linked List
         temp = self.head # Point a variable temp at the head of the linked list
         for _ in range(index): # Create a loop that runs the number of times in the index passed in
             temp = temp.next # Move the temp over one to the right

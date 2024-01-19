@@ -62,8 +62,8 @@ class LinkedList:
         return temp
     
     def insert(self, index, value):
-        if index < 0 or index > self.length:
-            return False
+        if index < 0 or index > self.length: # Must be ">" and not ">=" because you can
+            return False # insert at the end of the list
         if index == 0: # If the index is zero, prepend the node to the front of the list
             return self.prepend(value) # End the code here
         if index == self.length: # If the index is equal to the last index, append the node to the end of the list

@@ -57,9 +57,40 @@ class DoublyLinkedList:
             self.head = new_node # Move the head over by pointing it at the NN
         self.length += 1 # Increment the length by one
         return True
+    
+    def pop_first(self):
+        if self.length == 0: # If there is no Nodes in the list, 
+            return None # return None because there is no nodes to pop
+        temp = self.head # Need to assign variable here b/c if length is 1, you go   
+        # straight to the return statement (Create temp to point at the tail)
+        if self.length == 1: # If the length is one,
+            self.head = None # Set the head
+            self.tail = None # and tail to None
+        else:
+            self.head = self.head.next # Move the head over one node
+            temp.next = None # Disconnect first node from second node (Arrow going right)
+            self.head.prev = None # Disconnect second node from first (Arrow going left)
+        self.length -= 1 # Decrement length by one
+        return temp
+    
+    # We can optimize this method in a doubly linked list. Normally, we would set temp equal to the head and iterate through the list based on the index passed in. But with doubly linked lists, if the index passed in is more than halfway through the list, we can start out iteration from the tail.
+    def get(self, index):
+        if index < 0 or index >= self.length: # It is possible someone could pass in an 
+            return None # index outside of our Linked List
+        temp = self.head # Point a variable temp at the head of the linked list
+        if index < self.length/2: # If the index is less than the midpoint of the list,
+            for _ in range(index): # Create a loop that iterates the # of times based on
+                temp = temp.next # the index and stops on the correct node
+        else:
+            temp = self.tail # If the index is greater than the midpoint of the list,
+            for _ in range(index - 1, index, -1): # First argument is where to start the iteration, second is the # of times iterated based on the index, and the third is the step, or backwards by one each time
+                temp = temp.prev # temp stops on the correct node
+        return temp.value
 
 
 my_doubly_linked_list = DoublyLinkedList(1)
 my_doubly_linked_list.append(2)
-my_doubly_linked_list.prepend(0)
-my_doubly_linked_list.print_list()
+my_doubly_linked_list.append(3)
+my_doubly_linked_list.append(4)
+
+print(my_doubly_linked_list.get(4))

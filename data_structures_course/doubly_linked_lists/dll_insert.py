@@ -71,12 +71,58 @@ class DoublyLinkedList:
             temp.next = None # Disconnect first node from second node (Arrow going right)
             self.head.prev = None # Disconnect second node from first (Arrow going left)
         self.length -= 1 # Decrement length by one
-        return temp.value
+        return temp
+    
+    # We can optimize this method in a doubly linked list. Normally, we would set temp equal to the head and iterate through the list based on the index passed in. But with doubly linked lists, if the index passed in is more than halfway through the list, we can start out iteration from the tail.
+    def get(self, index):
+        if index < 0 or index >= self.length: # It is possible someone could pass in an 
+            return None # index outside of our Linked List
+        temp = self.head # Point a variable temp at the head of the linked list
+        if index < self.length/2: # If the index is less than the midpoint of the list,
+            for _ in range(index): # Create a loop that iterates the # of times based on
+                temp = temp.next # the index and stops on the correct node
+        else:
+            temp = self.tail # If the index is greater than the midpoint of the list,
+            for _ in range(index - 1, index, -1): # First argument is where to start the iteration, second is the # of times iterated based on the index, and the third is the step, or backwards by one each time
+                temp = temp.prev # temp stops on the correct node
+        return temp
+    
+    def set_value(self, index, value):
+        temp = self.get(index) # Use the "get" method to get a variable pointed at the correct node
+        if temp: # Must check if we get back a node from the get method, or if we get back "None" because our index was out of range
+            temp.value = value # Reassign the value
+            return True # Return True if we return a node and are successful
+        else:
+            return False # Return False if we do not return a node 
+
+# Very similar to Singly Linked List Insert, but we must connect the nodes in both directions
+    def insert(self, index, value):
+        if index < 0 or index > self.length: # If the index is out of range we want to
+            return False # return False right away
+        if index == 0: # If the index is equal to zero,
+            return self.prepend(value) # stop the code with the return statement & prepend
+        if index == self.length: # If the index is == to the length (one past the last node),
+            return self.append(value) # stop the code with the return statement & append
+        else:
+            new_node = Node(value) # Create a new node
+            before = self.get(index - 1) # Point a pointer at the node before insertion
+            after = before.next # Point a pointer at the node after insertion
+
+            before.next = new_node # Connect the before node to the new node
+            new_node.prev = before # Connect the new node to the before node
+            new_node.next = after # Connect the new node to the after node
+            after.prev = new_node # Connect the after node to the before node
+
+            self.length += 1 # Increment the length by one
+            return True # Return True after successful insertion
 
 
-my_doubly_linked_list = DoublyLinkedList(1)
+
+
+
+my_doubly_linked_list = DoublyLinkedList(0)
+my_doubly_linked_list.append(1)
 my_doubly_linked_list.append(2)
-my_doubly_linked_list.prepend(0)
-print(my_doubly_linked_list.pop_first())
-print(my_doubly_linked_list.pop_first())
-print(my_doubly_linked_list.pop_first())
+
+my_doubly_linked_list.insert(3,3)
+my_doubly_linked_list.print_list()
