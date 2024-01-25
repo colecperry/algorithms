@@ -16,7 +16,7 @@
     # "0(log n)"" - This is the big O of binary trees -  it takes 0(log n) steps to find,
     # insert, or remove a node. This is achieved by doing divide and conquer. Each steps
     # gets rid of 1/2 of the nodes
-    # "0(n)"" - This is technically the worst case scenario for Big O of binary search
+    # "0(n)" - This is technically the worst case scenario for Big O of binary search
     # trees. This would happen if every time we inserted a node, it  was greater than the
     # first node, second, third, and so on. If the tree never forks, it is essentially a
     # linked list.

@@ -1,3 +1,13 @@
+# Notes for practice code:
+    # Create a new node
+    # Check for edge case 
+    # Create pointer and an infite loop that ends if we return False
+    # See if new node is equal to node we are looping on (not allowed) and stop code
+    # Then see if the new node is less than the node we are looping on,
+    # If so, check if the next spot is open, if it is, place the new node and stop code
+    # If the spot is not open, move temp variable
+    # Repeat last 3 steps for if the new node is greater than the node we are looping on
+
 class Node:
     def __init__(self, value):
         self.value = value # Each node has a value, 
@@ -5,12 +15,8 @@ class Node:
         self.right = None # and something pointing to the right (other child)
 
 class BinarySearchTree:
-    def __init__(self, value):
-        new_node = Node(value) # Create a new node
-        self.root = new_node # Point the root, or top of the tree to the created node
-
-        # Note - you could also point the root to none, and add a node later with the
-        # insert method. You also would not initialize a new node in the Binary Tree init
+    def __init__(self):
+        self.root = None # Point the root to None, a placeholder for the top of the tree
 
     def insert(self, value):
         new_node = Node(value) # Create a new node
@@ -42,7 +48,8 @@ class BinarySearchTree:
 
 
 
-my_tree = BinarySearchTree(2) # Create an instance of the class
+my_tree = BinarySearchTree() # Create an instance of the class
+my_tree.insert(2)
 my_tree.insert(1)
 my_tree.insert(3)
 

@@ -16,10 +16,9 @@ class BinarySearchTree:
         # Note - you could also point the root to none, and add a node later with the
         # insert method. You also would not initialize a new node in the Binary Tree init
 
-my_tree = BinarySearchTree(1) # Create an instance of the class
+my_tree = BinarySearchTree() # Create an instance of BST the class
 
 print(my_tree.root)
-print(my_tree.root.value)
 
 
 

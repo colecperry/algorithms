@@ -1,3 +1,12 @@
+# Notes for practice coding:
+    # Check if root is none - edge case - if so, stop code
+    # Set pointer equal to the root
+    # Create a loop
+    # If the value we are looking for is greater than the node we are looping on, go right
+    # If the value we are looking for is less than the node we are looping on, go left
+    # Else, the only other option is that it is equal, stop code
+    # If we go all the way through the code and don't get a match, stop code
+
 class Node:
     def __init__(self, value):
         self.value = value # Each node has a value, 
@@ -43,7 +52,7 @@ class BinarySearchTree:
         if self.root == None: # If the tree is empty
             return False # Return False to stop the loop
         temp = self.root # Set a variable "temp" equal to the root
-        while temp is not None: # Create a loop that runs as long as temp is equal to a val
+        while temp: # Create a loop that runs as long as temp is equal to a val
             if value < temp.value: # If the value we are looking for is less than the value
                 # of the node we are iterating on
                 temp = temp.left # Move the "temp" variable down and to the left
