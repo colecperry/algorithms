@@ -1,13 +1,12 @@
 # Linked List POP FIRST - removes the first item in the linked list
 
 # How to Solve: Use the head node
-    # Move the head over one
+    # Move the head right
     # Pop off the old head
     # Solve for edge cases
 
 
-# Time complexity is O(1)
-# Time complexity is faster than regular list - O(n)
+# Time complexity is O(1) (constant time complexity): no traversal is required and the time that it takes to execute does not depend on the size of the input
 # 2 Edge Cases:
 #      1. If we have an empty linked list
 #      2. If we only have one node in the list

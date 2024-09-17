@@ -1,11 +1,12 @@
 # Binary Tree - How it Works
-    # Each node has children nodes
+    # Each node has children nodes, one to the left (smaller than parent) and one to the right (larger than the parent)
     # When you insert a node, you look at the first node and determine if it less or
     # greater. If it is less, and there is an open spot, add it left. If it is greater,
     # look to the right, if there is a node already there, determine if it is less or
-    # greater. Continue and add the node at the first open spot.
+    # greater than that node. Continue and add the node at the first open spot.
+    # Something to note: If you take any node and compare to the nodes under, everything to the left is smaller, and everything to the right is bigger (inlcuding all nodes, childs and parents under)
     # "Full tree" - each node either points to zero nodes or two nodes
-    # "Complete tree" - the tree is filled left to right with no gaps
+    # "Complete tree" - the tree is filled left to right with no gaps, so if you had one node on the left of a level by itself, it would still be complete
     # "Perfect tree" - any level in the tree that has  nodes is completely filled all the
     # way across
 
@@ -15,8 +16,8 @@
         # "x" represents the # of steps it could take to find something
     # "0(log n)"" - This is the big O of binary trees -  it takes 0(log n) steps to find,
     # insert, or remove a node. This is achieved by doing divide and conquer. Each steps
-    # gets rid of 1/2 of the nodes
+    # gets rid of 1/2 of the nodes. O(log n) means that the runtime of the algorithm increases logarithmically as the input size grows, which is often seen in algorithms that repeatedly halve the input size, such as a binary search. Therfore, with an input size of 1000, the algorithm would take about log2(1000) = 10 steps instead of 1000 steps like a linear search would. 
     # "0(n)" - This is technically the worst case scenario for Big O of binary search
     # trees. This would happen if every time we inserted a node, it  was greater than the
     # first node, second, third, and so on. If the tree never forks, it is essentially a
-    # linked list.
+    # linked list. O(n) is linear time complexity, which means that the runtime of the algorithm grows linearly with the input size. Example is a for loop which iterates over every element in the list because it processes each element exactly once. The runtime is proporational to the number of elements, n.

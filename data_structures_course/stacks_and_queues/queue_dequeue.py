@@ -1,3 +1,5 @@
+# Queue dequeue time complexity: 0(1) (constant time complexity) -> Fixed number of operations and does not depend on the size of the input
+
 class Node: # Use the same node class as linked lists
     def __init__(self, value):
         self.value = value

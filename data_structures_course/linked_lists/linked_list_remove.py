@@ -11,7 +11,9 @@
         # Break off the node
     # Decrement
 
-# Time complexity is O(n)
+# Time complexity is O(n): Linear time complexity -> operation increases linearly with the size of the input because we have to search for the element to remove
+    # If the index is 0: time complexity is 0(1): no traversal is required and the time that it takes to execute does not depend on the size of the input
+    # If the index is the last one: pop_first() is still 0(n) because we have to find the second to last node
 # Three Edge Cases:
 # 1. Node at index passed in is out of range
 # 2. First index passed in

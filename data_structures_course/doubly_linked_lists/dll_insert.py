@@ -1,3 +1,8 @@
+# Time complexity: 0(n) (linear time complexity): the operations increase linearly with the size of the input
+    # Inserting at index 0 (prepend): 0(1) because you don't need to traverse the list and only update a fixed number of pointers
+    # Inserting at index n-1 (append): 0(1) because you don't need to traverse the list and only update a fixed number of pointers
+    # Inserting at any other index: 0(n) because you traverse the list via the get method
+
 class Node:
     def __init__(self, value):
         self.value = value

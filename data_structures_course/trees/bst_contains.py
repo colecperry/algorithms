@@ -7,6 +7,10 @@
     # Else, the only other option is that it is equal, stop code
     # If we go all the way through the code and don't get a match, stop code
 
+# Time complexity for contains:
+    # For balanced Binary Search Trees (ensures the height is kept to a minimum relative to the number of nodes) the time complexity of contains is 0(log n) (logarithmic time complexity) which means that the number of operations increases logarithmically with the size of the input. In each iteration the number of operations are halved
+    # An unbalanced Binary Search Tree does not ensure any specific structure, meaning that the height can vary. The worst case, an unbalanced tree can degrade into a structure that resembles a linked list which would make the time complexity 0(n) (linear time complexity) and the input is equal to the number of operations
+
 class Node:
     def __init__(self, value):
         self.value = value # Each node has a value, 

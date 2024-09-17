@@ -1,3 +1,7 @@
+# Time complexity: 0(n) (linear time complexity): the time it takes to complete an operation grows linearly with the size of the input data set, n. As the size of the input increases, the time to complete the task increases proportionally.
+    # Accessing index 0 or the index of n-1 would be 0(1) -> You don't loop and you access these nodes via the head or the tail
+    # Accessing any other index would be 0(n) because to find the element you need to traverse the list
+
 class Node:
     def __init__(self, value):
         self.value = value

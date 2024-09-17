@@ -1,12 +1,16 @@
 # Notes for practice code:
     # Create a new node
-    # Check for edge case 
+    # Check for edge case: If the root is empty
     # Create pointer and an infite loop that ends if we return False
     # See if new node is equal to node we are looping on (not allowed) and stop code
     # Then see if the new node is less than the node we are looping on,
-    # If so, check if the next spot is open, if it is, place the new node and stop code
-    # If the spot is not open, move temp variable
+        # If so, check if the next spot is open, if it is, place the new node and stop code
+        # If the spot is not open, move to the next node
     # Repeat last 3 steps for if the new node is greater than the node we are looping on
+
+# Time complexity for insert:
+    # For balanced Binary Search Trees (ensures the height is kept to a minimum relative to the number of nodes) the time complexity of contains is 0(log n) (logarithmic time complexity) which means that the number of operations increases logarithmically with the size of the input. In each iteration the number of operations are halved.
+    # An unbalanced Binary Search Tree does not ensure any specific structure, meaning that the height can vary. The worst case, an unbalanced tree can degrade into a structure that resembles a linked list which would make the time complexity 0(n) (linear time complexity) and the input is equal to the number of operations
 
 class Node:
     def __init__(self, value):

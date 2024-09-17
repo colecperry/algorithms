@@ -1,3 +1,6 @@
+# If you are removing first or last index: time complexity: 0(1) (constant time complexity): Operation takes a constant or fixed number of operations and does not depend on the input. You don't need to traverse the list and only update a fixed number of pointers.
+# If you are removing an index in between: time complexity 0(n) (linear time complexity) because you have to use the .get() method and traverse the list. The time it takes to complete an operation grows linearly with the size of the input data set, n. As the size of the input increases, the time to complete the task increases proportionally.
+
 class Node:
     def __init__(self, value):
         self.value = value

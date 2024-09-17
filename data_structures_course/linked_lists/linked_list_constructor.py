@@ -1,9 +1,10 @@
 # How to Solve:
 # Create the Node class
-# Create the LinkedList class, which calls on the Node class via composition
+# Create the LinkedList class, which calls on the Node class via composition - explain?
 
 # Node class's sole responsibility is to create a new node so you can call the class to append, prepend, etc
 # "Self" variables are variables that apply to a specific instance
+# Node properties: value, next
 class Node:
     def __init__(self, value):
         self.value = value
@@ -11,6 +12,7 @@ class Node:
 
 # First line calls the Node class to create the first node in the linked list when we create it
 # Point head and tail to the first node, keep track of the length
+# LinkedList properties: head, tail, length
 class LinkedList:
     def __init__(self,value):
         new_node = Node(value)

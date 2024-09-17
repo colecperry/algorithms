@@ -6,7 +6,7 @@
     # Set head to the new node
     # Solve for edge cases
 
-# Time complexity is O(1)
+# Time complexity is O(1) (constant time complexity): no traversal is required to prepend a node 
 # For linkedlist big O is faster than regular lists! 0(1) vs 0(n)
 
 class Node:

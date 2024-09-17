@@ -6,9 +6,9 @@
     # Point Linked List to new tail
     # Solve for edge cases
 
-# Time complexity is 0(1)
+# Time complexity is 0(1) (constant time complexity) which means that the operation does not depend on the size of the input or increase with the size of the data. Append is 0(1) because the steps needed can be done without traversing the list.
 # Edge case is when we do not have any items in the linked list
-# In this case, there is no exisiting list to connect to new node to, so we won't be able to use "next" to connect them
+# In this case, there is no exisiting list to connect to new node to, so we won't be able to use "next" to connect them 
 
 class Node:
     def __init__(self, value):

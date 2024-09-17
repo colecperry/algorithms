@@ -1,3 +1,5 @@
+# Stack pop time complexity: 0(1) (constant time complexity) -> fixed number of operations and number of operations doesn't depend on the input size
+
 class Node: # Use the same node class as linked lists
     def __init__(self, value):
         self.value = value

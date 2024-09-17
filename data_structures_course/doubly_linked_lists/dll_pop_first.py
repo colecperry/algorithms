@@ -1,3 +1,5 @@
+# Time complexity: 0(1) (constant time complexity): Operation takes a constant or fixed number of operations and does not depend on the input. You don't need to traverse the list and only update a fixed number of pointers.
+
 class Node:
     def __init__(self, value):
         self.value = value

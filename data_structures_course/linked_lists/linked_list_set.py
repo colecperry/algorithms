@@ -5,7 +5,7 @@
     # If you return a node, reassign it's value
     # Don't need to solve for edge cases - that is done through GET method
 
-# SET - 0(n) since you use the GET method
+# SET - 0(n) (linear time complexity) -> operation increases linearly with the size of the input. Because this method uses the get methpd, which traverses the linked list to retrieve the node at a specific index, the number of operations is proportional to the node you pass in.
 # Whatever the index is, that's the number of times we have to move temp over
 # Remember to remove ".value" on the return statement of GET or it will not work b/c you are returning the value when using .GET on set_value method
 

@@ -6,6 +6,11 @@
     # Change the direction that the node is pointing by using .next
     # Move the pointers over
 
+# Time complexity: 0(n) (Linear time complexity) -> operation increases linearly with the size of the input. The method visits each node exactly once, performing a constant amount of work (pointer manipulations) per node
+
+# Tip - Use pre, temp, and after variables
+# We need to point the first arrow left (before the first node) and then proceed
+
 class Node:
     def __init__(self, value):
         self.value = value

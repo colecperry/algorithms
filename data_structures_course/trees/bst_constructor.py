@@ -1,3 +1,6 @@
+# Each node has a value, left, and right
+# Binary search tree has a root and nodes
+
 class Node:
     def __init__(self, value):
         self.value = value # Each node has a value, 

@@ -1,3 +1,5 @@
+# Time complexity: 0(1) (constant time complexity) -> the operation takes a constant amount of time to complete regardless of the input. Since you have a reference to the tail, prev, and next, each of the steps take a constant amount of time independent of how many nodes are already in the list. (no traversal needed)
+
 class Node:
     def __init__(self, value):
         self.value = value

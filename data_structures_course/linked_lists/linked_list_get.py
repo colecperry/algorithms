@@ -5,7 +5,7 @@
     # Create a loop that runs # of times of the index
     # Solve for edge cases - if index passed in is out of range
 
-# Time complexity is O(n)
+# Time complexity is O(n) (linear time complexity): The time that it takes to run the algorithm increases linearly with the size of the input. To get to index i, you have to start from the head and traverse the list moving through each node. Worst case, when you call the get on the last element of the list, the method needs to traverse through all the "n" nodes.
 # Whatever the index is, that's the number of times we have to move temp over
 
 class Node:

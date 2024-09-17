@@ -7,8 +7,12 @@
     # If index is neither, 
         # Create a new node
         # Get the index one before the index passed in to help connect it to the LL
+    # Remember you can insert a node after the last node
 
-# Time complexity is O(n)
+# Time complexity is O(n) (linear time complexity) : The runtime of the algorithm increases with the input size. 
+    # Insert at index 0 (prepend): 0(1) since the operation does not depend on the size of the input
+    # Insert at last index: 0(1) since the operation does not depend on the size of the input
+    # Inserting in the middle: 0(n) -> You'll have to traverse the list until you find the desired position, which's operations increase linearly with the size of the input (number of iterations equals the index you want to insert at)
 # Edge Cases:
     # If the index we are inserting at is zero
     # If the index we are inserting at is the last index of the list
@@ -62,7 +66,7 @@ class LinkedList:
         return temp
     
     def insert(self, index, value):
-        if index < 0 or index > self.length: # Must be ">" and not ">=" because you can
+        if index < 0 or index > self.length: # Must be ">" and not ">=" because you can insert after the last node
             return False # insert at the end of the list
         if index == 0: # If the index is zero, prepend the node to the front of the list
             return self.prepend(value) # End the code here
