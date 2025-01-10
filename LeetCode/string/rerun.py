@@ -10,10 +10,3 @@
 # Output: -1
 # Explanation: "leeto" did not occur in "leetcode", so we return -1.
 
-def strStr(haystack, needle):
-    if needle in haystack:
-        print(haystack[needle[0]])
-    else: 
-        print(-1)
-
-print(strStr("sadbutsad", "sad"))

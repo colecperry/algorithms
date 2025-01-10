@@ -12,6 +12,13 @@
 # Input: nums = [1,1,1,3,3,4,3,2,4,2]
 # Output: true
 
+# How to solve
+# Create a dictionary
+# Iterate through the dictionary
+    # If the value is not in the dict, add it to the dict
+    # If the value is in the dict, return true
+# If we iterate all the way through, we have all different numbers, return false
+
 class Solution(object):
     def containsDuplicate(self, nums):
         numdict = {}

@@ -48,6 +48,22 @@ class Solution(object):
             else:
                 stack.append(char)
         return True if len(stack) == 0 else False # If we go through the whole list and the stack is empty return False, if the stack is not empty return True
+    
+    def isValid2(self, s):
+        p_stack = []
+        p_dict = {
+            "(": ")",
+            "{": "}",
+            "[": "]"
+        }
+        for char in s:
+            if char in p_dict:  # If it's an opening bracket
+                p_stack.append(char)
+            elif p_stack and char == p_dict[p_stack[-1]]:  # Check if it matches the last open bracket
+                p_stack.pop()  # Pop the last open bracket from the stack
+            else:  # It's a closing bracket that doesn't match or stack is empty
+                return False
+        return len(p_stack) == 0
 
 s1 = "()"
 s2 = "()[]{}"

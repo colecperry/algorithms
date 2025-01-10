@@ -1,0 +1,1 @@
+# Tree needs to be balanced -> The difference of the height of the nodes can only be at most 1 level. If the tree becomes unbalanced, we must do a rebalancing technique. Methods are called rotation and double rotation

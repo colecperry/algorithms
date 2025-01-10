@@ -17,9 +17,11 @@
 # Output: [0,1]
 
 # Options to Solve
+
 # 1. Brute Force
 # Take the first number of the array, and check every combination of that number with the remaining numbers of the array
 # For example 1, check 2 against 7, 11, and 15. Repeat the process for number 7, check it against 11 and 15
+
 # 2. One Pass
 # Take the target number and subtract the number in the array at index i, and check if the number that equals target - number at index i exists. 
 # For example 1, given the target = 9 and number 2 at index[0], does the 7 exist?
@@ -44,18 +46,13 @@
 
 class Solution(object):
     def twoSum(self, nums, target):
-        valToIdx = {} 
+        valToIdx = {} # Create an empty dict to store values and corresponding indexes
 
-        for i, n in enumerate(nums):
-            diff = target - n   # n + diff = target
-            if diff in valToIdx:
-                return[valToIdx[diff], i]
-            valToIdx[n] = i
-            print("i =", i)
-            print("n =", n)
-            print("diff=", diff)
-            print(valToIdx)
-            print("---------------")
+        for i, n in enumerate(nums): # Iterate through the list nums
+            diff = target - n   # Calc the difference: Target - num we are iterating on
+            if diff in valToIdx: # Check if the matching number exists to add up to target
+                return[valToIdx[diff], i] # If so, return the value (index) of the diff and the index you are iterating on. We know the index of diff in the dict will be the smaller b/c we don't find the solution until the second matching val
+            valToIdx[n] = i # If not, add the number to the hahsmap
         return None
     
 solution = Solution()
