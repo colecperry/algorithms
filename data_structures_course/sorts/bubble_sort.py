@@ -1,4 +1,6 @@
-# Bubble sort -> start with the first item in the list, and compare it to the second. If the first item is greater than the second item, switch them. Then take the second item and compare it to the third item, if they don't need to be switched, move to the third item, if not, switch them. If you have n items, you will have n - 1 comparisons
+# Bubble sort: Think BUBBLE UP -> bubble up (by repeated comparison) to one end of array
+# Big Idea : you bubble up the largest element to the end of the array or smallest element to the beginning of the array one at a time. Starting at the beginnig or end of the array, you compare two elements at a time, and swap them depending, leaving either the largest or smallest element to the end or beginning of the array on each outer loop.
+# Start with the first item in the list, and compare it to the second. If the first item is greater than the second item, switch them. Then take the second item and compare it to the third item, if they don't need to be switched, move to the third item, if not, switch them. If you have n items, you will have n - 1 comparisons
 
 # How to solve:
     # TRICK - Iterate backwards on first loop

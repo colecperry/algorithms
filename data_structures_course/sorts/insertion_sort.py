@@ -1,4 +1,5 @@
-# Insertion Sort:
+# Insertion Sort: 
+    # Big Idea: Think of a deck of cards. As you continue to pull out cards, you keep sliding the card over until it is the sorted position (while loop).
     # Start with the second item in the list and compare it to the item before
     # If the item at the second index is less than the item at the first index, swap them
     # Move to the third item in the list and compare it to the item before

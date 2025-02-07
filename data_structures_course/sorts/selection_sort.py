@@ -1,4 +1,5 @@
-# Selection sort 
+# Selection sort: Think SELECTION -> we select the smallest element on each iteration
+    # Big idea: Loop through the array starting at the first element. Track the smallest element (assume it is the first element). If you find something smaller, set that element to the smallest element. Once you finish the loop, swap the new smallest element with the first element if it does not equal the first index still.
     # Find the smallest value: Start by assuming the first element is the smallest.
     # Look through the rest: Use a loop to check every other element in the list.
     # Update the smallest value: If you find something smaller, remember where it is.
@@ -9,6 +10,12 @@
     # Track the min index
     # Loop through the whole list to find min index before swapping
     # Before swapping, check that i is still not min index after loop
+
+# Psuedo code for selection sort not in place
+    # Create empty output array
+    # Loop through input array, track smallest element
+    # When we find the smallest element, add it to the output array
+    # Replace the index that held the smallest element in the input array to infinity so we don't keep selecting the same element
 
 # Big O:
     # Worst-case time complexity: O(n²): In the worst case, selection sort makes n passes and performs n comparisons in each pass, leading to a time complexity of O(n²).

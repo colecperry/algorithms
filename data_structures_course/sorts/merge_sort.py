@@ -1,5 +1,4 @@
-# Merge Sort - Idea : if you have two sorted lists, you can combine them into a new sorted list
-# Keep breaking your list into smaller lists until each list only has one element in it
+# Merge Sort - Idea : Keep breaking your list (left and right) into smaller lists until each list only has one element in it and we hit a base case
 # Then, take each list and compare with another list, sort them, and create a new sorted list
 # Keep doing this until you combine it into one sorted list
 
@@ -65,59 +64,62 @@ print('\nSorted List:', sorted_list)
 
 # ┌───────────────────────────────┐
 # │ Call stack -> merge_sort([3])          │
-# │ Base case: returns [3]                │
+# │ Base case: returns [3] to merge_sort([3,1]) & assigns to left  │
 # └───────────────────────────────┘
 # Back to: merge_sort([3,1])
 
 # ┌───────────────────────────────┐
-# │ Call stack -> merge_sort([3,1])       │
+# │ Call stack -> merge_sort([3,1])
+# │ Left = [3]
 # │ Right: merge_sort([1])               │
 # └───────────────────────────────┘
 
 # ┌───────────────────────────────┐
 # │ Call stack -> merge_sort([1])          │
-# │ Base case: returns [1]                │
+# │ Base case: returns [1] to merge_sort([3,1]) & assigns to right           │
 # └───────────────────────────────┘
 # Back to: merge_sort([3,1])
 
 # ┌───────────────────────────────┐
-# │ Call stack -> merge([3], [1])          │
-# │ Returns [1,3]                         │
+# │ Call stack -> merge([3], [1])
+# | Left = [3], right = [1]       │
+# │ Call merge(left, right) -> Returns [1,3]                       
 # └───────────────────────────────┘
 # Back to: merge_sort([3,1,4,2])
 
 # ┌───────────────────────────────┐
 # │ Call stack -> merge_sort([3,1,4,2])  │
-# │ Left: [1,3]                         │
-# │ Right: merge_sort([4,2])            │
+# │ Left = [1,3]                         │
+# │ Right calls merge_sort([4,2])            │
 # └───────────────────────────────┘
 
 # ┌───────────────────────────────┐
 # │ Call stack -> merge_sort([4,2])       │
 # │ mid_index = 1                        │
-# │ Left: merge_sort([4])                │
+# │ Left calls merge_sort([4])                │
 # └───────────────────────────────┘
 
 # ┌───────────────────────────────┐
 # │ Call stack -> merge_sort([4])          │
-# │ Base case: returns [4]                │
+# │ Base case: returns [4] to merge_sort(4,2)            │
 # └───────────────────────────────┘
 # Back to: merge_sort([4,2])
 
 # ┌───────────────────────────────┐
 # │ Call stack -> merge_sort([4,2])       │
-# │ Right: merge_sort([2])               │
+# │ Right calls merge_sort([2])               │
 # └───────────────────────────────┘
 
 # ┌───────────────────────────────┐
 # │ Call stack -> merge_sort([2])          │
-# │ Base case: returns [2]                │
+# │ Base case: returns [2] to merge_sort([4,2])               │
 # └───────────────────────────────┘
 # Back to: merge_sort([4,2])
 
 # ┌───────────────────────────────┐
-# │ Call stack -> merge([4], [2])          │
-# │ Returns [2,4]                         │
+# │ Call stack -> merge([4], [2]) 
+# | Left = [4], right = [2]         │
+# │ Merge([4],[2]) returns [2,4]                         │
 # └───────────────────────────────┘
 # Back to: merge_sort([3,1,4,2])
 

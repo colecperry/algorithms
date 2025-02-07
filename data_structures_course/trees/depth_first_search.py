@@ -1,3 +1,4 @@
+#
 #             47
 #            /   \
 #           /     \
@@ -63,6 +64,12 @@ class BinarySearchTree:
         traverse(self.root) # Call the function with the root, and push an instance onto call stack
         return results
     
+#             47
+#            /   \
+#           /     \
+#          21     76
+#         /  \   /  \
+#        18  27 52  82
     
     def dfs_post_order(self):
         results = []

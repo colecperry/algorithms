@@ -1,4 +1,9 @@
 # Time complexity - Remove a vertex
+# How to solve: 
+    # Check that the vertex exists
+    # Loop through the edges of the vertex you are trying to remove
+    # Go to that other vertex (the one from the list you are looping through) and remove the connection to the vertex you are trying to remove
+    # Delete the vertex
 # Adjacency List: O(V + E) Remove the vertex from the list, iterate through every edge and remove all common edges
 # Adjacency Matrix: O(N)^2 You have to remove the row and columns
 

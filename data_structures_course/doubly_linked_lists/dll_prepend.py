@@ -36,8 +36,7 @@ class DoublyLinkedList:
     def pop(self):
         if self.length == 0: # If the length of the DLL is 0, 
             return None # return None (nothing to pop)
-        temp = self.tail # Need to assign variable here b/c if length is 1, you go   
-        # straight to the return statement (Create temp to point at the tail)
+        temp = self.tail # Set temp to the tail -> Need to assign variable here b/c if length is 1, you go straight to the return statement (Create temp to point at the tail)
         if self.length == 1: # If the length of the DLL is 1,
             self.head = None # set the head
             self.tail = None # and tail to none

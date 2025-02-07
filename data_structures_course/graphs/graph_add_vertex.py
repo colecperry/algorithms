@@ -1,4 +1,4 @@
-# Add a vertex into the graph
+# Add a vertex into the graph: a node or point in the graph
 
 # Time complexity - Add vertex
 # Adjacency List - O(1) - you just add a new key to the dict
@@ -10,9 +10,9 @@ class Graph:
     
     def print_graph(self): # 
         for vertex in self.adj_list:
-            print(vertex, ':', self.adj_list[vertex])
+            print(vertex, ':', self.adj_list[vertex]) # Print the key and value
     
-    def add_vertex(self, vertex):
+    def add_vertex(self, vertex): # Pass in the vertex to add
         if vertex not in self.adj_list.keys(): # Check for duplicates in our graph
             self.adj_list[vertex] = [] # Create a new dictionary item with the vertex as the key and an empty list as the value
             return True # Return true if added

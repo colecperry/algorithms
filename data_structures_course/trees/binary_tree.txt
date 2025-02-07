@@ -1,0 +1,19 @@
+Binary Tree - a tree where every node has at most two children
+
+It consists of:
+    - A root node
+    - Each node may have zero, one, or two children
+    - The structure continues recursively down the tree
+
+As opposed to the binary search tree which has an ordering rule where left subtree < Node < right subtree, a binary tree has no ordering rule. This is not great for searching efficiency! Also, a binary tree may or may not allow duplicates, as to where a binary search tree does not allow duplicates
+
+- Big O of searching a binary tree: At worst case O(n) vs a Binary Search Tree (O(log n))
+
+Example:
+        A
+       / \
+      B   C
+     / \   \
+    D   E   F
+
+

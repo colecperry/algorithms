@@ -25,6 +25,28 @@ def binary_search(arr, target):
     
     return -1  # Return -1 if the target is not found
 
+# Binary search recursively - > notice no while loop, only recursive call
+def binary_search_recursive(array, target, left, right):
+
+    # Base case: If the range is invalid, the target is not in the list
+    if left > right:
+        return -1
+
+    # Find the middle index
+    mid = (left + right) // 2
+    mid_value = array[mid]
+
+    # Check if the target is at the middle
+    if mid_value == target:
+        return mid
+
+    # If the target is smaller than the middle value, search the left half
+    if target < mid_value:
+        return binary_search_recursive(array, target, left, mid - 1)
+
+    # If the target is larger than the middle value, search the right half
+    return binary_search_recursive(array, target, mid + 1, right)
+
 
 def main():
     """Main function to demonstrate binary search."""
@@ -35,6 +57,17 @@ def main():
     # Perform binary search
     result = binary_search(arr, target)
 
+    # Display results
+    if result != -1:
+        print(f"Target {target} found at index {result}.")
+    else:
+        print(f"Target {target} not found in the list.")
+
+    # Example usage
+    sorted_list = [1, 3, 5, 7, 9, 11, 13, 15]
+    target = 7
+
+    result = binary_search_recursive(sorted_list, target, 0, len(sorted_list) - 1)
     # Display results
     if result != -1:
         print(f"Target {target} found at index {result}.")
