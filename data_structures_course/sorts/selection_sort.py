@@ -22,6 +22,7 @@
     # Best-case time complexity: O(n²): Even if the list is already sorted, selection sort still scans the entire unsorted portion in every pass, resulting in a best-case time complexity of O(n²).
     # Average-case time complexity: O(n²): On average, selection sort performs the same number of comparisons regardless of the input's initial order, yielding an average time complexity of O(n²).
 
+# In place
 def selection_sort(array):
     for i in range(len(array) - 1): # Iterate one less b/c of i+1
         min_index = i # Set minimum index to i to track the position in the outer loop
@@ -35,8 +36,37 @@ def selection_sort(array):
             
     return array
 
+# Using an output array (not in place)
+import math
 
+def selection_sort2(A):
+    """
+    This version sorts A into a new list B without modifying A directly.
+    
+    Parameters:
+    A (list): The list to be sorted.
 
+    Returns:
+    list: A new sorted list B.
+
+    Example:
+    A = [3, 1, 4, 1, 5, 9, 2]
+    B = selection_sort(A)
+    print(B)  # Output: [1, 1, 2, 3, 4, 5, 9]
+    """
+    B = [0] * len(A)  # Initialize the output list B with the same length as A
+
+    for i in range(len(A)):  # Iterate through all elements of A
+        min_ind = 0  # Assume the first element is the minimum
+        
+        for j in range(1, len(A)):  # Iterate to find the smallest element
+            if A[j] < A[min_ind]:  # If we find a smaller element
+                min_ind = j # Store that index
+
+        B[i] = A[min_ind]  # Store the smallest element in output array B
+        A[min_ind] = math.inf  # Mark the elements "used" in input array A by setting it to infinity
+    
+    return B  # Return the sorted list
 
 
 
