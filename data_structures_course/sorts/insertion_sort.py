@@ -11,30 +11,11 @@
 
 # Tips:
     # Start at the second index for first loop
-    # Need a variable to decrement -> The variable is initialized to i each loop
-    # Use a while loop for the second loop
-    # Remember edge case for decrementing j -> don't let j go out of bounds
+    # Need a pointer variable to move backwards and do comparisons -> The variable j is initialized to i each loop which allows the correct amount of comparisons at each loop
+    # Use a while loop for the second loop -> while j >= 0 and ele smaller than prev ele
 
 # Big O Analysis of Insertion Sort:
 # Worst Case: O(n^2) - Occurs when the array is sorted in reverse order, requiring (n-1) comparisons and shifts for each element.
-# Best Case: O(n) - Happens when the array is already sorted, resulting in one comparison per element.
+# Best Case: O(n) - Happens when the array is already sorted (we don't enter the second while loop)
 # Average Case: O(n^2) - For a randomly ordered array, each element may need to be compared and shifted about half the time.
 # Space Complexity: O(1) - Insertion sort operates in place, using only a constant amount of additional space.
-
-
-# [2,8,4,6,3]
-
-
-
-
-def insertion_sort(arr):
-    for i in range(1, len(arr)): # Start on second index for i, end on last item of arr
-        j = i # Set counter j equal to i (number of iterations for second loop)
-        while j > 0 and arr[j] < arr[j-1]: 
-            arr[j], arr[j-1] = arr[j-1], arr[j]
-            j -= 1
-    return arr
-
-
-
-print(insertion_sort([4, 3, 2, 1]))

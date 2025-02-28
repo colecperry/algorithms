@@ -94,8 +94,8 @@ class MaxHeap:
 
 # Start with a unsorted heap
 out_of_order_heap = MaxHeap()
-out_of_order_heap.heap = [50, 95, 80, 60, 75, 55, 65]  # Not a valid max heap
-#                         0   1   2   3   4   5   6
+out_of_order_heap.heap = [35, 29, 22, 15, 26]  # Not a valid max heap
+#                         
 print("Out-of-order heap:", out_of_order_heap.heap)
 
 # Use heapify to convert it to a max heap -> [95, 75, 80, 60, 50, 55, 65]

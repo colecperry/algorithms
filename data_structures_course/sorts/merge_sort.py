@@ -138,6 +138,10 @@ print('\nSorted List:', sorted_list)
 
 # Final Result: [1,2,3,4]
 
+# Quick summary:
+# Recursively calls left until you get to one element [1] and assign to left, and get one element [3] and assign to right, then call merge on those two elements, which returns a sorted list [1,3] to the previous call stack [3,1,4,2] and assigns to left, then recursively call right and repeat the same process, which will eventually return [2,4] to call stack [3,1,4,2] and assign to right, then call merge on [1,3] and [2,4] where you arrive at your final answer
+
+
 
 
 
