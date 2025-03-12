@@ -17,11 +17,10 @@
     # We then start at the end of the array and add to our result a max of k times
 
 
-
 # Time complexity: O(n)
 # Space complexity: O(n)
 
-# Solution 1 uses an array to organize elements into the freq array without using a sort, which is the most expensive operation in Solution 2 and increases the time complexity to O(n log n)
+from collections import Counter
 
 class Solution(object):
     def topKFrequent(self, nums, k):
@@ -41,26 +40,27 @@ class Solution(object):
                 if len(res) == k: # When the length of the result is equal to k
                     return res # Return the result
     
-    # The second solution needed extra handling for this edge case because sorting by frequency alone does not inherently preserve the order of elements as they appear in the input array (nums). In contrast, the first solution indirectly preserves the order due to the way it constructs the freq array and processes it in reverse.
+# How to Solve: Hashmap with sorting
+    # Create a frequency arr using counter
+    # Sort the dict by freq using a lambda -> Creates a list of tuples
+    # iterate through the list of tuples, and append k key's to the output array
+    # Time complexity: Sorting is O(n log n), iterating again is O(n), total is O(n log n)
+    # Space complexity: Creating counter dict is O(n), storing a list of tuples is O(n), and storing the output array is O(k), simplify to O(n)
+
 
     def topKFrequent2(self, nums, k):
-        my_dict = dict()
-
-        # Count the frequency of each number
-        for i in range(len(nums)):
-            if nums[i] not in my_dict:
-                my_dict[nums[i]] = 1
-            else:
-                my_dict[nums[i]] += 1
+        count = Counter(nums) # Create a frequency dict
+        output = [] # Create an output array
         
-        # Sort the dictionary by frequency (descending) and tie-break by the order in `nums`
-        sorted_items = sorted(my_dict.items(), key=lambda item: (-item[1], nums.index(item[0])))
+        sorted_counts = sorted(count.items(), key=lambda item: item[1], reverse=True) # Sort the dict by freq
+        # Iterate trhough the list of tuples
+        for i, (key, value) in enumerate(sorted_counts):
+            if i >= k: # Check if we already have k ele's
+                break
+            output.append(key) # If not append the key (ele)
 
-        # Extract the top k keys
-        res = [item[0] for item in sorted_items[:k]]
-        
-        return res
+        return output
 
 my_solution = Solution()
-print(my_solution.topKFrequent([1,1,1,2,2,3], 2))
+print(my_solution.topKFrequent2([1,1,1,2,2,3], 2))
 print(my_solution.topKFrequent([1], 1))
