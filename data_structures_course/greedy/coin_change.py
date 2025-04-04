@@ -1,37 +1,37 @@
 """
-Greedy Algorithm for US Coin Change Problem
+Cashier Algorithm - Greedy Approach for Making Change
 
-This algorithm finds the minimum number of coins needed to make a given amount using standard US coin denominations: [25, 10, 5, 1] (quarters, dimes, nickels, pennies) -> only works for US denominations, if other denominations greedy may not work
+This function calculates the minimum number of coins or bills needed to make change for a given amount using a provided list of denominations.
 
-Approach:
-1. Start with the highest denomination and use as many of that coin as possible.
-2. Move to the next lower denomination and repeat until the amount is zero.
-3. This greedy approach works optimally for US coin denominations due to their specific structure.
+The algorithm follows a **greedy approach**, where it:
+1. Always takes the largest available denomination first.
+2. Determines how many times that denomination can fit into the remaining amount.
+3. Updates the remaining amount accordingly.
+4. Moves to the next largest denomination.
 
-Time Complexity: O(n) where n is the number of denominations.
+This method works optimally when the denominations are structured like standard currencies (e.g., US dollars, Euros) but may fail for arbitrary denominations.
 """
 
-def greedy_coin_change(amount):
+def cashier_algorithm(amount, denominations):
     """
-    Function to determine the minimum number of coins needed for a given amount.
-    :param amount: The amount in cents (integer)
-    :return: Dictionary with coin denominations and their respective counts
+    Computes the minimum number of coins/bills needed to make change for a given amount.
+    :param amount: The total amount to make change for.
+    :param denominations: A list of available coin/bill denominations (should be sorted in descending order).
+    :return: A dictionary where keys are denominations and values are counts.
     """
-    # US coin denominations in cents
-    coins = [25, 10, 5, 1]  # Quarters, Dimes, Nickels, Pennies
-    coin_count = {}  # Dictionary to store the count of each coin
-
-    for coin in coins:
+    
+    change = {}  # Dictionary to store the count of each denomination used
+    
+    for coin in denominations:
         if amount >= coin:
-            coin_count[coin] = amount // coin  # Number of coins of this denomination
-            amount %= coin  # Reduce the amount by the used coins
+            count = amount // coin  # Determine how many of this coin/bill fit in the remaining amount (floor division)
+            change[coin] = count  # Store the count of this denomination
+            amount -= count * coin  # Reduce the remaining amount
     
-    return coin_count
+    return change
 
-# Test input
-if __name__ == "__main__":
-    test_amount = 87  # Example: 87 cents
-    
-    print(f"Amount: {test_amount} cents")
-    result = greedy_coin_change(test_amount)
-    print("Coin Breakdown:", result)
+# Example usage:
+denominations = [100, 25, 10, 5, 1]  # Standard bill/coin denominations (sorted in descending order)
+amount = 187  # Amount to be converted into change
+
+print("Change for $", amount, ":", cashier_algorithm(amount, denominations))

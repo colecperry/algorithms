@@ -17,3 +17,23 @@ Example:
     D   E   F
 
 
+Other notes about trees:
+    - Directed: one way links between nodes (no cycles)
+    - Acyclic - no path wraps around the same node twice
+    - Edge - directed link between nodes
+    - Root - the start of the tree, the top most node
+    - Parent - any node with at least one child
+    - Child - any node with a Parent
+    - Siblings - all nodes at the same level
+    - Internal node - a node with at least one child (except root)
+    - Leaf node - a node without children
+    - Path - a sequence of edges that connects two nodes
+    - Node level - the number of edges along the unique path between that node and the root
+    - Height - the length of the longest path from the node to some leaf (height of any leaf node is 0)
+    - Tree height - the number of levels of the tree -1
+    - Balanced - the heights of all left and right subtrees differ by at most 1
+
+What is not a tree?
+     - Cycles: there is a cycle in the tree (node points at itself)
+     - Multiple parents - node 3 has multiple parents on different levels
+     - Disconnected components - there are two unconnected groups of nodes

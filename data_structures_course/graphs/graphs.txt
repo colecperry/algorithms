@@ -1,0 +1,29 @@
+Graph: A graph G is a pair (V,E) where V represents a set of verticies or nodes, and E is a set of edges that connect verticies
+    ex. V = {A, B, C, D, E, F}, E = {(A,B), (A,D), (B,C), (C,D), (D,E)}
+Undirected Graphs: edges go both ways -> edge (x,y) implies edge (y,x)
+Directed Graph: edges go one way -> edge (x,y) does not imply edge (y,x)
+Adjacent: two verticies are adjacent in an undirected graph G if {u,v} is an edge in G
+    Adjacent to: Vertex u is adjacent to vertex v in a directed graph G if (u,v) is an edge in G and vertex u is the initial vertex of (u,v)
+    Adjacent from: Vertex v is adjacent from vertex u if vertex v is the terminal (or end) vertex of (u,v)
+Incident: two edges are incident with eachother if they are both connected to the same vertex: 
+    Vertices: A, B, C  
+    Edges:  
+        e₁ = (A, B)  
+        e₂ = (B, C)  
+        e₃ = (A, C)
+
+        - e₁ and e₂ are incident with each other because they both touch vertex B.
+        - e₁ and e₃ are incident with each other because they both touch vertex A.
+        - e₂ and e₃ are also incident with each other (via vertex C).
+Degree: the degree of a vertex in an undirected graph is the number of edges incident with it. A self loop counts twice (both ends count)
+    In-Degree: the number of edges with the vertex as the terminal vertex. In (u,v) the terminal vertex is v, so it's the number of edges TO the terminal vertex v
+    Out-Degree: the number of edges with the vertex as the initial vertex. In (u,v), the initial vertex is u, so it's the number of edges FROM the initial vertex u
+Weighted Graph: Each edge or vertex is assigned a numerical value
+Unweighted Graph: There is no distinction between edges
+Sparse Graphs: The graphs are sparse when a small fraction of vertex pairs have edges between them
+Dense Graphs: The graphs are dense when a large fraction of vertex pairs have edges between them
+Acylic graph: Contains no cycles
+Cyclic graph: Contains a cycles
+DAG: Directed acylic graphs
+Labeled Graph: Each vertex is assigned a unique name or identifier
+Unlabeled Graph: There are no named nodes

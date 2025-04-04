@@ -1,0 +1,26 @@
+# 🌳 DFS vs BFS in Tree Problems — Quick Guide
+
+# ✅ Use DFS (recursive or with a stack) when:
+# - You need to visit every node and combine data (e.g., sum, merge, max depth)
+#   → DFS naturally dives into subtrees, making it easy to combine results bottom-up.
+# - You're building up answers using subtree results (like in postorder traversal)
+#   → Recursive DFS mirrors the tree structure and is great for divide-and-conquer logic.
+# - You need to explore all paths or use backtracking (e.g., path sum problems)
+#   → DFS makes it easy to track the current path using the call stack.
+# - You're processing children before the parent or need full control over traversal order
+#   → Postorder/inorder logic is much easier with DFS.
+# - The problem doesn't care about "levels" or "distances" from root
+#   → DFS is simpler when layer info isn’t needed.
+
+# ✅ Use BFS (with a queue) when:
+# - You need to process nodes level-by-level (e.g., level order, zigzag traversal)
+#   → BFS processes one level at a time, which is perfect for layered logic.
+# - You want the shortest path or minimum steps to a node (e.g., closest leaf)
+#   → BFS finds the shortest path in an unweighted tree/graph by nature.
+# - The problem asks for "top to bottom" or "layer-wise" behavior
+#   → This is a clear signal that level order matters — perfect for BFS.
+# - You're worried about recursion depth or stack overflow on deep trees
+#   → BFS is iterative and avoids hitting Python’s recursion limit.
+
+# 🧠 Tip: If recursion feels natural and no level info is needed, start with DFS.
+#        If the problem talks about levels, shortest paths, or early exits, go with BFS.
