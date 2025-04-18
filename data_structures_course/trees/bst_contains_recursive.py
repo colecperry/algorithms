@@ -18,7 +18,6 @@ class BinarySearchTree:
         return current # Duplicates will just return
 
 
-
     # Helper method to pass in the root as current
     def r_insert(self, value):
         if self.root == None: # Edge case for empty 

@@ -27,3 +27,30 @@ Cyclic graph: Contains a cycles
 DAG: Directed acylic graphs
 Labeled Graph: Each vertex is assigned a unique name or identifier
 Unlabeled Graph: There are no named nodes
+Cut: A cut is a way to divide the vertices of a graph into two disjoint sets — let's call them Set A and Set B — such that:
+- Every vertex belongs to either A or B.
+- The cut-set is the group of edges that connect a node in Set A to a node in Set B.
+- Imagine we make a cut: 
+        A --- B
+        |     |
+        C --- D
+
+Cut: 
+- Set A = {A, C}
+- Set B = {B, D}
+
+Edges crossing the cut: 
+- A - B
+- C - D
+
+Graph BFS 
+
+Graph DFS
+
+Minimum Spanning Trees - 
+
+Dijkstra - 
+
+Bellman Ford -
+
+Max Flow - 
