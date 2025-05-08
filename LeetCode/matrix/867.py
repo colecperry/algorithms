@@ -39,8 +39,8 @@ class Solution:
         result = [[0] * len(matrix) for _ in range(len(matrix[0]))]
 
         # Step 2: Loop through each cell in the original matrix
-        for i in range(len(matrix)):              # m rows
-            for j in range(len(matrix[0])):       # n columns
+        for i in range(len(matrix)): # m rows
+            for j in range(len(matrix[0])): # n columns
                 result[j][i] = matrix[i][j] # flip row and col
         
         return result

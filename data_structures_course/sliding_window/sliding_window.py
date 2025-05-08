@@ -1,4 +1,4 @@
-# Given a list of itmes with it's angle (degree), and a field of vision, find the most items that can be see at any given time
+# Given a list of items with it's angle (degree), and a field of vision, find the most items that can be see at any given time
 
 # Ex. 1    
 #           R          
@@ -6,7 +6,8 @@
     #       L
     #                   
     # field_of_vision = 90
-    # Output: 12
+    # Output: 12 
+    # Explanation: You can fit all degrees 120, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210 inside 90 degrees
 
 # How to solve
     # Use a sliding window approach
