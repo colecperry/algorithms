@@ -46,7 +46,8 @@
 # Input: root = [1,null,2,3,4,5,null,null,6,7,null,8,null,9,10,null,null,11,null,12,null,13,null,null,14]
 # Output: 5
 
-# How to Solve (Big Picture)
+# How to Solve (Big Picture) - Level Based BFS
+    # An N-ary tree is a tree where each node can have multiple children, so we know that the list of children is either an empty list or a list of nodes with no null values
     # Track depth, use a deque starting with the root, and for each level of the tree, pop off each node and add it's children, adding one to the depth for each level processed
 
 # Time complexity: Each node is processed once -> We remove it from the queue and add it's children -> O(n)
@@ -62,7 +63,7 @@ class Node(object):
 
 
 class Solution(object):
-    def maxDepth(self, root):
+    def maxDepth(self, root): # Level Based BFS
         if not root: # Edge case, empty tree
             return 0
         
@@ -78,6 +79,15 @@ class Solution(object):
 
         return depth
     
+    def maxDepth(self, root: 'Node') -> int: # Tuple Based BFS
+        if not root: # Edge case, empty tree
+            return 0
+        queue = deque([(root, 1)]) # Initialize a deque with the root and depth 1
+        while queue: # Process each level
+            node, depth = queue.popleft() # Pop off the node and its depth
+            for i in range(len(node.children)): # Loop through each child
+                queue.append((node.children[i], depth + 1)) # Add child and increment depth
+        return depth # The last depth processed is the max depth of the tree
 
 # ----------- Tree 1 -----------
 

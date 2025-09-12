@@ -106,15 +106,43 @@ class TreeNode:
         self.val = val
         self.left = left
         self.right = right
-class Solution:
+class Solution: 
+    # Recursive remaining sum solution
     def hasPathSumRecursive(self, root: Optional[TreeNode], targetSum: int) -> bool:
         if not root: # Base case -> empty tree
             return False
         if not root.left and not root.right: # If we are at a leaf node
             return targetSum == root.val # Check if equal to root.val because we haven't subtracted current node's val yet
-        left_has_path = self.hasPathSumRecursive(root.left, targetSum - root.val) # Recurse left and update targetSum
-        right_has_path = self.hasPathSumRecursive(root.right, targetSum - root.val) # Recurse right and update targetSum
+        left_has_path = self.hasPathSumRecursive(root.left, targetSum - root.val) # Recurse L and R
+        right_has_path = self.hasPathSumRecursive(root.right, targetSum - root.val) # Update rem sum
         return left_has_path or right_has_path # Returns True if either path leads to 0
+    
+    # Recursive running total dfs solution
+    def hasPathSumRecursive2(self, root: Optional[TreeNode], targetSum: int) -> bool:
+        if not root: # Check for empty tree
+            return False
+
+        def dfs(node, currSum):
+            # Base case -> we hit a leaf node, check if we found the path sum
+            if not node.left and not node.right:
+                return currSum == targetSum
+
+            # Recursive case: explore left child if it exists
+            if node.left:
+                left = dfs(node.left, currSum + node.left.val) # Returns true if any path == target or false if no such path exists, add the val each call to track the current sum
+            else:
+                left = False 
+
+            # Explore right child if it exists
+            if node.right:
+                right = dfs(node.right, currSum + node.right.val)
+            else:
+                right = False
+
+            return left or right # For each curr node, return true if any branch finds the target 
+
+        return dfs(root, root.val)
+    
     
     def hasPathSumIterative(self, root: Optional[TreeNode], targetSum: int) -> bool:
         if not root: # Empty tree

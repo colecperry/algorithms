@@ -30,27 +30,21 @@
 # Input: root = [2,null,3,null,4,null,5,null,6]
 # Output: 5
 
-# How to solve (DFS):
-    # 
+# Big Idea -> Recursion 3 step process
+    # What can I answer immediately? (Base Cases)
+        # Scenario A: Null node -> return 0 (a null node has no tree depth)
+        # Scenario B: Leaf node -> return 1 (just count this node since it's the end of the path)
+        # Scenario C: Only one child exists -> keep exploring path (which returns the depth), and one for curr node
+    # What do I need to know?
+        # Numbers/Depth counts -> what's the min depth from any left/right child to any leaf?
+        # Each recursive call returns an integer representing the shortest distance to a leaf
+    # How do I combine the answers?
+        # Math operation (min) + add 1
 
 # Time Complexity: We will traverse each node in the tree only once; hence, the total time complexity would be O(N).
 # Space Complexity: The only space required is the stack space; the maximum number of active stack calls would equal the maximum depth of the tree, which could equal the total number of nodes in the tree. Hence, the space complexity would equal O(N).
 
-# CALL STACK (Last In, First Out)
-
-# 1. dfs(3)   ← waiting for results from dfs(9) and dfs(20)
-# │   2. dfs(9)   → returns 1 
-# │   3. dfs(20)  ← waiting for results from dfs(15) and dfs(7)
-# │   │   4. dfs(15) → returns 1
-# │   │   5. dfs(7)  → returns 1
-# │   6. dfs(20)  → returns 2
-# 7. dfs(3)   → returns 2
-
-# How to solve (BFS):
-
-
-
-
+from typing import Optional
 from collections import deque
 
 # Definition for a binary tree node.
@@ -62,29 +56,26 @@ class TreeNode(object):
 
 class Solution(object):
     # DFS Solution
-    def minDepth(self, root):
-        # Define the depth-first search
-        def dfs(root): # we go straight to the return statement
-            if root is None: # Base case -> when we hit the end of a path
-                return 0
-            # If either node has an empty left or right node, go opposite direction
-            if root.left is None:
-                return 1 + dfs(root.right) # Add one for current node, search right
-            elif root.right is None:
-                return 1 + dfs(root.left) # Add one for current node, search left
-            # Both children are non-null, hence call for both children.
-            return 1 + min(dfs(root.left), dfs(root.right)) # Add one for current node
-
-        return dfs(root)# Call dfs function
+    def minDepth(self, root: Optional[TreeNode]) -> int:
+        # Base case: no tree exists
+        if not root:
+            return 0
+        
+        # Base case: found a leaf node -> depth is just 1 for leaf nodes
+        if not root.left and not root.right:
+            return 1
+        
+        # Special case: only left child exists -> keep exploring left and add that depth to curr node
+        if not root.left:
+            return 1 + self.minDepth(root.right)
+        
+        # Special case: only right child exists -> keep exploring right and add that depth to curr node
+        if not root.right:
+            return 1 + self.minDepth(root.left)
+        
+        # Normal case: both children exist -> keep exploring
+        return 1 + min(self.minDepth(root.left), self.minDepth(root.right)) # Return one for root and min depth of (L, R)
     
-    # 1. dfs(3)   ← waiting for results from dfs(9) and dfs(20)
-    # │   2. dfs(9)   → returns 1 to dfs(3) 
-    # │   3. dfs(20)  ← waiting for results from dfs(15) and dfs(7)
-    # │   │   4. dfs(15) → returns 1 to dfs(20)
-    # │   │   5. dfs(17)  → returns 1 to dfs(20)
-    # │   6. dfs(20)  → returns 2 to dfs(3) -> 1 + min(1, 1)
-    # 7. dfs(3)   → returns 2  -> 1 + min(dfs(9), dfs(20)) -> 1 + min(1, 2)
-
     # Example 1:
     #               3
     #              / \
@@ -93,7 +84,7 @@ class Solution(object):
     #               15   17
 
     
-    def minDepth2(self, root):
+    def minDepth2(self, root): # BFS
         if not root:
             return 0
         q = deque([root])
@@ -112,8 +103,6 @@ class Solution(object):
                 q.append(node.right)
             depth += 1
         return -1
-
-
 
 
 my_solution = Solution()

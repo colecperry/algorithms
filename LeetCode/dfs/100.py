@@ -51,7 +51,31 @@
     # Time complexity: O(p + q) -> Worst case we have to iterate through every node in both trees
     # Space complexity: -> O(h): If the tree is balanced, the max deapth of recursion is O(log n) because at each level the tree splits into two subtrees, and for a skewed tree, each recursive call only processes one child at a time, resulting in n recursive calls in total before reaching the base case -> O(n)
 
-# Line by line BFS:
+from collections import deque
+
+class TreeNode(object):
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+class Solution(object):
+    def isSameTree(self, p, q): # DFS
+        if not p and not q:  # Both trees are empty -> We reach base case
+            return True
+        if not p or not q:  # One tree is empty, the other is not
+            return False
+        if p.val != q.val:  # Mismatched values -> has to come last of three cases or it will check None.val (error)
+            return False
+        
+        # Recursively check left and right subtrees
+        left_same = self.isSameTree(p.left, q.left) # Recursively step into left subtree -> Returns True or False
+        right_same = self.isSameTree(p.right, q.right) # Recursively step into right subtree -> Returns True or False 
+        
+        # Both left and right subtrees must be identical
+        return left_same and right_same
+    
+# How to Solve (BFS):
     # Big Picture: We use a queue starting with the root, check our conditions for true or false, and then append the children to the queue. Essentially we check the next node each iteration, and the queue is a list of tuples where each tuple is a node from p and a node from q
     # Code: Initialize a deque with root nodes, loop and dequeue (pop from front) -> Check:
         # 1. If both nodes are None (same tree) -> continue to next loop
@@ -59,7 +83,6 @@
         # 3. If node values are None (different values) -> return False
     # Append the left and right children to the queue and continue to next iteration
 
-    
     # Line by Line:
     # queue = deque([(1, 1)]) -> start with root Node
     # popleft() -> node1 = 1, node2 = 1
@@ -77,38 +100,14 @@
     # popleft() 4 times -> node1 = None, node2 = None 
     # Return True once Queue is empty
 
-# Time Complexity: O(n)
-# - Each node in both trees is processed exactly once.
-# - Since we traverse all nodes, the time complexity is O(n), where n is the number of nodes in the trees.
+    # Time Complexity: O(n)
+    # - Each node in both trees is processed exactly once.
+    # - Since we traverse all nodes, the time complexity is O(n), where n is the number of nodes in the trees.
 
-# Space Complexity: O(n)
-# - In the worst case (if the trees are completely unbalanced), the queue holds O(n) nodes.
-# - In the best case (if the trees are balanced), the queue holds O(log n) nodes at a time.
-# - Overall, the worst-case space complexity is O(n).
-
-from collections import deque
-
-class TreeNode(object):
-    def __init__(self, val=0, left=None, right=None):
-        self.val = val
-        self.left = left
-        self.right = right
-
-class Solution(object):
-    def isSameTree(self, p, q): # DFS
-        if not p and not q:  # Both trees are empty -> We reach base case
-            return True
-        if not p or not q:  # One tree is empty, the other is not
-            return False
-        if p.val != q.val:  # Mismatched values
-            return False
-        
-        # Recursively check left and right subtrees
-        left_same = self.isSameTree(p.left, q.left) # Recursively step into left subtree -> Returns True or False
-        right_same = self.isSameTree(p.right, q.right) # Recursively step into right subtree -> Returns True or False 
-        
-        # Both left and right subtrees must be identical
-        return left_same and right_same
+    # Space Complexity: O(n)
+    # - In the worst case (if the trees are completely unbalanced), the queue holds O(n) nodes.
+    # - In the best case (if the trees are balanced), the queue holds O(log n) nodes at a time.
+    # - Overall, the worst-case space complexity is O(n).
     
     def isSameTree2(self, p, q): # BFS
         queue = deque([(p, q)])  # Initialize queue with root nodes
@@ -128,8 +127,6 @@ class Solution(object):
             queue.append((node1.right, node2.right))
 
         return True  # If we never return False, the trees are identical
-    
-
 
 p = TreeNode(1, TreeNode(2), TreeNode(3))
 q = TreeNode(1, TreeNode(2), TreeNode(3))
@@ -141,7 +138,7 @@ p3 = TreeNode(1, TreeNode(2), TreeNode(1))
 q3 = TreeNode(1, TreeNode(1), TreeNode(2))
 
 my_solution = Solution()
-print(my_solution.isSameTree2(p, q)) # Same trees -> True
+print(my_solution.isSameTree(p, q)) # Same trees -> True
 print(my_solution.isSameTree2(p2, q2)) # Different tree structure -> False
 print(my_solution.isSameTree2(p3, q3)) # Different tree values -> False
 

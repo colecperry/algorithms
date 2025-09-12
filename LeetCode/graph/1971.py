@@ -76,7 +76,7 @@ class Solution: # BFS Solution
                 return True
 
             # Explore all unvisited neighbors
-            for neighbor in graph[current]: # Find current nodes neighbors
+            for neighbor in graph[current]: # Find curr nodes neighbors using adj list
                 if not seen[neighbor]: # If that neighbor has not been seen
                     seen[neighbor] = True # Mark true in visited array
                     queue.append(neighbor) # Append neighbor to queue
@@ -188,5 +188,5 @@ class Solution: # BFS Solution
 
 
 sol = Solution()
-print(sol.validPathIterative(3, [[0,1],[1,2],[2,0]], 0, 2))
-print(sol.validPathIterative(6, [[0,1],[0,2],[3,5],[5,4],[4,3]], 0, 5))
+print(sol.validPathBFS(3, [[0,1],[1,2],[2,0]], 0, 2))
+print(sol.validPathBFS(6, [[0,1],[0,2],[3,5],[5,4],[4,3]], 0, 5))

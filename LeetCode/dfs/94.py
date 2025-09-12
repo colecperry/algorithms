@@ -49,26 +49,9 @@
 # 3. Process (append) the current node.
 # 4. Recursively traverse the right subtree.
 
-# === Iterative Approach ===
-
-# Big idea: We have a stack to store nodes for our iteration, and a list to store our results. We continue iterating left and pushing nodes onto the stack until we reach our base case, then we pop the top node off the stack, add it to our results, and move the current pointer to the right. Once our stack is empty we know we have finished processing the tree and we can return the results. 
-
-# 1. Create an empty stack and set a pointer (cur) to the root node.
-# 2. While cur is not None or the stack is not empty -> once stack becomes empty we return, and at that point current will be None
-#    a. Inner loop keeps traversing left and pushing nodes onto the stack.
-#    b. Once we reach None (end of left subtree), exit inner while loop and pop the top node from the stack.
-#    c. Append the popped node's value to the result list.
-#    d. Move to the right child and repeat the process.
-# 3. Continue until both the stack is empty and cur is None.
-# 4. Return the result list containing in-order values.
-
-# === Time & Space Complexity ===
-# - Time Complexity: O(n) (Every node is visited once)
-# - Space Complexity:
-#   - Worst case: O(n) (Skewed tree → recursive call stack OR iterative stack stores all nodes)
-#   - Best case: O(log n) (Balanced tree → stack depth is proportional to tree height)
-
-
+# === Other Notes ===   
+# - Lists are mutable objects that can be stored in outer functions and modified in-place from inner functions, while integers are immutable and would require reassignment (which needs nonlocal)
+# - Storing res in the outer function scope keeps each method call independent instead of sharing state across all instances like a class variable would.
 
 # Definition for a binary tree node.
 class TreeNode(object):
@@ -82,7 +65,7 @@ class Solution(object):
 
         def dfs(root):
             if root is None: # Base case -> when we hit the end of the path
-                return
+                return # to prev call stack (node)
             dfs(root.left) # Recursively call left node until root is None
             res.append(root.val) # Return to prev call stack and append node
             dfs(root.right)
@@ -111,18 +94,35 @@ class Solution(object):
 # Call stack dfs(3) -> calls dfs(root.left) -> None and returns, appends 3 to array, calls dfs(root.right) -> None, code finishes and returns to call stack dfs(2)
 # Call stack dfs(2) -> append 2 since we already called dfs(root.left), calls dfs(root.right) -> None, code finishes returns to call stack dfs(1) where we finish and return the result
 
+# === Iterative Approach ===
+
+# Big idea: We have a stack to store nodes for our iteration, a list to store our results, and a pointer for traversal. We continue iterating left and pushing nodes onto the stack until we reach our base case (replacing recursion), then we pop the top node off the stack and assign it to our pointer(mimics hitting base case), add it to our results, and move the current pointer to the right. Once our stack is empty we know we have finished processing the tree and we can return the results. 
+
+# 1. Setup: Create empty res list, empty stack, set cur (pointer) = root
+# 2. Main loop: While we have nodes to process (cur exists OR stack has nodes):
+    # - Go left: Push all left nodes onto stack until we hit None
+    # - Process: Pop from stack and assign to curr ptr (mimics moving back to last recursive call stack), add value to result 
+    # - Go right: Move to right child and repeat
+# 3. Done: Return result when both stack is empty and cur is None
+
+# === Time & Space Complexity ===
+# - Time Complexity: O(n) (Every node is visited once)
+# - Space Complexity:
+#   - Worst case: O(n) (Skewed tree → recursive call stack OR iterative stack stores all nodes)
+#   - Best case: O(log n) (Balanced tree → stack depth is proportional to tree height)
+
     # Iterative solution
     def inorderTraversal2(self, root):
         res = [] # Array to store result
         stack = [] # Array to store iterative stack
         cur = root # Pointer
 
-        # Continue as long as pointer is non null or stack is not empty
+        # While ptr is non null or stack is not empty (keep going until we process everything)
         while cur or stack:
-            while cur: # While pointer is non null
+            while cur: # While pointer is non null (handles go left phase)
                 stack.append(cur) # Append node to the stack
                 cur = cur.left # Move the pointer left
-            cur = stack.pop() # Once our ptr reaches null, pop from the stack
+            cur = stack.pop() # Once we finish going left, pop from the stack, move ptr back
             res.append(cur.val) # Append popped node to the result
             cur = cur.right # Move our pointer right
         
@@ -139,11 +139,12 @@ class Solution(object):
 
 my_solution = Solution()
 
+
 root1 = TreeNode(1)
 root1.right = TreeNode(2)
 root1.right.left = TreeNode(3)
 
-print(my_solution.inorderTraversal2(root1))
+print(my_solution.inorderTraversal(root1))
 
 root2 = TreeNode(1)
 root2.left = TreeNode(2)

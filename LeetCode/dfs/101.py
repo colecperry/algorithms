@@ -27,13 +27,15 @@
 # Output: false
 
 # How to solve: (Recursive)
-    # First we need to check if each root node is equal -> this is the second level because the first node is always the same
-    # Then, we need to check if the left child of the first subtree is equal to the right child of the second subtree, and vice versa
-    # This means comparing: left.left with right.right, and left.right with right.left
-    # Base case -> Null nodes are symmetric or if one node is null and the other is not -> not symmetric
-    # Check if both nodes exist but their values are different -> not symmetric
-    # Use DFS to recursively compare these mirror pairs at each level of the tree
-    # Return True only if all mirror pairs match in both structure and value
+    # Create nested dfs function and pass in two args, root's left node and root's right node bc root node is always symmetric
+    # Base cases 
+        # If both nodes are none -> return True
+        # If only one node is none -> return False
+        # If node's values are not equal -> return False
+    # Recursive case -> runs if no base cases hit (nodes vals are equal)
+        # Call dfs on (left.left, right.right) and (left.right, right.left)
+        # Combine boolean results of each call with AND
+    # Return the original dfs function call (returns the recursive subtree boolean of each side)
 
 # Time complexity: O(n) -> we visit each node once
 # Space complexity: O(h) -> all dfs algos
@@ -73,17 +75,16 @@ class TreeNode:
 class Solution:
     def isSymmetricRecursive(self, root: Optional[TreeNode]) -> bool: # Recursive
         def dfs(left, right):
-            if not left and not right:  # Base case -> both nodes are None
-                return True  # That is symmetrical
-            if not left or not right:  # One of the nodes is None
-                return False  # Not symmetrical 
-
-            # Get boolean values
-            values_match = left.val == right.val # Compare values
-            outer_pair = dfs(left.left, right.right) # Traverse to outer pairs (left.left and right.right)
-            inner_pair = dfs(left.right, right.left) # Traverse to inner pairs (left.right and right.left)
-
-            return values_match and outer_pair and inner_pair # current node & subtrees match at each level
+            # Base cases:
+            if not left and not right: # If both nodes are none -> return True
+                return True
+            elif not left or not right: # If only one node is none -> return False
+                return False
+            elif left.val != right.val: # If nodes values are not equal -> return False
+                return False
+            
+            # Recursive case
+            return dfs(left.left, right.right) and dfs(left.right, right.left) # combine bool with AND
 
         return dfs(root.left, root.right) # Two DFS calls starting at second level
     
@@ -97,12 +98,16 @@ class Solution:
         while stack:
             left, right = stack.pop() # Unpack the tuple
 
-            # Case 1: Both nodes are None -> symmetric at this point
+            # Case 1: Both nodes are None -> symmetric at this point, continue searching
             if not left and not right:
                 continue
 
-            # Case 2: One is None or values don't match -> not symmetric -> if False is hit at any point, function ends
-            if not left or not right or left.val != right.val:
+            # Case 2: One is None -> not symmetric -> if False is hit at any point, function ends
+            if not left or not right:
+                return False
+            
+            # Case 3: values don't match -> not symmetric -> fn ends
+            if left.val != right.val:
                 return False
 
             # Push mirrored child pairs to stack for future comparison

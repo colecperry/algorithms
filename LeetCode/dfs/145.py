@@ -52,31 +52,6 @@
 #   - O(n) in the worst case (skewed tree, deep recursion call stack).
 #   - O(log n) in the best case (balanced tree, recursion depth ~ tree height).
 
-# ============================= #
-# Post-Order Traversal (Iterative)
-# ============================= #
-# How to Solve:
-# 1. Create:
-#    - A stack to store nodes for traversal.
-#    - A `visit` list to track whether a node has been visited before.
-#    - A result list (`res`) to store the traversal order.
-# 2. Push the root node onto the stack and mark it as unvisited (`False`).
-# 3. While the stack is not empty:
-#    - Pop a node and its visit status.
-#    - If the node is marked as visited (`True`), append its value to `res` (process it).
-#    - Otherwise:
-#      - Push the node back onto the stack and mark it as visited (`True`).
-#      - Push the right child first (so it is processed second).
-#      - Push the left child last (so it is processed first).
-# 4. Final result: Nodes are visited in post-order (Left → Right → Root) order.
-
-# Time Complexity: O(n) - Each node is visited exactly once.
-# Space Complexity:
-#   - O(n) in the worst case (skewed tree, stack holds all nodes).
-#   - O(log n) in the best case (balanced tree, stack depth ~ tree height).
-
-
-
 # Definition for a binary tree node.
 class TreeNode(object):
     def __init__(self, val=0, left=None, right=None):
@@ -99,35 +74,77 @@ class Solution(object):
 
         return res
     
+    # ============================= #
+    # Post-Order Traversal (Iterative)
+    # ============================= #
+
+    # Big Idea: 
+        # Since post order is Left -> Right -> Process Node, we use a stack and visited list to make sure:
+            # If we iterate to a node and it's not visited yet, we need to process it's children and come back to it:
+                # Push node back onto the stack but mark visited as true (next time we process it)
+                # Push right child onto the stack and visit set (False) -> we want to pop this off second (left, right, root)
+                # Push left child onto the stack and visit set (False) -> we want to visit this first (left, right, root)
+            # If we iterate onto a node and it has been visited, we know that we have already processed it's children -> add to res
+
+    # Example execution with tree:
+    #
+    #     1
+    #    / \
+    #   2   3
+    #
+    # Step | Stack         | Visit              | Action
+    # -----|---------------|--------------------|-----------------------------------------
+    # 1    | [1]           | [False]            | Pop 1(False) → first visit, add back 1(True), add children
+    # 2    | [1,3,2]       | [True,False,False] | Pop 2(False) → first visit, add back 2(True), no children
+    # 3    | [1,3,2]       | [True,False,True]  | Pop 2(True) → second visit, process 2!
+    # 4    | [1,3]         | [True,False]       | Pop 3(False) → first visit, add back 3(True), no children
+    # 5    | [1,3]         | [True,True]        | Pop 3(True) → second visit, process 3!
+    # 6    | [1]           | [True]             | Pop 1(True) → second visit, process 1!
+    #
+    # Result: [2, 3, 1] ✓ (Left → Right → Root)
+
+
+    # Time Complexity: O(n) - Each node is visited exactly once.
+    # Space Complexity:
+    #   - O(n) in the worst case (skewed tree, stack holds all nodes).
+    #   - O(log n) in the best case (balanced tree, stack depth ~ tree height).
+    
     def postorderTraversal2(self, root):
         if not root:
             return []  # Handle empty tree case
 
-        stack = [root]
-        visit = [False]
+        stack = [root] # DFS stack (init with root)
+        visit = [False] 
         res = []
 
         while stack:
-            cur, v = stack.pop(), visit.pop()
-            if cur:
-                if v:
-                    res.append(cur.val)  # Process node after left & right subtrees
-                else:
-                    # Post-order (Left → Right → Root)
-                    stack.append(cur)  # Re-add node to stack for post-processing
-                    visit.append(True)  # Mark for processing after children
+            cur, v = stack.pop(), visit.pop() # pop and visit node
+            if v: # If node already visited -> process itself
+                res.append(cur.val) 
+            else: # If node not visited -> process children
+                stack.append(cur)  # Put back in stack to revisit after children 
+                visit.append(True)  # So node gets processed next visit
 
-                    if cur.right:  # Push right child first (processed second)
-                        stack.append(cur.right)
-                        visit.append(False)
+                if cur.right:  # Push right child first (processed second)
+                    stack.append(cur.right)
+                    visit.append(False)
 
-                    if cur.left:  # Push left child last (processed first)
-                        stack.append(cur.left)
-                        visit.append(False)
+                if cur.left:  # Push left child last (processed first)
+                    stack.append(cur.left)
+                    visit.append(False)
 
         return res
     
-
+        #           1
+        #         /   \
+        #        /     \
+        #       2       3
+        #      / \       \
+        #     4   5       8
+        #        / \     /
+        #       6   7   9
+        #         
+        #
 
 
 my_solution = Solution()

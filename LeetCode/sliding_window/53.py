@@ -45,9 +45,6 @@
 # Output: 23
 # Explanation: The subarray [5,4,-1,7,8] has the largest sum 23.
 
-nums1 = [-2,1,-3,4,-1,2,1,-5,4]
-nums2 = [1]
-nums3 = [5,4,-1,7,8]
 
 class Solution(object):
     # DP Solution
@@ -62,7 +59,7 @@ class Solution(object):
         return res
     
     # Sliding Window Solution
-    def maxSubArray(self, nums):
+    def maxSubArray2(self, nums):
         maxSub = nums[0] # Set max subarray to the first value
         curSum = 0 # Create variable to track current sum
 
@@ -87,6 +84,6 @@ class Solution(object):
         return largest
     
 my_solution = Solution()
-print(my_solution.maxSubArray(nums1))
-print(my_solution.maxSubArray(nums2))
-print(my_solution.maxSubArray(nums3))
+print(my_solution.maxSubArray2([-2,1,-3,4,-1,2,1,-5,4])) # 6 -> [4,-1,2,1]
+print(my_solution.maxSubArray([1])) # 1 -> [1]
+print(my_solution.maxSubArray([5,4,-1,7,8])) # 23 -> [5,4,-1,7,8]

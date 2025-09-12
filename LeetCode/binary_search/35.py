@@ -20,7 +20,7 @@ class Solution(object):
         start = 0
         end = len(nums) - 1
         while start <= end:
-            middle = (start + end) // 2
+            middle = start + (end - start) // 2
             if nums[middle] == target:
                 return middle
             elif nums[middle] < target:

@@ -27,8 +27,7 @@
 # How to solve: (BFS)
     # - We treat each room as a node in a graph.
     # - Each room may contain keys to other rooms, which are the edges.
-    # - We start with room 0 and perform a Breadth-First Search (BFS)
-    #   to explore all reachable rooms.
+    # - We start with room 0 and perform a Breadth-First Search (BFS) to explore all reachable rooms.
     # - We use a queue to control the BFS traversal order (FIFO).
     # - We also use a 'visited' list to track which rooms we've already entered, so we don’t revisit the same room and cause infinite loops.
 
@@ -65,10 +64,10 @@ class Solution: # BFS
         queue = deque([0]) # Start BFS from room index 0
 
         while queue:
-            current_room = queue.popleft() # Take the next room to explore
+            current_room = queue.popleft() # Explore next room
 
             # Look at every key in the current room
-            for key in rooms[current_room]:
+            for key in rooms[current_room]: # Check each room in curr room
                 if not visited[key]: # If key isn't visited
                     visited[key] = True # Mark the room as visited
                     queue.append(key) # Add the room index to the queue for later exploration
@@ -117,8 +116,23 @@ class Solution: # BFS
                     stack.append(key)
         
         return all(visited)
+    
+    def canVisitAllRooms2(self, rooms: List[List[int]]) -> bool:
+        visited = set([0])
+        q = deque([0])
+        while q:
+            vertex = q.popleft()
+            for room in rooms[vertex]:
+                if room not in visited:
+                    visited.add(room)
+                    q.append(room)
+        
+        if len(visited) == len(rooms):
+            return True
+        else:
+            return False
 
 
 sol = Solution()
-print(sol.canVisitAllRooms([[1],[2],[3],[]]))
-print(sol.canVisitAllRooms([[1,3],[3,0,1],[2],[0]]))
+print(sol.canVisitAllRoomsBFS([[1],[2],[3],[]]))
+print(sol.canVisitAllRoomsBFS([[1,3],[3,0,1],[2],[0]]))

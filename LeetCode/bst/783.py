@@ -30,8 +30,7 @@
 # Strategy:
 # - Perform an in-order DFS traversal of the BST to collect node values in sorted order.
 # - Store these values in an array.
-# - Because in-order traversal of a BST gives values in ascending order,
-#   the minimum difference between any two nodes must be between two consecutive values.
+# - Because in-order traversal of a BST gives values in ascending order, the minimum difference between any two nodes must be between two consecutive values.
 # - Loop through the sorted array and compare each adjacent pair to find the minimum difference.
 
 # Time Complexity:

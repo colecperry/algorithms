@@ -37,17 +37,28 @@
 
 from typing import List
 
+from collections import Counter
+
 class Solution:
     def findCenter(self, edges: List[List[int]]) -> int:
-        a, b = edges[0] # Destructure first edge
-        c, d = edges[1] # Destructure second edge
+    # Compare the nodes in the first two edges
+        if edges[0][0] == edges[1][0] or edges[0][0] == edges[1][1]: # check if the center is the 1st node in the 1st index (appears twice in first 2 indexes)
+            return edges[0][0]
+        return edges[0][1] # if not, it must be the second node in the first index
 
-        # Check if 'a' is in the second edge
-        if a == c or a == d:
-            return a
-        else:
-            return b  # Otherwise, 'b' must be the center
-
+    def findCenter2(self, edges: List[List[int]]) -> int: # Counter solution
+            count = Counter()
+            
+            # Count how many times each node appears
+            for a, b in edges:
+                count[a] += 1
+                count[b] += 1
+            
+            # The center will appear n - 1 times (in every edge)
+            n = len(edges) + 1  # total number of nodes
+            for node, freq in count.items():
+                if freq == n - 1:
+                    return node
 
 
 sol = Solution()

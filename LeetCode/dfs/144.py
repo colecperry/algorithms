@@ -35,56 +35,41 @@
 # Input: root = [1]
 # Output: [1]
 
-# ============================ #
-# Preorder Traversal (Recursive) - Process Node, Left, Right
-# ============================ #
-# How to Solve:
-# 1. Process the current node (append its value to the result list).
-# 2. Recursively traverse the left subtree until reaching a `None` node (base case).
-# 3. Return to the previous function call (backtrack to the parent).
-# 4. Recursively traverse the right subtree until reaching a `None` node.
-# 5. Once both left and right subtrees have been processed, return to the previous call stack.
-# 6. Final result: Nodes are visited in preorder (Root → Left → Right) order.
+# ====================================================== #
+# Preorder Traversal (Recursive) - Root → Left → Right
+# ====================================================== #
+
+# PATTERN: Process current node FIRST, then recurse left, then right
+
+# Algorithm Steps:
+# 1. BASE CASE: If node is None, return (hit a leaf's child)
+# 2. PROCESS: Add current node's value to result 
+# 3. RECURSE LEFT: Visit entire left subtree
+# 4. RECURSE RIGHT: Visit entire right subtree
+
+# Key Insight: Unlike inorder/postorder, we process the node IMMEDIATELY when we first visit it, not when we backtrack to it.
+
+# Example execution on tree:    1
+#                              / \
+#                             2   3
+#                            / \
+#                           4   5
+# 
+# Call stack visualization:
+    # Visit 1 → add 1 → go left
+    #   Visit 2 → add 2 → go left  
+    #     Visit 4 → add 4 → go left (None) → go right (None) → return
+    #   Back to 2 → go right
+    #     Visit 5 → add 5 → go left (None) → go right (None) → return
+    #   Back to 2 → return
+    # Back to 1 → go right
+    #   Visit 3 → add 3 → go left (None) → go right (None) → return
+    # Result: [1, 2, 4, 5, 3] ✓
 
 # Time Complexity: O(n) - Each node is visited exactly once.
 # Space Complexity: 
 #   - O(n) in the worst case (skewed tree, deep recursion call stack).
 #   - O(log n) in the best case (balanced tree, recursion depth ~ tree height).
-
-# ============================ #
-# Preorder Traversal (Iterative)
-# ============================ #
-
-# Big Idea:
-#  The stack helps us **remember the right child** before we traverse left, ensuring that after finishing the left subtree, we correctly return to the right subtree.
-# Since preorder follows **Root → Left → Right**, we must process nodes in this order.
-    # We process (append) the current node first.
-    # We **push the right child first** so that the left child is processed before it.
-# This ensures when we pop from the stack, we continue in preorder order.
-# By popping nodes from the stack, we simulate recursive backtracking, allowing us to return to the correct subtree at the right time.
-
-
-
-# How to Solve:
-# 1. Create:
-#    - A pointer (`cur`) initialized to `root` to traverse the tree.
-#    - A stack to store nodes for backtracking.
-#    - A result list (`res`) to store the traversal order.
-# 2. Iterate while `cur` is not None or the stack is not empty:
-#    - Process the current node by appending its value to `res`.
-#    - Push the right child onto the stack (if it exists) before moving left.
-#    - Move left by setting `cur = cur.left`.
-# 3. When `cur` reaches `None` (end of a left path):
-#    - Pop from the stack to backtrack to the right child.
-#    - Set `cur` to the popped node and continue traversal.
-# 4. Final result: Nodes are visited in preorder (Root → Left → Right) order.
-
-# Time Complexity: O(n) - Each node is visited exactly once.
-# Space Complexity:
-#   - O(n) in the worst case (skewed tree, stack holds all nodes).
-#   - O(log n) in the best case (balanced tree, stack depth ~ tree height).
-
-
 
 # Definition for a binary tree node.
 class TreeNode(object):
@@ -108,8 +93,29 @@ class Solution(object):
 
         return res
 
+
+# =============================== #
+# Preorder Traversal (Iterative)
+# =============================== #
+
+# Big Idea:
+#  The stack helps us remember the right child when we process the current node and before we traverse left, ensuring that after finishing the left subtree (hit base case), we correctly return to the right subtree.
+# Since preorder follows **Root → Left → Right**, we must process nodes in this order.
+    # We process (append) the current node first.
+    # We **push the right child first** so that the left child is processed before it.
+# This ensures when we pop from the stack, we continue in preorder order.
+
+# Big Idea
+    # While we are processing the current node or there are still nodes left to visit, we check -> are we on a current node?
+            # Yes -> process current node (pre-order), save right node to stack to process later, and move the pointer left
+            # No -> we hit out base case, let's go back and pop the last right node we visited off the stack and visit it
+
+# Time Complexity: O(n) - Each node is visited exactly once.
+# Space Complexity:
+#   - O(n) in the worst case (skewed tree, stack holds all nodes).
+#   - O(log n) in the best case (balanced tree, stack depth ~ tree height).
     
-    # Iterative
+    # Iterative PreOrder (Root -> Left -> Right)
     def preorderTraversal2(self, root):
 
         res = [] # Output array
@@ -117,11 +123,11 @@ class Solution(object):
         cur = root
 
         while cur or stack: # Iterate until current and stack are non empty
-            if cur: # If cur ptr is non null
-                res.append(cur.val) # Append current pointer's val to res
-                stack.append(cur.right) # Append right child to stack
-                cur = cur.left # Move pointer left
-            else: # If cur ptr is null
+            if cur: # We can try to go left
+                res.append(cur.val) # Process curr node
+                stack.append(cur.right) # Save the right child for later
+                cur = cur.left # Go left
+            else: # We are at base case -> need to backtrack and go right
                 cur = stack.pop() # set cur to node at top of the stack
 
         return res
@@ -135,8 +141,6 @@ class Solution(object):
     #     4   5       8
     #        / \     /
     #       6   7   9
-
-
 
 my_solution = Solution()
 

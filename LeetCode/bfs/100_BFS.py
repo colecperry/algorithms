@@ -51,31 +51,18 @@
     # Time complexity: O(p + q) -> Worst case we have to iterate through every node in both trees
     # Space complexity: -> O(h): If the tree is balanced, the max deapth of recursion is O(log n) because at each level the tree splits into two subtrees, and for a skewed tree, each recursive call only processes one child at a time, resulting in n recursive calls in total before reaching the base case -> O(n)
 
-# Line by line BFS:
-    # Big Picture: We use a queue starting with the root, check our conditions for true or false, and then append the children to the queue. Essentially we check the next node each iteration, and the queue is a list of tuples where each tuple is a node from p and a node from q
-    # Code: Initialize a deque with root nodes, loop and dequeue (pop from front) -> Check:
-        # 1. If both nodes are None (same tree) -> continue to next loop
+# How to Solve(BFS):
+    # When comparing two trees, it almost always makes more sense to use one deque with a tuple (each tuple representing one pair of nodes to comapare at that moment). This helps:
+        # - Simplify iteration
+        # - Fewer edge cases
+        # - Less code
+        # - Less risk of synchronization issues
+
+    # Initialize a deque with a tuple of both root nodes, loop and dequeue (pop from front) -> Check:
+        # 1. If both nodes are None -> trees are still the same
         # 2. If only one node is None (different structure) -> return False
         # 3. If node values are None (different values) -> return False
-    # Append the left and right children to the queue and continue to next iteration
-
-    
-    # Line by Line:
-    # queue = deque([(1, 1)]) -> start with root Node
-    # popleft() -> node1 = 1, node2 = 1
-    # don't enter any if statement, children of 1: (2, 2), (3, 3) 
-
-    # queue = deque([(2, 2), (3, 3)]) -> appended children
-    # popleft() -> node1 = 2, node2 = 2
-    # don't enter any if statment, append childern of 2: (None, None), (None, None)
-
-    # queue = deque([(3, 3), (None, None), (None, None)])
-    # popleft() -> node1 = 3, node2 = 3
-    # don't enter any if statment, append children of 3: (None, None), (None, None)
-
-    # queue = deque([(None, None), (None, None), (None, None), (None, None)])
-    # popleft() 4 times -> node1 = None, node2 = None 
-    # Return True once Queue is empty
+    # Append the left and right children (tuples) to the queue and continue to next iteration
 
 # Time Complexity: O(n)
 # - Each node in both trees is processed exactly once.
@@ -111,7 +98,7 @@ class Solution(object):
         return left_same and right_same
     
     def isSameTree2(self, p, q): # BFS
-        queue = deque([(p, q)])  # Initialize queue with root nodes
+        queue = deque([(p, q)])  # Always wrap root nodes/tuples in a list when creating a deque so it's iterable
 
         while queue:
             node1, node2 = queue.popleft()  # Pop off pair of nodes p, q

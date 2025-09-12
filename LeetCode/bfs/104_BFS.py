@@ -30,19 +30,6 @@
 # Time complexity: O(n): each node is visited once
 # Space complexity: O(h): height of the tree, worst case O(n) for skewed tree: This is due to the recursion call stack, which stores function calls during the recursive traversal.
 
-# Solution 2: BFS: 
-# Big idea: Create a deque and start with the root as the only element, process each level by popping off that element and adding it's children
-
-# Handle edge case if root is None
-# Initialize variable to count the tree levels and a deque to insert children nodes
-# Loop until the deque is empty
-# Loop over each element in the deque
-    # Pop off the node (popleft() for a queue since it's FIFO
-    # Add left and right children nodes if they exist
-# Increment the level
-
-# Solution 3: Iterative DFS
-
 # Example 1:
 #                3
 #               / \
@@ -71,6 +58,7 @@ class TreeNode(object):
         self.right = right
 
 from collections import deque
+from typing import Optional
 
 class Solution(object):
     # Recursive DFS
@@ -83,14 +71,25 @@ class Solution(object):
 
 
         return 1 + max(left_depth, right_depth) # Take max of both children and add one for current node
+    
+    # How to Solve - Level Based BFS: 
+    # Big idea: Create a deque and start with the root as the only element, process each level (while loop with a nested for loop) by popping off that element and adding it's children
 
-    # BFS
+    # Handle edge case if root is None
+    # Initialize variable to count the tree levels and a deque to insert children nodes
+    # Loop until the deque is empty
+    # Loop over each element in the deque (each level)
+        # Pop off the node (popleft() for a queue since it's FIFO
+        # Add left and right children nodes if they exist
+    # Increment the level
+
+    # BFS - level based
     def maxDepth2(self, root):
         if not root:
             return 0
         
         level = 0 # Store the levels of the tree
-        q = deque([root]) # Create a doubly ended queue
+        q = deque([root]) # Always wrap root in a list when creating a deque so it's iterable
 
         while q: # While the deque is not empty
 
@@ -104,9 +103,33 @@ class Solution(object):
             level += 1 # Increment the level
         
         return level
+    
+    # BFS - tuple based
+    def maxDepth3(self, root: Optional[TreeNode]) -> int:
+        if root == None: # Edge case empty tree
+            return 0
+        max_depth = 1 # Track max depth
+        q = deque([(root, 1)]) # Each tuple has ele & level
+        while q: # Loop until queue is empty 
+            node, depth = q.popleft() # Pop next tuple & destructure
+            max_depth = max(max_depth, depth) # Update max depth
+            if node.left: # Append left child if not None
+                q.append((node.left, depth + 1)) 
+            if node.right: # Append right child if not None
+                q.append((node.right, depth + 1))
+        return max_depth 
+    
+    # Example 1:
+    #                3
+    #               / \
+    #              /   \
+    #             9     20
+    #                   / \
+    #                  /   \
+    #                 15    7
 
     # Iterative DFS
-    def maxDepth3(self, root):
+    def maxDepth4(self, root):
         stack = [[root, 1]]
         res = 1
 
@@ -123,7 +146,7 @@ class Solution(object):
 my_solution = Solution()
 root1 = TreeNode(3, TreeNode(9), TreeNode(20, TreeNode(15), TreeNode(7)))
 root2 = root = TreeNode(1, None, TreeNode(2))
-print(my_solution.maxDepth2(root1))
+print(my_solution.maxDepth3(root1))
 print(my_solution.maxDepth1(root2))
 
 

@@ -92,26 +92,63 @@ class Solution(object):
     #                /  \
     #               15   17
 
-    
-    def minDepth2(self, root):
-        if not root:
+    # How to Solve - BFS (Level-based)
+        # - Use BFS to traverse the tree level by level.
+        # - Initialize the queue with the root node and a depth counter starting at 1.
+        # - While the queue is not empty:
+        #     - For each node in the current level (detected using the current queue length):
+        #         - Pop the node.
+        #         - If the node is a leaf (no left or right child), return the current depth as the minimum depth.
+        #         - Otherwise, add the node’s left and right children to the queue for the next level.
+        #     - After processing the level, increment the depth counter.
+        # - This ensures you find the shallowest leaf node by level order.
+
+        # Time Complexity: O(N), because each node is visited once in the worst case.
+        # Space Complexity: O(N), because in the worst case the queue holds up to N/2 nodes at the last level.
+
+
+    def minDepth2(self, root): # level-based
+        if not root: # Edge case for empty tree
             return 0
-        q = deque([root])
-        depth = 1
-        while q:
-            qSize = len(q)
-            for _ in range(qSize):
+        q = deque([root]) # Init the queue with the root
+        depth = 1 # track depth to return min depth
+        while q: # level based logic -> for loop with len of q for each level inside while loop
+            for _ in range(len(q)):
                 node = q.popleft()
-                # Since we added nodes without checking null, we need to skip them here.
-                if not node:
-                    continue
-                # The first leaf would be at minimum depth, hence return it.
-                if not node.left and not node.right:
-                    return depth
-                q.append(node.left)
-                q.append(node.right)
-            depth += 1
-        return -1
+                if not node.left and not node.right: # if we found a leaf
+                    return depth # return depth
+                if node.left:
+                    q.append(node.left) # append left and right children
+                if node.right:
+                    q.append(node.right)
+            depth += 1 # increase depth each level
+    
+    # How to Solve - BFS (Tuple)
+        # - Use BFS to traverse the tree level by level.
+        # - Store tuples of (node, current depth) in the queue to track depth.
+        # - Start by adding the root with depth 1 to the queue.
+        # - While the queue is not empty:
+        #     - Pop the front node and its depth.
+        #     - If the node is a leaf (no left or right child), return its depth as the minimum depth.
+        #     - Otherwise, add the node’s children to the queue with depth incremented by 1.
+        # - This guarantees the first leaf reached has the minimum depth.
+
+        # Time Complexity: O(N), because each node is visited once in the worst case.
+        # Space Complexity: O(N), because in the worst case (complete binary tree) the queue holds up to N/2 nodes.
+
+    
+    def minDepth3(self, root): # tuple-based
+        if root is None: # Edge case for empty tree
+            return 0
+        q = deque([(root, 1)]) # create an it list w/ node & depth tuple
+        while q: 
+            node, depth = q.popleft() # unpack tuple
+            if node.left is None and node.right is None: # if leaf node
+                return depth 
+            if node.left: 
+                q.append((node.left, depth + 1)) # add left child
+            if node.right:
+                q.append((node.right, depth + 1)) # add right child
 
 
 

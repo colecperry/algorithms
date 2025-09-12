@@ -1,0 +1,14 @@
+1. "Can I answer immediately?" (Base Cases)
+    - Am I at a boundary? (null node, empty array, out of bounds) -> going too far or running out of data
+    - Do I have a trivial answer? (single element, reached target) -> is the answer obvious now?
+    - Is this an invalid state? (contradiction found) -> Did I violate a rule or constraint?
+
+2. "What do I need to know?" (What to return from helpers/recursive calls)
+    - What information do I need from my children/subproblems?
+    - A boolean? A count? A path? A maximum value?
+
+3. "How do I combine the answers?" (Combine results)
+    - AND logic? (all must be true)
+    - OR logic? (any can be true)
+    - Math operation? (sum, max, min)
+    - Build something? (construct path, count total)

@@ -32,22 +32,29 @@
 # How To Solve:
     # Choose if we want to use BFS or DFS -> choose DFS because we have to visit each node and combine data
 
-# 1. Use Depth-First Search (DFS) to traverse both trees simultaneously.
-#    - We recursively visit corresponding nodes from both trees.
-# 2. Base Case:
-#    - If one of the nodes is None, return the other node.
-#      This handles cases where a subtree exists in only one of the trees.
-# 3. Merge Step:
-#    - If both nodes exist:
-#       a. Add their values.
-#       b. Recursively merge their left children.
-#       c. Recursively merge their right children.
-# 4. Return the updated node from the first tree.
-#    - The merged tree is constructed by modifying the first input tree in place.
-# This approach works because:
-# - The recursive structure mirrors the shape of the trees.
-# - The base case ensures we handle None values gracefully.
-# - Each merge operation is localized to a pair of corresponding nodes.
+    # 1. Use Depth-First Search (DFS) to traverse both trees simultaneously.
+    #    - We recursively visit corresponding nodes from both trees.
+    # 2. Base Case:
+    #    - If one of the nodes is None, return the other node.
+    #      This handles cases where a subtree exists in only one of the trees.
+    # 3. Merge Step:
+    #    - If both nodes exist:
+    #       a. Add their values.
+    #       b. Recursively merge their left children.
+    #       c. Recursively merge their right children.
+    # 4. Return the updated node from the first tree.
+    #    - The merged tree is constructed by modifying the first input tree in place.
+    # 5. Assignment Pattern:
+    #    - **Leaf level assignments:** Come from base cases (return root2/root1 when one is None)
+    #    - **Internal level assignments:** Come from "return root1" after full recursive processing
+    #    - This creates a bottom-up building process where each level receives a fully 
+    #      constructed subtree from the level below it.
+
+    # This approach works because:
+    # - The recursive structure mirrors the shape of the trees.
+    # - The base case ensures we handle None values gracefully.
+    # - Each merge operation is localized to a pair of corresponding nodes.
+    # - The assignment pattern ensures proper tree reconstruction from leaves up to root.
 
 
 # Time complexity: O(n+m) -> we iterate through each node in both trees once to combine them
@@ -71,7 +78,7 @@ class Solution(object):
         if root2 is None: # Case where right tree has no node
             return root1 
         
-        root1.val += root2.val # Update the current node in the left tree with the sum of both nodes
+        root1.val += root2.val # Update the curr node in the left tree with the sum of both nodes -> Did not hit base case, so we must have 2 vals
         root1.left = self.mergeTreesDFS(root1.left, root2.left) # Recurse left, return val for the left child and assign it to node's left
         root1.right = self.mergeTreesDFS(root1.right, root2.right) # Recurse right, return val the right child, assign to node's right
         

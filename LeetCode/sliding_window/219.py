@@ -62,11 +62,14 @@ class Solution(object):
 
 my_solution = Solution()
 
-nums1 = [1,2,3,1], k1 = 3
+nums1 = [1,2,3,1]
+k1 = 3
 print(my_solution.containsNearbyDuplicate2(nums1, k1))
 
-nums2 = [1,0,1,1], k2 = 1
+nums2 = [1,0,1,1]
+k2 = 1
 print(my_solution.containsNearbyDuplicate2(nums2, k2))
 
-nums3 = [1,2,3,1,2,3], k3 = 2
+nums3 = [1,2,3,1,2,3]
+k3 = 2
 print(my_solution.containsNearbyDuplicate2(nums3, k3))

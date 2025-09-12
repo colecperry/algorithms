@@ -58,7 +58,7 @@ class Solution:
             trust_count[trusting] -= 1 # Decrement the count for the person trusting another person in the count arr
             trust_count[trusted] += 1 # Increment the person being trusted in the count arr
 
-        for i in range(1, len(trust_count)): # Find the person in the trust count arr
+        for i in range(1, len(trust_count)): # Find the person in the trust count arr -> ignore index 0 because person labels go from 1 to n
             if trust_count[i] == (n - 1): # that's count is n - 1
                 return i # i is the same as the person
 

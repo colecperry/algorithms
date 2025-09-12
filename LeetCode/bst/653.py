@@ -1,6 +1,6 @@
 # 653. Two Sum IV - Input is a BST
 
-# Topics: Hash Table, Two Pointers, Tree, Depth First Search, Breadth First Search, Binary Tree
+# Topics: Hash Table, Two Pointers, Tree, Depth First Search, Breadth First Search, Binary Search Tree, Binary Tree
 
 # Given the root of a binary search tree and an integer k, return true if there exist two elements in the BST such that their sum is equal to k, or false otherwise.
 

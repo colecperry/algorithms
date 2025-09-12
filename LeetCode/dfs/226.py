@@ -25,11 +25,11 @@
 # Output: []
 
 # How to solve (Recursive):
-    # If the current node is None, return None (base case of recursion)
-    # Swap the left and right children of the current node
-    # Recurse left
-    # Recurse right
-    # Return the current node to reconnect it properly in the parent call
+    # (Base Case):
+        # Scenario A: I'm at a null node -> Return null immediately (nothing to invert)
+    # Swap the children
+    # Recursively call the fn on left and right subtrees (inverts them)
+    # Return the root
 
 # Time Complexity: O(n)
 # - We visit every node exactly once
@@ -57,7 +57,7 @@ class TreeNode:
 class Solution:
     def invertTreeRecursive(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
         if not root: # Edge case for empty tree 
-            return None # & base case for end of recursion
+            return  # & base case for end of recursion
         # Swap the children
         root.left, root.right = root.right, root.left
         # Recur on the children

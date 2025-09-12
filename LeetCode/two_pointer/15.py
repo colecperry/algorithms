@@ -7,14 +7,18 @@
 # Notice that the solution set must not contain duplicate triplets.
 
 # How to Solve:
-# Brute Force: Triple loop
-# Optimal:
-    # Sort the input array
-    # When we are searching for combinations on our first loop, and we get to the same number we skip it (this eliminates us from having duplicates)
-    # Create left and right pointers l = i+1, r = len(nums)
-    # Check for duplicates among left and right pointers by comparing l and r to nums[i], if found move the pointer
-    # Add up the sum of i, l, and r
-    # If it == 0 add to ans, if sum > 0 move right pointer over (decreases our sum), if sum < 0 move left pointer over (increases our sum)
+    # 1. Sort the input list to enable the two‐pointer approach.
+    # 2. Loop over each element as the “first” value of the triplet, skipping duplicates to avoid repeats.
+    # 3. For each fixed element, initialize two pointers (left, right) at the ends of the remaining subarray.
+    #    - If the sum of the three values is less than zero, move left pointer right to increase the sum.
+    #    - If the sum is greater than zero, move right pointer left to decrease the sum.
+    #    - If the sum equals zero, record the triplet, then advance the left pointer past any duplicates.
+    # 4. Continue moving pointers until they cross, then proceed to the next fixed element.
+    # 5. Return the list of all unique triplets that sum to zero.
+
+    # Time Complexity: O(n^2) – the outer loop runs O(n) times and the two‐pointer scan takes O(n) each
+    # Space Complexity: O(1) extra space (ignoring the output list)
+
 
 # Example 1:
 # Input: nums = [-1,0,1,2,-1,-4]
@@ -41,32 +45,28 @@ class Solution(object):
         nums.sort() # Sort the nums for 2 pointer
         ans = [] # Store answer
         for i, a in enumerate(nums): # Loop through idx and val
-            if i > 0 and a == nums[i-1]: # Check for dups 
-                continue # If dup found skip
+            if i > 0 and a == nums[i-1]: # Don't go OOB on first iteration
+                continue # Check for consecutive dups when iterating i, skip if dup found
 
             l,r = i + 1, len(nums) - 1 # Set two pointers
             while l < r: # Loop until they meet
-                sum = a + nums[l] + nums[r] # Calc sum
-                if sum == 0: # If sum is equal to zero
-                    ans.append([a, nums[l], nums[r]]) # Append ans and move both ptrs
-                    l += 1
-                    r -=1
-                    while l < r and (nums[l] == nums[l-1]): # Check for dups on l
-                        l += 1
-                    while l < r and nums[r] == nums[r+1]: # Check and skip dups for r
-                        r -= 1
-                elif sum > 0: # If sum is too big
-                    r -= 1 # Make sum smaller (sorted arr)
-                else: # If sum too small
-                    l += 1 # Make sum bigger (sorted arr)
+                sum = a + nums[l] + nums[r] # calc sum from three pointers
+                if sum > 0: # if the sum is greater than zero,
+                    r -= 1 # make total sum smaller (since arr is sorted)
+                elif sum < 0: # if the sum is less than zero
+                    l += 1 # make the total sum bigger
+                else: # if sum == 0
+                    ans.append([a, nums[l], nums[r]]) 
+                    l += 1 
+                    while nums[l] == nums[l - 1] and l < r: # Keep shifting while there are duplicates,
+                        l += 1 # then recalculate sum
                 
         return ans
-
-
-
-
+    
 
 my_solution = Solution()
 print(my_solution.threeSum([-1,0,1,2,-1,-4]))
 print(my_solution.threeSum([0,1,1]))
 print(my_solution.threeSum([0,0,0]))
+print(my_solution.threeSum([-2,-1,-1,0,1,3])) # inner while loop gets triggered
+
