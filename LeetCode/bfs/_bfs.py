@@ -1,592 +1,366 @@
 """
-BFS (Breadth-First Search) Complete Guide for LeetCode Problems
-Based on problems: 100, 101, 103, 104, 111, 199, 200, 257, 404, 417, 559, 637, 733, 783, 993
+=================================================================
+BREADTH-FIRST SEARCH (BFS) COMPLETE GUIDE
+=================================================================
+
+WHAT IS BFS?
+-----------
+Breadth-First Search (BFS) is a graph traversal algorithm that explores nodes level by level,
+visiting all nodes at distance d before visiting nodes at distance d+1.
+
+Key characteristics:
+- Uses a QUEUE (FIFO - First In, First Out) data structure
+- Explores all neighbors at current level before going deeper
+- Guarantees shortest path in unweighted graphs
+
+BFS CORE TEMPLATES
+==================
 """
 
 from collections import deque
 from typing import List, Optional
 
-# =============================================================================
-# WHAT IS BFS?
-# =============================================================================
-"""
-BFS explores nodes level by level, visiting all nodes at depth d before visiting nodes at depth d+1. Uses a queue (FIFO) data structure.
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
 
-Key characteristics:
-- Processes nodes in order of distance from starting point
-- Guarantees shortest path in unweighted graphs
-- Uses more memory than DFS due to queue storage
-"""
-
-# =============================================================================
-# BASIC BFS STRUCTURE
-# =============================================================================
-
-def basic_bfs_template(start_node):
+# ================================================================
+# BFS TREE TEMPLATE
+# ================================================================
+def bfs_tree_template(root):
     """
-    Standard BFS template - memorize this pattern
+    Basic tree BFS template - no visited set needed (trees have no cycles)
+    - Time complexity: O(n) -> n = number ot total nodes -> BFS visits each node exactly once and not revisited (trees have no cycles)
+    - Space complexity: O(w) -> w is maximum width of any level of a tree since BFS queues store all nodes from current level before moving to next level
     """
-    if not start_node:
-        return
+    if not root:
+        return []
     
-    queue = deque([start_node]) # deque & set expects an iterable obj (array or tuple)
-    visited = set([start_node])  # Prevent revisiting nodes
+    queue = deque([root])
+    result = []
     
     while queue:
         node = queue.popleft()
         
         # Process current node
-        print(node.val)  # Or whatever processing needed
+        result.append(node.val)
         
-        # Add neighbors to queue (replace with specific neighbor access)
-        # For binary tree:
-        if node.left and node.left not in visited: # not null & not visited
-            visited.add(node.left) 
-            queue.append(node.left) # add to be explored
-        if node.right and node.right not in visited:
-            visited.add(node.right)
+        # Add children to queue (left then right - order matters for some problems)
+        if node.left:
+            queue.append(node.left)
+        if node.right:
             queue.append(node.right)
-        
-        # For graph with adjacency list (node.neighbors):
-        # for neighbor in node.neighbors:
-        #     if neighbor not in visited:
-        #         visited.add(neighbor)
-        #         queue.append(neighbor)
-        
-        # For grid/matrix (assuming node has row, col attributes):
-        # directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-        # for dr, dc in directions:
-        #     new_row, new_col = node.row + dr, node.col + dc
-        #     if (0 <= new_row < rows and 
-        #         0 <= new_col < cols and 
-        #         grid[new_row][new_col] not in visited):
-        #         visited.add(grid[new_row][new_col])
-        #         queue.append(grid[new_row][new_col])
-
-# =============================================================================
-# TREE BFS VARIANTS
-# =============================================================================
-
-class TreeNode:
-    def __init__(self, val=0, left=None, right=None):
-        self.val = val
-        self.left = left
-        self.right = right
-
-def level_order_traversal(root):
-    """
-    Basic tree BFS - no visited set needed since trees have no cycles
-    Used in: LC 100, 101, 103, 104, 111, 199, 404, 559, 637, 783, 993
-    """
-    if not root:
-        return []
-    
-    result = []
-    queue = deque([root])
-    
-    while queue:
-        level_size = len(queue)  # Process entire level at once
-        level_nodes = []
-        
-        for _ in range(level_size):
-            node = queue.popleft()
-            level_nodes.append(node.val)
-            
-            if node.left: # Add each node's children
-                queue.append(node.left)
-            if node.right:
-                queue.append(node.right)
-        
-        result.append(level_nodes)
     
     return result
 
-# Create the tree nodes
-class TreeNode:
-    def __init__(self, val=0, left=None, right=None):
-        self.val = val
-        self.left = left
-        self.right = right
-
-    def bfs_with_level_tracking(self):
-        """
-        Track level explicitly - useful for problems requiring level information
-        Used in: LC 103 (zigzag), 199 (right side view), 637 (level averages)
-        """
-        if not root:
-            return []
-        
-        result = []
-        queue = deque([(root, 0)])  # tuple with (node, level)
-        
-        while queue:
-            node, level = queue.popleft() # destructure to get node val and level
-            
-            # Extend result if new level
-            if level >= len(result):
-                result.append([])
-            
-            result[level].append(node.val) # Append val to level (index in array)
-            
-            if node.left:
-                queue.append((node.left, level + 1))
-            if node.right:
-                queue.append((node.right, level + 1))
-        
-        return result
-    
-    #       3
-    #      / \
-    #     9   20
-    #        /  \
-    #       15   7
-    
-# Build the tree
-root = TreeNode(3)
-root.left = TreeNode(9)
-root.right = TreeNode(20)
-root.right.left = TreeNode(15)
-root.right.right = TreeNode(7)
-
-print(root.bfs_with_level_tracking())  # Output: [[3], [9, 20], [15, 7]]
-
-# Common Tuple Tracking in Tree-Based BFS:
-# 1. (node, level): Track the level of each node for level-specific processing (e.g., Zigzag Level Order, Right Side View).
-# 2. (node, is_left_child): Track if a node is a left child for problems like Sum of Left Leaves.
-# 3. (node, parent): Track the parent of each node for parent-child relationship problems (e.g., Lowest Common Ancestor).
-# 4. (node, path): Track the path from the root to the current node for path reconstruction (e.g., Binary Tree Paths).
-# 5. (node, cumulative_sum): Track the sum of values from the root to the current node (e.g., Path Sum).
-# 6. (node, depth): Track the depth of each node for depth-specific processing (e.g., Maximum Depth).
-# 7. (node, distance): Track the distance from a target node (e.g., All Nodes Distance K).
-# 8. (node, visited): Track visited nodes in trees with parent pointers to avoid revisiting (e.g., Distance
-
-# =============================================================================
-# GRID BFS TEMPLATE 
-# =============================================================================
-
-from collections import deque
-
-def grid_bfs_example(grid, start_row, start_col):
+# ================================================================
+# BFS MATRIX TEMPLATE
+# ================================================================
+def bfs_matrix_template(matrix, start_row, start_col):
     """
-    Grid BFS template - Grid BFS template - Perform a BFS matrix traversal and return a list of values from the visited cells in the order they were explored
-
-    EXPLORATION PATTERN: BFS explores in "ripple" or "wave" layers
-    - Layer 0: Starting cell (0,0)
-    - Layer 1: All direct neighbors of start
-    - Layer 2: All neighbors of layer 1 (2 steps from start)
-    - Layer 3: All neighbors of layer 2 (3 steps from start)
-    This guarantees shortest path/minimum steps to any reachable cell.
+    Basic matrix BFS template with visited tracking
+    - TC: O(rows * cols) -> each cell in the matrix is visited at most once due to visited set tracking
+    - SC: O(rows * cols) -> visited set can store up to (rows * cols) tuples, queue can store up to O(min(rows, cols)) worst case per BFS level
     """
-    if not grid or not grid[0]: # If grid is empty or first row is empty, grid invalid for BFS
+    if not matrix or not matrix[0]:
         return []
     
-    rows, cols = len(grid), len(grid[0]) # get number of rows and columns
-    queue = deque([(start_row, start_col)]) # create queue with tuple of (row, col)
-    visited = set([(start_row, start_col)]) # create visited set with tuple of (row, col)
-    result = [] # collect values in order visited
+    rows, cols = len(matrix), len(matrix[0])
+    queue = deque([(start_row, start_col)])
+    visited = set([(start_row, start_col)])
+    result = []
     
-    # 4 directions: up, down, left, right
-    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # up, down, left, right
     
     while queue:
-        row, col = queue.popleft() # FIFO: add to end, pop from front
+        row, col = queue.popleft()
         
-        # Process current cell - collect its value
-        result.append(grid[row][col])
+        # Process current cell
+        result.append(matrix[row][col])
         
-        for dr, dc in directions: # travel all four directions
+        # Add valid neighbors
+        for dr, dc in directions:
             new_row, new_col = row + dr, col + dc
             
-            # Check bounds and conditions
-            if (0 <= new_row < rows and # row not OOB
-                0 <= new_col < cols and # col not OOB
-                (new_row, new_col) not in visited): # not already visited
+            if (0 <= new_row < rows and 
+                0 <= new_col < cols and 
+                (new_row, new_col) not in visited):
                 
-                visited.add((new_row, new_col)) # Add new cell to visited set
-                queue.append((new_row, new_col)) # Add to end of queue (will be processed in next layer)
+                visited.add((new_row, new_col))
+                queue.append((new_row, new_col))
     
     return result
 
-# Test matrix
-test_matrix = [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
-]
-
-# Run the function
-print("Matrix BFS from (0,0):", grid_bfs_example(test_matrix, 0, 0))
-
-# =============================================================================
-# BFS VS DFS - WHEN TO USE WHICH
-# =============================================================================
 """
+WHEN TO USE BFS VS DFS
+======================
+
 Use BFS when:
-- Need shortest path in unweighted (all steps cost 1) graph/grid. BFS guarentees that the first time a node is reached, it is reached via the shortest path b/c it explores all nodes at the curr level before moving to the next level
+- Need shortest path/minimum steps in unweighted graphs
 - Need to process nodes level by level
-- Want to find minimum steps/distance
-- Memory usage is not a primary concern
+- Want guaranteed minimum distance/depth
+- Multi-source problems (start from multiple points)
 
 Use DFS when:
-- Memory usage is critical (stack uses less space than queue)
+- Memory is limited (stack uses less space than queue)
 - Need to explore all paths (backtracking)
-- Tree problems that don't require level information
-- Recursive solutions are more intuitive
+- Tree problems without level requirements
+- Recursive solutions are more natural
 
-Examples from problems:
-- LC 111 (min depth): BFS better - stops at first leaf
-- LC 104 (max depth): DFS equally good, more intuitive
-- LC 200 (islands): Both work, DFS slightly more memory efficient
+COMMON BFS PATTERNS
+===================
 """
 
-# =============================================================================
-# COMMON BFS PATTERNS & SOLUTIONS
-# =============================================================================
+# ================================================================
+# PATTERN 1: LEVEL-BY-LEVEL PROCESSING
+# PATTERN EXPLANATION: Process entire levels at once, maintaining level structure in results.
+# Key insight: BFS naturally visits nodes level by level due to its FIFO queue structure. By capturing level_size = len(queue) at the start of each iteration, you can process exactly one complete level before moving to the next.
+# Applications: Level order traversal, zigzag traversal, level averages, right view.
+# ================================================================
 
-# ----------------------------------------
-# Pattern 1: Zigzag Level Order Traversal
-# ----------------------------------------
-
-# Traverse a binary tree level by level, but alterates the direction of traversal for each level
-
-def zigzag_level_order(root):  # LC 103
-    """Return the values of a binary tree's nodes level by level, but alternate the direction for each level."""
-    # Handle empty tree
-    if not root:
+def levelOrder(root: Optional[TreeNode]) -> List[List[int]]: # LC 102
+    '''
+    Problem: Given the root of a binary tree, return the level order traversal of its nodes' values. (i.e., from left to right, level by level).
+    TC: O(n) -> each node visited once
+    SC:
+        - O(n) -> output list stores all n node values
+        - O(w) -> queue stores nodes from current level where w is the widest level
+        - Combined: O(n) > O(w), total = O(n)
+    '''
+    if not root: # Edge case - empty tree
         return []
-    
-    # Initialize BFS components
-    queue = deque([root])  # BFS queue starting with root
-    output = []            # Final result list
-    flag = False           # Toggle for zigzag direction
-    
-    # Process each level
+    queue = deque([root]) # BFS queue
+    output = []
     while queue:
-        inner = []  # Store current level's values
-        
-        for _ in range(len(queue)): # Process all nodes in cur lvl
-            node = queue.popleft() # Get next node from queue
-            
-            # Add children to queue for next level
-            if node.left:
+        inner = [] # collect BFS level
+        for _ in range(len(queue)): # travese full BFS level
+            node = queue.popleft()
+            inner.append(node.val)
+            if node.left: # Append children if non null (next level)
                 queue.append(node.left)
             if node.right:
                 queue.append(node.right)
-            
-            # Collect node value for current level
-            inner.append(node.val)
-        
-        # Apply zigzag logic based on flag
-        if flag == False:
-            output.append(inner)                    # Normal order
-        else:
-            output.append(list(reversed(inner)))    # Reversed order
-        
-        # Toggle direction for next level
-        flag = not flag
+        output.append(inner) # Append the full level each iteration
     
     return output
 
-# Example Tree:
-#       3
-#      / \
-#     9   20
-#        /  \
-#       15   7
+#            3
+#           / \
+#          /   \
+#         9    20
+#             /  \
+#           15    7
 
-root = TreeNode(3)
-root.left = TreeNode(9)
-root.right = TreeNode(20)
-root.right.left = TreeNode(15)
-root.right.right = TreeNode(7)
+# Test level processing
+test_root = TreeNode(3, TreeNode(9), TreeNode(20, TreeNode(15), TreeNode(7))) # [[3],[9,20],[15,7]]
+print("Level order:", levelOrder(test_root))
 
-print(zigzag_level_order(root))  # Output: [[3], [20, 9], [15, 7]]
+# ================================================================
+# PATTERN 2: EARLY TERMINATION BFS
+# PATTERN EXPLANATION: Stop BFS as soon as target condition is met, avoiding unnecessary exploration.
+# Key insight: BFS guarantees first occurrence is at minimum distance/level.
+# Applications: Minimum depth, shortest path, first target found.
+# ================================================================
 
-# ----------------------------------
-# Pattern 2: Early termination BFS
-# ----------------------------------
-
-def min_depth(root):  # LC 111
-    """Find minimum depth - BFS stops at first leaf"""
-    if not root: # Handle empty tree
+def min_depth_early_termination(root): # LC 111
+    """
+    Problem: Given a binary tree, find its minimum depth. The minimum depth is the number of nodes along the shortest path from the root node down to the nearest leaf node.
+    TC: O(n) worst case -> visit all nodes if the first leaf is at maximum depth
+    SC: O(w) where w = max width of any tree level, queue holds nodes from each level in the tree
+    """
+    if not root: # Edge case - empty tree has a min depth of 0
         return 0
     
-    # Initialize BFS components
-    q = deque([root])  # BFS queue with root
-    depth = 1          # Track current depth
+    queue = deque([root]) # Initialize BFS queue with the root
+    depth = 1 # track min depth
     
-    # Level-by-level processing
-    while q: 
-        for _ in range(len(q)): # Process all nodes at cur level
-            node = q.popleft() # Get next node from current level
-            
-            # Check if this is a leaf node (first leaf = minimum depth)
-            if not node.left and not node.right:
-                return depth  # Return depth immediately when leaf found
-            
-            # Add children to queue for next level
-            if node.left:
-                q.append(node.left)
-            if node.right:
-                q.append(node.right)
-        
-        # Move to next level - increment depth
-        depth += 1
-
-# Example Tree:
-#       3
-#      / \
-#     9   20
-#        /  \
-#       15   7
-
-root = TreeNode(3)
-root.left = TreeNode(9)
-root.right = TreeNode(20)
-root.right.left = TreeNode(15)
-root.right.right = TreeNode(7)
-
-print(min_depth(root))  # Output: 2
-
-# ----------------------------
-# Pattern 3: Grid flood fill
-# ----------------------------
-
-def flood_fill(image, start_row, start_col, new_color):  # LC 733
-    """Change connected pixels of same color"""
-    num_rows, num_cols = len(image), len(image[0]) # Get grid dimensions
-    original_color = image[start_row][start_col] # Store original color we're replacing
-    
-    # Early return if already the target color
-    if original_color == new_color:
-        return image
-    
-    # Initialize BFS with starting position
-    queue = deque([(start_row, start_col)])
-    
-    # Direction vectors for 4-directional movement: up, down, left, right
-    direction_deltas = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-    
-    # Process all connected pixels
     while queue:
-        current_row, current_col = queue.popleft() # Get current pixel position
+        level_size = len(queue) # Capture the current level
         
-        image[current_row][current_col] = new_color # Change current pixel to new color
-        
-        # Check all 4 neighboring pixels
-        for delta_row, delta_col in direction_deltas:
-            # Calculate neighbor position
-            neighbor_row = current_row + delta_row
-            neighbor_col = current_col + delta_col
+        for _ in range(level_size): # Level based logic -> process all nodes in the level
+            node = queue.popleft()
             
-            # Check if neighbor is valid and needs to be changed
-            if (0 <= neighbor_row < num_rows and  # Row not OOB
-                0 <= neighbor_col < num_cols and  # Col not OOB
-                image[neighbor_row][neighbor_col] == original_color):  # Has original color -> add to queue to be changed to target color
-                queue.append((neighbor_row, neighbor_col)) # add neighbor to be explored
+            # Early termination: first leaf found is minimum depth
+            if not node.left and not node.right:
+                return depth
+            
+            if node.left: # Appending children of each node at current level adds next level to the queue
+                queue.append(node.left)
+            if node.right:
+                queue.append(node.right)
+        
+        depth += 1  # Move to next level only after processing current level
     
-    return image
+    return depth
 
-image = [
-    [1, 1, 1],
-    [1, 1, 0],
-    [1, 0, 1]
-]
-start_row, start_col = 1, 1
-new_color = 2
+#               3
+#              / \
+#             9   20
+#                /  \
+#               15   17
 
-print(flood_fill(image, start_row, start_col, new_color))
-# Output:
-# [
-#     [2, 2, 2],
-#     [2, 2, 0],
-#     [2, 0, 1]
-# ]
+root = TreeNode(3, TreeNode(9), TreeNode(20, TreeNode(15), TreeNode(7)))
 
+print("Minimum depth:", min_depth_early_termination(root))
 
-# -------------------------------
-# Pattern 4: Multi-source BFS
-# -------------------------------
+# ================================================================
+# PATTERN 3: MULTI-SOURCE BFS - 994
+# PATTERN EXPLANATION: Start BFS from multiple source points simultaneously in the same structure, useful for problems where multiple starting conditions exist or need to find closest distance to any source.
+# Key insight: Add all sources to initial queue, they all start at distance 0.
+# Applications: Rotten oranges, walls and gates, pacific atlantic.
+# ================================================================
 
-def pacific_atlantic(heights):  # LC 417
-    """Water flow to both oceans - start BFS from all ocean edges and return a list of coordinates [row, col] where water can flow to both the pacific and atlantic"""
-    # Edge case: empty grid
-    if not heights or not heights[0]:
-        return []
-
-    # Get grid dimensions
-    rows, cols = len(heights), len(heights[0])
-
-    # Initialize queues for BFS starting points (cells touching each ocean)
-    pacific_queue = deque()
-    atlantic_queue = deque()
-
-    # Add all cells in the first and last columns
-    for r in range(rows):
-        pacific_queue.append((r, 0)) # Left column touches Pacific
-        atlantic_queue.append((r, cols - 1))  # Right column touches Atlantic
-
-    # Add all cells in the first and last rows
-    for c in range(cols):
-        pacific_queue.append((0, c)) # Top row touches Pacific
-        atlantic_queue.append((rows - 1, c))  # Bottom row touches Atlantic
-
-    # BFS function to find all cells reachable from a given ocean
-    def bfs(queue):
-        visited = set()
-        directions = [(-1, 0), (1, 0), (0, 1), (0, -1)]  # up, down, right, left
-
-        while queue:
-            r, c = queue.popleft()  # Get current position
-            visited.add((r, c))     # Mark as visited
-
-            # Check all 4 neighbors
-            for dr, dc in directions:
-                nr, nc = r + dr, c + dc  # Calc neighbor position
-
-                # Check if neighbor is valid and water can flow FROM it TO current cell
-                if (
-                    0 <= nr < rows and # Neighbor row in bounds
-                    0 <= nc < cols and # Neighbor col in bounds
-                    (nr, nc) not in visited and # Not visited
-                    heights[nr][nc] >= heights[r][c] # Water can flow uphill (reverse logic)
-                ):
-                    queue.append((nr, nc))  # Add neighbor for exploration
-
-        return visited  # Return all cells reachable by this ocean
-
-    # Run BFS from Pacific and Atlantic starting points
-    pacific_reachable = bfs(pacific_queue)   # Returns cells that can reach Pacific
-    atlantic_reachable = bfs(atlantic_queue) # Returns cells that can reach Atlantic
-
-    # Find cells reachable by both oceans
-    result = []
+def orangesRotting(grid: List[List[int]]) -> int:
+    '''
+    # Problem: You are given an m x n grid where each cell can have one of three values: 0 representing an empty cell, 1 representing a fresh orange, or 2 representing a rotten orange. Every minute, any fresh orange that is 4-directionally adjacent to a rotten orange becomes rotten. Return the minimum number of minutes that must elapse until no cell has a fresh orange. If this is impossible, return -1.
+    # TC: Initial scan to find rotten oranges: O(rows * cols)
+        # BFS traversal: O(rows * cols) - each cell visited once
+        # Final check for remaining fresh oranges: O(rows * cols)
+        # Total: O(rows * cols)
+    # SC: O(rows * cols) worst case -> queue if grid is all rotten oranges 
+    '''
+    rows, cols = len(grid), len(grid[0])
+    queue = deque()
+    
+    # Add all initially rotten oranges to queue
     for r in range(rows):
         for c in range(cols):
-            # Cell must be reachable by both oceans
-            if (r, c) in pacific_reachable and (r, c) in atlantic_reachable:
-                result.append([r, c])
+            if grid[r][c] == 2:
+                queue.append((r, c, 0))
+    
+    max_time = 0   # Track max time elapsed to spread rot to max area
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)] # Matrix BFS goes 4 directions
+    
+    # BFS to spread rot
+    while queue:
+        row, col, time = queue.popleft()
+        max_time = max(max_time, time)
+        
+        for dr, dc in directions:
+            new_row, new_col = row + dr, col + dc
+            
+            if (0 <= new_row < rows and # OOB check
+                0 <= new_col < cols and 
+                grid[new_row][new_col] == 1):  # Find a fresh orange
+                
+                grid[new_row][new_col] = 2  # Make rotten
+                queue.append((new_row, new_col, time + 1)) # Add cell to explore with updated elapsed time 
+    
+    # Check if any fresh oranges remain
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == 1:  # If any fresh oranges remain, return -1
+                return -1
+    
+    return max_time
 
-    return result
+#         Minute 0         Minute 1         Minute 2         Minute 3           Minute 4
+#        [[2, 1, 1],      [[2, 2, 1],      [[2, 2, 2],      [[2, 2, 2],        [[2, 2, 2],
+#         [1, 1, 0],       [2, 1, 0],       [2, 2, 0],       [2, 2, 0],         [2, 2, 0]
+#         [1, 0, 1]]       [1, 0, 1]]       [1, 0, 1]]       [2, 0, 1]]         [2, 0, 2]]
+#
 
+print(orangesRotting([[2,1,1],
+                      [1,1,0],
+                      [0,1,1]])) # 4
 
-# FN Calls
-heights = [
-    [1, 2, 2, 3, 5],
-    [3, 2, 3, 4, 4],
-    [2, 4, 5, 3, 1],
-    [6, 7, 1, 4, 5],
-    [5, 1, 1, 2, 4]
-]
+print(orangesRotting([[2,1,1],
+                      [0,1,1],
+                      [1,0,1]])) # -1
 
-print(pacific_atlantic(heights))
-# Output: [[0, 4], [1, 3], [1, 4], [2, 2], [3, 0], [3, 1], [4, 0]]
+# ================================================================
+# PATTERN 4: CONNECTED REGION EXPLORATION
+# PATTERN EXPLANATION: Explore/process connected regions or simultaneously compare multiple structures.
+# Key insight: Use BFS to systematically discover and process related elements, whether exploring connected components in one structure or comparing corresponding elements across multiple structures.
+# Applications: Island counting, flood fill, tree comparison, tree symmetry, connected components.
+# ================================================================
 
-# =============================================================================
-# BFS NUANCES & PROBLEM-SPECIFIC INSIGHTS
-# =============================================================================
+def numIslands(grid: List[List[str]]) -> int:
+    '''
+    # Given an m x n 2D binary grid grid which represents a map of '1's (land) and '0's (water), return the number of islands. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.
+    '''
+    if not grid: # edge case -> empty grid
+        return 0
 
-#  ----------------------------------------------------------------------------------------------------
-# NUANCE 1: You must process corresponding nodes from two trees simultaneously, carefully handling None cases and ensuring structural and value equality at every step.
-#  ----------------------------------------------------------------------------------------------------
+    num_rows, num_cols = len(grid), len(grid[0]) # track num of rows and cols for OOB checks
+    visited = set() # track visited elements so we don't revisit eles -> infinite loop caused by continuing to explore elements we have already explored and adding their neighbors over and over
+    island_count = 0 # output
 
-def isSameTree(self, p, q): # BFS
-        queue = deque([(p, q)])  # Always wrap root nodes/tuples in a list when creating a deque so it's iterable
+    def bfs(start_row, start_col): # Nested fn keeps exploring neighbors until island disconnects
+        queue = deque([(start_row, start_col)]) # append the first ele (tuple of rows and cols)
+        visited.add((start_row, start_col)) # add curr ele to visited set (tuple of rows and cols)
 
-        while queue:
-            node1, node2 = queue.popleft()  # Pop off pair of nodes p, q
+        directions = [(-1, 0), (1, 0), (0, 1), (0, -1)] # up, down, left, right (tuples of rows and cols)
 
-            if not node1 and not node2:  # Both nodes are None, continue checking -> Tree still equal
-                continue
-            if not node1 or not node2:  # If only one is None, trees are different
-                return False
-            if node1.val != node2.val:  # Different values -> trees are different
-                return False
+        while queue: # Keep exploring island
+            current_row, current_col = queue.popleft() # pop the ele & get it's row and col
 
-            # Add left children and right children to the queue
-            queue.append((node1.left, node2.left))
-            queue.append((node1.right, node2.right))
+            for d_row, d_col in directions: # Matrix BFS explores 4 directions
+                neighbor_row = current_row + d_row # update row to neighbor's row
+                neighbor_col = current_col + d_col # update col to neighbor's col
 
-        return True  # If we never return False, the trees are identical
+                if (
+                    0 <= neighbor_row < num_rows and # if row in bounds
+                    0 <= neighbor_col < num_cols and # if col in bounds
+                    grid[neighbor_row][neighbor_col] == '1' and # if we find land (island continues) 
+                    (neighbor_row, neighbor_col) not in visited # and it's not already visited
+                ):
+                    queue.append((neighbor_row, neighbor_col)) # append neighbor if land is connected
+                    visited.add((neighbor_row, neighbor_col)) # add the node to visited
 
-# Ex. 1
-#           1              1
-#         /   \          /   \
-#        2     3        2     3
+    for row in range(num_rows): # iterate through each ele in the matrix ([row][col])
+        for col in range(num_cols):
+            if grid[row][col] == '1' and (row, col) not in visited: # if we find a new land
+                bfs(row, col) # explore it's neighbors until we can't go further
+                island_count += 1 # increment island count
 
-p = TreeNode(1, TreeNode(2), TreeNode(3))
-q = TreeNode(1, TreeNode(2), TreeNode(3))
-print(isSameTree(p, q))
+    return island_count
 
-# Ex. 2
-#           1              1
-#         /                  \
-#        2                    2
+    
+print(numIslands([
+    ["1","1","1","1","0"],
+    ["1","1","0","1","0"],
+    ["1","1","0","0","0"],
+    ["0","0","0","0","0"]
+])) # 1
 
-p2 = TreeNode(1, TreeNode(2), None)
-q2 = TreeNode(1, None, TreeNode(2))
-print(isSameTree(p2, q2))
+print(numIslands(
+    [["1","1","0","0","0"],
+    ["1","1","0","0","0"],
+    ["0","0","1","0","0"],
+    ["0","0","0","1","1"]
+])) # 3
 
-# Ex. 3
-#           1              1
-#         /   \          /   \
-#        2     1        1     2
-
-p3 = TreeNode(1, TreeNode(2), TreeNode(1))
-q3 = TreeNode(1, TreeNode(1), TreeNode(2))
-print(isSameTree(p3, q3))
-
-# =============================================================================
-# TIME & SPACE COMPLEXITY ANALYSIS
-# =============================================================================
 """
+BFS COMPLEXITY ANALYSIS
+=======================
+
 TIME COMPLEXITY:
-- Tree BFS: O(N) where N = number of nodes
-  Each node visited exactly once
-  
-- Grid BFS: O(M×N) where M×N = grid dimensions  
-  Each cell visited at most once
-  
-- Graph BFS: O(V + E) where V = vertices, E = edges
-  Visit each vertex once, examine each edge once
+- Tree BFS: O(n) - visit each node exactly once
+- Grid BFS: O(rows × cols) - visit each cell at most once  
+- Graph BFS: O(V + E) - visit each vertex once, examine each edge once
 
 SPACE COMPLEXITY:
-- Queue space: O(W) where W = maximum width of tree/graph
-  Tree: can be O(N) for complete binary tree (last level has N/2 nodes)
-  Grid: O(min(M,N)) for typical patterns
-  
-- Visited set: O(N) to store all visited nodes
-- Total: O(N) in most cases
+- Queue: O(w) where w = maximum width of tree/level
+- Visited set: O(n) for nodes/cells visited
+- Total: O(n) in most cases
 
-BFS vs DFS space comparison:
-- BFS queue can grow large (stores entire level)
-- DFS recursion stack depth = O(H) where H = height
-- For balanced trees: BFS uses more space
-- For skewed trees: DFS uses more space
+BFS vs DFS Space Comparison:
+- BFS: Queue can store entire level (wide trees use more space)
+- DFS: Recursion stack depth equals height (deep trees use more space)
+- Choose based on expected tree/graph structure
+
+KEY INSIGHTS FOR INTERVIEWS
+===========================
+
+1. Always handle empty/null inputs first
+2. Use deque for O(1) append/popleft operations
+3. Track visited nodes/cells to prevent cycles (except pure trees)
+4. Process entire levels when level information needed
+5. Multi-source BFS: add all sources to initial queue
+6. Early termination: first occurrence in BFS is guaranteed minimum
+7. Simultaneous traversal: handle null cases carefully
+8. Flood fill: check boundaries and conditions before adding to queue
 """
-
-# =============================================================================
-# KEY TAKEAWAYS FOR INTERVIEWS
-# =============================================================================
-"""
-1. Always check for empty input first
-2. Use deque for efficient queue operations (O(1) append/popleft)
-3. Track visited nodes to avoid cycles (except in trees)
-4. Process entire levels when level information is needed
-5. Consider multi-source BFS for problems with multiple starting points
-6. BFS guarantees shortest path - use when minimum distance/steps needed
-7. Early termination in BFS can save significant time
-8. Handle None/boundary cases carefully in tree problems
-"""
-
-# =============================================================================
-# Additional Patterns & Problems to Consider
-# =============================================================================
-
-'''
-994
-542
-934
-513
-662
-'''

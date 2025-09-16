@@ -19,6 +19,7 @@ Binary search finds a target in sorted data by repeatedly halving the search spa
 # CORE TEMPLATE
 # =============================================================================
 
+# ITERATIVE
 def binary_search_iterative(nums, target):
     """Standard template - memorize this"""
     left, right = 0, len(nums) - 1
@@ -37,6 +38,7 @@ nums = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19]
 target = 7  # Should return index 3
 print(binary_search_iterative(nums, target))
 
+# RECURSIVE
 def binary_search_recursive(array, target, left, right):
     # Base case: If the range is invalid, the target is not in the list
     if left > right:
@@ -64,9 +66,12 @@ print(binary_search_recursive(nums, target, 0, len(nums) - 1))
 # KEY PATTERNS
 # =============================================================================
 
-# -----------------------------------------------------------------------------
-# Pattern 1: Find Insertion Position in Sorted Array
-# -----------------------------------------------------------------------------
+# ================================================================
+# PATTERN 1: FINDING INSERTION POSITIONS
+# PATTERN EXPLANATION: Use binary search to find where a target value should be inserted in a sorted array to keep the array in order.
+# KEY INSIGHT: When binary search finishes without finding the target, the left pointer shows exactly where the target should be inserted. This works whether the target exists in the array or not.
+# Applications: Finding insertion points, locating where values belong in sorted data, finding boundaries in sorted arrays, first/last occurrence problems.
+# ================================================================
 
 def search_insert(nums, target):  # LC 35
     """
@@ -77,6 +82,9 @@ def search_insert(nums, target):  # LC 35
               [1,3,5,6], target = 7 → 4 (insert at end)
 
     # Key Insight - binary search ensures that the start ptr always ends up at the smallest index where the target could be inserted
+
+    # TC: O(log n): Binary search eliminates half the search space in each iteration. Each comparison reduces the problem size by half
+    # SC: O(1): no extra data structures needed
     """
     start, end = 0, len(nums) - 1
     while start <= end:
@@ -93,15 +101,21 @@ print(search_insert([1,3,5,6], 5)) # 2
 print(search_insert([1,3,5,6], 2)) # 1
 print(search_insert([1,3,5,6], 7)) # 4
 
-# -----------------------------------------------------------------------------
-# Pattern 2 - Search in rotated sorted array
-# -----------------------------------------------------------------------------
+# ================================================================
+# PATTERN 2: BINARY SEARCH IN ROTATED ARRAYS
+# PATTERN EXPLANATION: Search in arrays that have been rotated by finding which half is still properly sorted, then deciding which half to search next.
+# KEY INSIGHT: In rotated sorted arrays, one half is always still in proper order. Find the sorted half, check if your target could be there, then search the correct half to eliminate impossible options.
+# Applications: Rotated arrays, finding elements in shifted data, searching arrays where sorting has been disrupted but partial order remains.
+# ================================================================
 
-def search_rotated(nums, target):
+def search_rotated(nums, target): # LC 33
     """
     Problem: Search for target in a sorted array that has been rotated at some pivot. Array was originally [0,1,2,4,5,6,7] but rotated to become [4,5,6,7,0,1,2].
     
     Key insight: After rotation, one half is always properly sorted (side that includes the middle element [4,5,6,7]). Identify which half is sorted, then decide to search left or right since we can compare the target to the ends of each sorted half. The sorted half allows you to quickly eliminate half of the search space, guarenteeing you can find the target in O(log n).
+
+    # TC: O(log n): Binary search eliminates half the search space in each iteration. Each comparison reduces the problem size by half
+    # SC: O(1): no extra data structures needed
     """
     left, right = 0, len(nums) - 1
     
@@ -135,86 +149,12 @@ print(search_rotated([4,5,6,7,0,1,2], 0))  # 4
 print(search_rotated([4,5,6,7,0,1,2], 3))  # -1
 print(search_rotated([1], 0))              # -1
 
-# -----------------------------------------------------------------------------
-# Pattern 3: Find Minimum Element in Rotated Sorted Array
-# -----------------------------------------------------------------------------
-
-def find_min_rotated(nums):  # LC 153
-    """
-    Problem: Find minimum element in rotated sorted array
-    Example: [3,4,5,1,2] → return 1
-
-    Key insight: The minimum element is always in the "unsorted" portion since it includes the rotation point. If left portion is sorted, minimum must be in right portion.
-    
-    Key Pattern:
-    1. If current portion is sorted (nums[left] < nums[right]), minimum is at left
-    2. Otherwise, check which half contains the minimum:
-       - If nums[mid] > nums[right], minimum is in right half
-       - If nums[mid] < nums[right], minimum is in left half
-
-    Binary Search Guarentee: When we maintain the invariant that the minimum element is always within our [left, right] range and continuously shrink this range by eliminating portions that don't contain the minimum, binary search mathematically guarantees that left and right will converge exactly on the minimum element.
-    """
-    left, right = 0, len(nums) - 1
-    
-    while left < right:
-        # If this portion is sorted, minimum is at left
-        if nums[left] < nums[right]:
-            return nums[left]
-            
-        mid = left + (right - left) // 2
-        
-        # If middle element > rightmost element, right side is unsorted
-        # minimum must be in right half (after rotation point)
-        if nums[mid] > nums[right]:
-            left = mid + 1
-        
-        else: # If middle element < rightmost element,
-            right = mid # minimum must be in left half (including mid)
-            
-    return nums[left]  # left and right converge on minimum
-
-# Test cases
-print(find_min_rotated([3,4,5,1,2]))     # 1
-print(find_min_rotated([4,5,6,7,0,1,2])) # 0
-print(find_min_rotated([11,13,15,17]))   # 11
-print(find_min_rotated([4,5,1,2,3]))     # 1
-
-# -----------------------------------------------------------------------------------------------
-# Pattern 4: Mathematical Binary Search - Finding a single correct answer that satisfies a
-# formula
-# -----------------------------------------------------------------------------------------------
-
-def my_sqrt(x):  # LC 69
-    """
-    Problem: Find the integer square root of x (largest integer whose square ≤ x).
-    Examples: x=8 → 2 (since 2²=4 ≤ 8 < 3²=9)
-              x=4 → 2 (since 2²=4 exactly)
-    
-    Key insight: Instead of searching a given array, we create our own search space in the range [0, x//2]. This applies binary search to mathematical problems on any sorted range where you can test if candidates are too big, too small, or just right.
-    """
-    if x <= 1: # Handles edge case where x = 0 or x = 1 (bin search ranges would be incorrect)
-        return x 
-    
-    l, r = 0, x // 2 # Define search space -> any number greater than x//2 would have square > x
-
-    while l <= r:
-        mid = l + (r - l) // 2 # Calc midpoint
-        square = mid * mid # Find square of mid
-        if square == x:
-            return mid
-        elif square > x: # Our guess mid is too large (square exceeds target)
-            r = mid - 1 # need a smaller number, search left half
-        else: # Our guess mid is too small
-            l = mid + 1 # need a bigger num, search right half
-    return r  # r points to the last valid position
-
-print(my_sqrt(4)) # Expected output: 2
-print(my_sqrt(8)) # Expected output: 2
-
-# -----------------------------------------------------------------------------
-# Pattern 5: Binary Search on Answer Space - Optimizing a min/max value among many possible 
-# valid answers
-# -----------------------------------------------------------------------------
+# ================================================================
+# PATTERN 3: BINARY SEARCH ON MATHEMATICAL RANGES
+# PATTERN EXPLANATION: Use binary search to find answers within a range of numbers by testing calculated values instead of searching through a given array.
+# KEY INSIGHT: When you can calculate and test values in a number range, binary search can find the correct answer by treating the range like a sorted array where math calculations replace looking up array elements.
+# Applications: Finding square roots, calculating powers, solving equations, any problem where you test numbers in a range to find the right answer.
+# ================================================================
 
 def min_eating_speed(piles, h):  # LC 875
     """
@@ -231,6 +171,9 @@ def min_eating_speed(piles, h):  # LC 875
     1. Define answer range [min_possible, max_possible]
     2. Write helper function to test if candidate answer works
     3. Binary search: if works, try smaller; if doesn't work, try larger
+
+    TC: O(n * log(max_pile)) -> Binary search iterations: O(log(max_pile)) where max_pile is the largest pile, helper function per iteration: O(n) to check all piles
+    SC: O(1) -> uses no additional data structures
     """
     import math
 
@@ -257,9 +200,13 @@ def min_eating_speed(piles, h):  # LC 875
 print(min_eating_speed([3,6,7,11], 8))  # 4
 print(min_eating_speed([30,11,23,4,20], 5))  # 30
 
-# -----------------------------------------------------------------------------
-# Pattern 6: 2D Matrix Binary Search
-# -----------------------------------------------------------------------------
+# ================================================================
+# PATTERN 4: BINARY SEARCH ON 2D MATRICES
+# PATTERN EXPLANATION: Search sorted 2D matrices by treating them as flattened 1D arrays.
+# KEY INSIGHT: Convert between 1D index positions and 2D row/column coordinates to apply standard binary search on matrix data that maintains sorted order.
+# Applications: 2D matrix search, searching flattened representations of grids,
+# any rectangular data that can be treated as a single sorted sequence.
+# ================================================================
 
 def search_matrix(matrix, target):  # LC 74
     """
@@ -278,6 +225,9 @@ def search_matrix(matrix, target):  # LC 74
     Convert between 1D index and 2D coordinates:
     - row = mid // cols
     - col = mid % cols
+
+    TC: O(log(m * n)) where m = number of rows, n = number of columns, total elements: m * n, Binary search iterations: log₂(m * n)
+    SC: O(1) -> uses no additional data structures
     """
     if not matrix or not matrix[0]: # Empty matrix or empty 1st row (breaks MxN matrix condition)
         return False

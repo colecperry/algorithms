@@ -12,6 +12,7 @@
 #            /     / \
 #           /     /   \
 #          3     1     5
+#
 # Input: root = [3,1,4,3,null,1,5]
 # Output: 4
 # Explanation: Nodes in blue are good.

@@ -185,12 +185,10 @@ COMMON LEETCODE PATTERNS
 """
 
 # ================================================================
-# PATTERN 1: TREE TRAVERSAL
-# LC 94 - Binary Tree Inorder Traversal
-# PATTERN EXPLANATION:
-# This pattern involves visiting all nodes in a specific order (inorder: left-root-right).
-# Key insight: For inorder iterative, we need to go as left as possible first,
-# then process the node, then go right. This requires careful stack management.
+# PATTERN 1: SYSTEMATIC NODE VISITATION
+# PATTERN EXPLANATION: Visit every node in a tree following a predetermined order.
+# Key insight: Choose traversal order based on when you need to process data.
+# Applications: Data collection, validation, transformation, serialization.
 # ================================================================
 
 class TreeNode(object):
@@ -200,8 +198,8 @@ class TreeNode(object):
         self.right = right
 
 class InorderTraversal:
-    # RECURSIVE SOLUTION
-    def inorderTraversal(self, root):
+    # RECURSIVE SOLUTION 
+    def inorderTraversal(self, root): # LC 94 - Binary Tree Inorder Traversal
         """
         Pattern: Tree traversal with result collection
         Time: O(n), Space: O(h) where h is height
@@ -215,14 +213,23 @@ class InorderTraversal:
         res = []
         
         def dfs(root):
-            if root is None:  # Base case
+            if root is None:  # Base case - hit end 
                 return
-            dfs(root.left)    # Left
-            res.append(root.val)  # Root
-            dfs(root.right)   # Right
+            dfs(root.left)    # Keep going left until base case
+            res.append(root.val)  # Process root
+            dfs(root.right)   # Go right
         
         dfs(root)
         return res
+    
+        #           1
+        #         /   \
+        #        /     \
+        #       2       3
+        #      / \       \
+        #     4   5       8
+        #        / \     /
+        #       6   7   9
     
     # ITERATIVE SOLUTION
     def inorderTraversalIterative(self, root):
@@ -236,450 +243,375 @@ class InorderTraversal:
         3. Move to right child and repeat
         """
         res = []
-        stack = []
-        curr = root
+        stack = [] # Store nodes we need to return to after exploring left subtrees
+        curr = root # Current node we are exploring
         
-        while curr or stack:
-            # Go to the leftmost node
+        while curr or stack: # Continue while we have a current node or nodes to explore
+            # Step 1: Go left as far as possible
             while curr:
-                stack.append(curr)
+                stack.append(curr) # Save node for later processing
                 curr = curr.left
             
-            # Process current node
-            curr = stack.pop()
-            res.append(curr.val)
+            # Step 2: Once we can't go any further, process deepest left node
+            curr = stack.pop() # Go back to last unprocessed node
+            res.append(curr.val) # Append node (follows in order principle)
             
-            # Move to right subtree
+            # Step 3: Move to right subtree and continue traversal
             curr = curr.right
         
         return res
 
+    #           1
+    #         /   \
+    #        /     \
+    #       2       3
+    #      / \       \
+    #     4   5       8
+    #        / \     /
+    #       6   7   9
+
 # Test the inorder traversal
-root = TreeNode(1)
-root.right = TreeNode(2)
-root.right.left = TreeNode(3)
+root = TreeNode(1, TreeNode(2, TreeNode(4), TreeNode(5, TreeNode(6), TreeNode(7))), TreeNode(3, None, TreeNode(8, TreeNode(9), None)))
 
 solution = InorderTraversal()
-print("Recursive inorder:", solution.inorderTraversal(root))  # [1, 3, 2]
-print("Iterative inorder:", solution.inorderTraversalIterative(root))  # [1, 3, 2]
+print("Recursive inorder:", solution.inorderTraversal(root))  # [4,2,6,5,7,1,3,9,8]
+print("Iterative inorder:", solution.inorderTraversalIterative(root))  # [4,2,6,5,7,1,3,9,8]
 
 # ================================================================
-# PATTERN 2: TREE COMPARISON
-# LC 100 - Same Tree
-# PATTERN EXPLANATION:
-# This pattern compares two trees simultaneously by traversing both at the same time.
-# Key insight: Use parallel traversal - compare corresponding nodes at each step.
-# Base cases handle mismatched structures (one null, other not null).
+# PATTERN 2: SIMULTANEOUS DUAL TRAVERSAL
+# PATTERN EXPLANATION: This pattern traverses two parts of a tree (or two trees) 
+# simultaneously to compare their structure, values, or relationships.
+# Key insight: Instead of traversing once and storing results, traverse both 
+# sides at the same time making comparisons at each step.
+# Applications: Tree symmetry, tree equality, subtree matching, mirror validation.
 # ================================================================
 
-class SameTree:
-    # RECURSIVE SOLUTION
-    def isSameTree(self, p, q):
-        """
-        Pattern: Simultaneous tree traversal with comparison
-        Time: O(min(m,n)), Space: O(min(m,n))
-        
-        How it works:
-        1. Base cases: both null (true), one null (false), values differ (false)
-        2. If current nodes match, recursively check left and right subtrees
-        3. Return true only if both subtrees match
-        """
-        # Base cases
-        if not p and not q:
+# RECURSIVE SOLUTION
+def isSymmetric(root): # LC 101
+    """
+    Problem: Given the root of a binary tree, check whether it is a mirror of itself
+    
+    How it works:
+    1. Helper function compares two nodes for symmetry
+    2. Base cases: both null (symmetric), one null (not symmetric), different values (not symmetric)
+    3. For symmetry: values must match AND subtrees must be mirrors
+    4. Mirror check: left.left vs right.right, left.right vs right.left
+    """
+    def dfs(left, right):
+        if not left and not right: # Both null -> Symmetric
             return True
-        if not p or not q:
+        if not left or not right: # One node null -> Not symmetric
             return False
-        if p.val != q.val:
+        if left.val != right.val: # Nodes have diff vals -> Not symmetric
             return False
         
-        # Recursive comparison
-        return (self.isSameTree(p.left, q.left) and 
-                self.isSameTree(p.right, q.right))
+        # Mirror comparison: left.left with right.right, left.right with right.left
+        return (dfs(left.left, right.right) and 
+                dfs(left.right, right.left))
     
-    # ITERATIVE SOLUTION
-    def isSameTreeIterative(self, p, q):
-        """
-        Pattern: Paired node processing with stack
-        
-        How it works:
-        1. Stack stores pairs of corresponding nodes
-        2. For each pair, check if they match
-        3. Add their children pairs to stack for future comparison
-        """
-        stack = [(p, q)]
-        
-        while stack:
-            node1, node2 = stack.pop()
-            
-            if not node1 and not node2:
-                continue
-            if not node1 or not node2:
-                return False
-            if node1.val != node2.val:
-                return False
-            
-            stack.append((node1.left, node2.left))
-            stack.append((node1.right, node2.right))
-        
+    return dfs(root.left, root.right) if root else True # Pass in child nodes to start fn call if not empty tree, if empty Tree return True (empty tree is symmetric)
+
+#               1                  1
+#              / \                / \
+#             /   \              /   \
+#            2     2            2     2
+#           / \   / \            \     \
+#          3   4 4   3            3     3
+
+# ITERATIVE SOLUTION
+def isSymmetricIterative(root):
+    """
+    Pattern: Mirror node pairs in stack
+    
+    How it works:
+    1. Stack stores pairs of nodes that should be mirrors
+    2. For each pair, verify they match for symmetry
+    3. Add their mirror children pairs to stack
+    """
+    if not root: # Base Case -> empty Tree is symmetric
         return True
-
-# Test same tree
-p = TreeNode(1, TreeNode(2), TreeNode(3))
-q = TreeNode(1, TreeNode(2), TreeNode(3))
-p2 = TreeNode(1, TreeNode(2), None)
-q2 = TreeNode(1, None, TreeNode(2))
-
-same_tree = SameTree()
-print("Same trees (recursive):", same_tree.isSameTree(p, q))  # True
-print("Different trees (recursive):", same_tree.isSameTree(p2, q2))  # False
-print("Same trees (iterative):", same_tree.isSameTreeIterative(p, q))  # True
-print("Different trees (iterative):", same_tree.isSameTreeIterative(p2, q2))  # False
-
-# ================================================================
-# PATTERN 3: TREE PROPERTY VALIDATION - MIRROR COMPARISON
-# LC 101 - Symmetric Tree
-# PATTERN EXPLANATION:
-# This pattern checks if a tree is symmetric by comparing mirror positions.
-# Key insight: For symmetry, left subtree should mirror right subtree.
-# Compare left.left with right.right AND left.right with right.left.
-# ================================================================
-
-class SymmetricTree:
-    # RECURSIVE SOLUTION
-    def isSymmetric(self, root):
-        """
-        Pattern: Mirror comparison with helper function
-        Time: O(n), Space: O(h)
-        
-        How it works:
-        1. Helper function compares two nodes for symmetry
-        2. Base cases: both null (symmetric), one null (not symmetric)
-        3. For symmetry: values must match AND subtrees must be mirrors
-        4. Mirror check: left.left vs right.right, left.right vs right.left
-        """
-        def dfs(left, right):
-            if not left and not right:
-                return True
-            if not left or not right:
-                return False
-            if left.val != right.val:
-                return False
-            
-            # Mirror comparison: left.left with right.right, left.right with right.left
-            return (dfs(left.left, right.right) and 
-                    dfs(left.right, right.left))
-        
-        return dfs(root.left, root.right) if root else True
     
-    # ITERATIVE SOLUTION
-    def isSymmetricIterative(self, root):
-        """
-        Pattern: Mirror node pairs in stack
-        
-        How it works:
-        1. Stack stores pairs of nodes that should be mirrors
-        2. For each pair, verify they match for symmetry
-        3. Add their mirror children pairs to stack
-        """
-        if not root:
-            return True
-        
-        stack = [(root.left, root.right)]
-        
-        while stack:
-            left, right = stack.pop()
-            
-            if not left and not right:
-                continue
-            if not left or not right:
-                return False
-            if left.val != right.val:
-                return False
-            
-            # Add mirror pairs
-            stack.append((left.left, right.right))
-            stack.append((left.right, right.left))
-        
-        return True
-
-# Test symmetric tree
-symmetric_root = TreeNode(1)
-symmetric_root.left = TreeNode(2)
-symmetric_root.right = TreeNode(2)
-symmetric_root.left.left = TreeNode(3)
-symmetric_root.left.right = TreeNode(4)
-symmetric_root.right.left = TreeNode(4)
-symmetric_root.right.right = TreeNode(3)
-
-asymmetric_root = TreeNode(1)
-asymmetric_root.left = TreeNode(2)
-asymmetric_root.right = TreeNode(2)
-asymmetric_root.left.right = TreeNode(3)
-asymmetric_root.right.right = TreeNode(3)
-
-symmetric = SymmetricTree()
-print("Symmetric tree (recursive):", symmetric.isSymmetric(symmetric_root))  # True
-print("Asymmetric tree (recursive):", symmetric.isSymmetric(asymmetric_root))  # False
-print("Symmetric tree (iterative):", symmetric.isSymmetricIterative(symmetric_root))  # True
-print("Asymmetric tree (iterative):", symmetric.isSymmetricIterative(asymmetric_root))  # False
-
-# ================================================================
-# PATTERN 4: PATH SUM PROBLEMS - TARGET TRACKING
-# LC 112 - Path Sum
-# PATTERN EXPLANATION:
-# This pattern tracks a running sum/target while traversing root-to-leaf paths.
-# Key insight: Subtract current node value from target and pass remaining target down.
-# Success condition: reach a leaf node with remaining target = node value.
-# ================================================================
-
-class PathSum:
-    # RECURSIVE SOLUTION
-    def hasPathSum(self, root, targetSum):
-        """
-        Pattern: Path tracking with remaining sum
-        Time: O(n), Space: O(h)
-        
-        How it works:
-        1. Base case: no node means no path
-        2. Leaf node check: if leaf, check if remaining sum equals node value
-        3. Recursive calls: subtract current value and check subtrees
-        4. Return true if ANY path sums to target
-        """
-        if not root:
-            return False
-        
-        # Leaf node check
-        if not root.left and not root.right:
-            return targetSum == root.val
-        
-        # Recursive calls with updated sum
-        remaining = targetSum - root.val
-        return (self.hasPathSum(root.left, remaining) or 
-                self.hasPathSum(root.right, remaining))
+    stack = [(root.left, root.right)] # Iterative stack starts at root's l and r subtrees
     
-    # ITERATIVE SOLUTION
-    def hasPathSumIterative(self, root, targetSum):
-        """
-        Pattern: Node-sum pairs in stack
+    while stack:
+        left, right = stack.pop() # Pop the pair of nodes 
         
-        How it works:
-        1. Stack stores (node, remaining_sum) pairs
-        2. For each node, calculate new remaining sum
-        3. If leaf node and remaining sum is 0, found path
-        4. Add children with updated remaining sum
-        """
-        if not root:
-            return False
+        if not left and not right: # Both null -> Symmetric 
+            continue # do not add children
+        if not left or not right: # One node null -> Not symmetric
+            return False # Return False immediately
+        if left.val != right.val: # Nodes have diff vals -> Not symmetric
+            return False # Return False immediately
         
-        stack = [(root, targetSum)]
-        
-        while stack:
-            node, curr_sum = stack.pop()
-            remaining = curr_sum - node.val
-            
-            # Check leaf node
-            if not node.left and not node.right and remaining == 0:
-                return True
-            
-            # Add children with updated sum
-            if node.right:
-                stack.append((node.right, remaining))
-            if node.left:
-                stack.append((node.left, remaining))
-        
+        # Add mirror pairs to continue search
+        stack.append((left.left, right.right))
+        stack.append((left.right, right.left))
+    
+    return True # Return True if we explore all nodes and no pairs are asymmetric
+
+#               1                  1
+#              / \                / \
+#             /   \              /   \
+#            2     2            2     2
+#           / \   / \            \     \
+#          3   4 4   3            3     3
+
+# Symmetric tree
+symmetric_root = TreeNode(1, TreeNode(2, TreeNode(3), TreeNode(4)), TreeNode(2, TreeNode(4), TreeNode(3)))
+
+# Asymmetric tree  
+asymmetric_root = TreeNode(1, TreeNode(2, None, TreeNode(3)), TreeNode(2, None, TreeNode(3)))
+
+print("Symmetric tree (recursive):", isSymmetric(symmetric_root))  # True
+print("Asymmetric tree (recursive):", isSymmetric(asymmetric_root))  # False
+print("Symmetric tree (iterative):", isSymmetricIterative(symmetric_root))  # True
+print("Asymmetric tree (iterative):", isSymmetricIterative(asymmetric_root))  # False
+
+# ================================================================
+# PATTERN 3: ACCUMULATIVE PATH TRACKING
+# PATTERN EXPLANATION: Track running values while traversing paths to meet conditions.
+# Key insight: Update target/sum at each node and check condition at path endpoints.
+# Applications: Path sum validation, counting paths, finding target sequences.
+# ================================================================
+
+# RECURSIVE SOLUTION
+def hasPathSum(root, targetSum): # LC 112 - Path Sum
+    """
+    # Given the root of a binary tree and an integer targetSum, return true if the tree has a root-to-leaf path such that adding up all the values along the path equals targetSum.
+    """
+    if not root: # Edge case for null tree -> cannot rearch target 
         return False
+    
+    # Base Case -> Found a leaf node
+    if not root.left and not root.right:
+        return targetSum == root.val # Check if we reached our target
+    
+    # Recursive calls with updated sum for children
+    remaining = targetSum - root.val # Update sum we are looking for
+    return (hasPathSum(root.left, remaining) or 
+            hasPathSum(root.right, remaining)) # If any point we return True, no need to check second part -> True propogates up the call stack
+
+# Ex. 1 - target = 22
+#
+#               5 x
+#              / \
+#             /   \
+#            4 x   8
+#           /     / \
+#          /     /   \
+#         11 x  13    4
+#        /  \          \
+#       7    2 x        1
+
+# ITERATIVE SOLUTION
+def hasPathSumIterative(root, targetSum):
+    if not root: # Edge case null tree
+        return False
+    
+    stack = [(root, targetSum)] # Iterative DFS stack
+    
+    while stack:
+        node, curr_sum = stack.pop() # Pop the node and check the needed sum
+        remaining = curr_sum - node.val # Update remaining sum for children
+        
+        # Check leaf node
+        if not node.left and not node.right and remaining == 0:
+            return True
+        
+        # Add children with updated sum -> adding R first follows DFS property
+        if node.right:
+            stack.append((node.right, remaining))
+        if node.left:
+            stack.append((node.left, remaining))
+    
+    return False
+
+# Ex. 1 - target = 22
+#
+#               5 x
+#              / \
+#             /   \
+#            4 x   8
+#           /     / \
+#          /     /   \
+#         11 x  13    4
+#        /  \          \
+#       7    2 x        1
 
 # Test path sum
-path_root = TreeNode(5)
-path_root.left = TreeNode(4)
-path_root.right = TreeNode(8)
-path_root.left.left = TreeNode(11)
-path_root.right.left = TreeNode(13)
-path_root.right.right = TreeNode(4)
-path_root.left.left.left = TreeNode(7)
-path_root.left.left.right = TreeNode(2)
-path_root.right.right.right = TreeNode(1)
+path_root = TreeNode(5, TreeNode(4, TreeNode(11, TreeNode(7), TreeNode(2)), None), TreeNode(8, TreeNode(13), TreeNode(4, None, TreeNode(1))))
 
-path_sum = PathSum()
-print("Has path sum 22 (recursive):", path_sum.hasPathSum(path_root, 22))  # True
-print("Has path sum 22 (iterative):", path_sum.hasPathSumIterative(path_root, 22))  # True
+print("Has path sum 22 (recursive):", hasPathSum(path_root, 22))  # True
+print("Has path sum 22 (iterative):", hasPathSumIterative(path_root, 22))  # True
 
 # ================================================================
-# PATTERN 5: TREE MODIFICATION - IN-PLACE CHANGES
-# LC 226 - Invert Binary Tree
-# PATTERN EXPLANATION:
-# This pattern modifies tree structure while traversing.
-# Key insight: Make changes to current node, then recursively process children.
-# Order matters: can modify before recursion (preorder) or after (postorder).
+# PATTERN 4: STRUCTURAL TRANSFORMATION
+# PATTERN EXPLANATION: Modify tree structure or node values during traversal.
+# Key insight: Timing of changes matters - modify before recursion or after based on needs.
+# Applications: Tree inversion, flattening, value updates, structural rebuilding.
 # ================================================================
 
-class InvertTree:
-    # RECURSIVE SOLUTION
-    def invertTree(self, root):
-        """
-        Pattern: Tree modification with recursive processing
-        Time: O(n), Space: O(h)
-        
-        How it works:
-        1. Base case: null node needs no inversion
-        2. Swap current node's children
-        3. Recursively invert both subtrees
-        4. Return modified root
-        """
-        if not root:
-            return None
+# RECURSIVE SOLUTION
+def invertTree(root): # LC 226 - Invert Binary Tree
+    """
+    # Given the root of a binary tree, invert the tree, and return its root.
+    Time: O(n), Space: O(h)
+    
+    How it works:
+    1. Base case: null node needs no inversion
+    2. Swap current node's children
+    3. Recursively invert both subtrees
+    4. Return modified root
+    """
+    if not root: # Base case -> reach end of tree path
+        return None # Edge case -> empty tree
+    
+    # Swap children
+    root.left, root.right = root.right, root.left
+    
+    # Recursively invert subtrees
+    invertTree(root.left)
+    invertTree(root.right)
+    
+    return root # Return modified root of each recursive call back to caller (parent) and return the tree of the original root with it's updated subtrees
+#
+#               4                    4
+#              / \                  / \
+#             /   \                /   \
+#            2     7      ->      7     2
+#           / \   / \            / \   / \
+#          1   3 6   9          9   6 3   1
+
+# ITERATIVE SOLUTION
+def invertTreeIterative(root):
+    if not root: # Empty Tree
+        return None
+    
+    stack = [root] # Iterative DFS stack
+    
+    while stack:
+        node = stack.pop()
         
         # Swap children
-        root.left, root.right = root.right, root.left
+        node.left, node.right = node.right, node.left
         
-        # Recursively invert subtrees
-        self.invertTree(root.left)
-        self.invertTree(root.right)
-        
-        return root
+        # Add children to stack to swap their subtrees later
+        if node.left:
+            stack.append(node.left)
+        if node.right:
+            stack.append(node.right)
     
-    # ITERATIVE SOLUTION
-    def invertTreeIterative(self, root):
-        """
-        Pattern: Node processing with stack
-        
-        How it works:
-        1. Use stack to visit all nodes
-        2. For each node, swap its children
-        3. Add children to stack for future processing
-        """
-        if not root:
-            return None
-        
-        stack = [root]
-        
-        while stack:
-            node = stack.pop()
-            
-            # Swap children
-            node.left, node.right = node.right, node.left
-            
-            # Add children to stack
-            if node.left:
-                stack.append(node.left)
-            if node.right:
-                stack.append(node.right)
-        
-        return root
+    return root
 
-# Test invert tree
-invert_root = TreeNode(4)
-invert_root.left = TreeNode(2)
-invert_root.right = TreeNode(7)
-invert_root.left.left = TreeNode(1)
-invert_root.left.right = TreeNode(3)
-invert_root.right.left = TreeNode(6)
-invert_root.right.right = TreeNode(9)
+#
+#               4                    4
+#              / \                  / \
+#             /   \                /   \
+#            2     7      ->      7     2
+#           / \   / \            / \   / \
+#          1   3 6   9          9   6 3   1
 
-def print_tree_inorder(root):
-    if not root:
-        return []
-    result = []
-    def inorder(node):
-        if node:
-            inorder(node.left)
-            result.append(node.val)
-            inorder(node.right)
-    inorder(root)
-    return result
+invert_root = TreeNode(4, TreeNode(2, TreeNode(1), TreeNode(3)), TreeNode(7, TreeNode(6), TreeNode(9)))
 
-print("Original tree inorder:", print_tree_inorder(invert_root))
-invert_tree = InvertTree()
-inverted = invert_tree.invertTree(invert_root)
-print("Inverted tree inorder:", print_tree_inorder(inverted))
+
+print(invertTree(invert_root))
+print(invertTreeIterative(invert_root))
+
 
 # ================================================================
-# PATTERN 6: LOWEST COMMON ANCESTOR - BOTTOM-UP INFORMATION FLOW
-# LC 236 - Lowest Common Ancestor of Binary Tree
-# PATTERN EXPLANATION:
-# This pattern propagates information up from children to parents.
-# Key insight: If a node receives non-null from both children, it's the LCA.
-# If it receives non-null from one child, it passes that up (the LCA is above).
+# PATTERN 5: BOTTOM-UP INFORMATION PROPAGATION
+# PATTERN EXPLANATION: Gather info from children and propagate it up to parents.
+# Key insight: Child results determine parent behavior - process children first, then parent.
+# Applications: LCA finding, tree validation, height calculation, subtree properties.
 # ================================================================
 
-class LCA:
-    # RECURSIVE SOLUTION (Most elegant for this problem)
-    def lowestCommonAncestor(self, root, p, q):
-        """
-        Pattern: Bottom-up information propagation
-        Time: O(n), Space: O(h)
-        
-        How it works:
-        1. If current node is p or q, return it (found one target)
-        2. Recursively search left and right subtrees
-        3. If both return non-null: current node is LCA (targets in different subtrees)
-        4. If one returns non-null: pass it up (both targets in that subtree)
-        5. If both return null: neither target found in this subtree
-        
-        Key insight: The first node that receives non-null from both children is the LCA
-        """
-        if not root or root == p or root == q:
-            return root
-        
-        left = self.lowestCommonAncestor(root.left, p, q)
-        right = self.lowestCommonAncestor(root.right, p, q)
-        
-        if left and right:  # Found both nodes in different subtrees
-            return root
-        return left or right  # Return whichever is non-null
+# RECURSIVE SOLUTION 
+def lowestCommonAncestor(root, p, q): # LC 236
+    """
+    # Given a binary tree, find the lowest common ancestor (LCA) of two given nodes in the tree. The lowest common ancestor is defined between two nodes p and q as the lowest node (lowest depth on tree) in T that has both p and q as descendants (where we allow a node to be a descendant of itself).
+    """
+    if not root: # Base Case: Reached end of path OR empty tree
+        return None # No node found in this direction
+    
+    if root == p or root == q: # If we find p or q
+        return root # Return that node to the caller (parent)
+    
+    # DFS: # If we do not find p or q, 
+    l = lowestCommonAncestor(root.left, p, q) # Child reports back
+    r = lowestCommonAncestor(root.right, p, q) # a target node or nothing
+
+    if l and r: # Case 1: p & q on opposite sides of subtree
+        return root # current node we are at is the LCA
+    else: # Case 2: only p or q returns a target
+        return l or r # Return whatever was found (target node/ LCA from subtree or None if we reach the end of path or target not found in this subtree)
+
+#                3                  
+#              /   \             
+#             /     \
+#            /       \
+#           5         1
+#          / \       / \
+#         /   \     /   \
+#        6     2   0     8
+#             / \ 
+#            7   4
+#
+#      ex.1  p = 5, q = 1
+#            output = 3
+#
+#      ex.2  p = 5, q = 4
+#            output = 5
 
 # Test LCA
-lca_root = TreeNode(3)
-lca_root.left = TreeNode(5)
-lca_root.right = TreeNode(1)
-lca_root.left.left = TreeNode(6)
-lca_root.left.right = TreeNode(2)
-lca_root.right.left = TreeNode(0)
-lca_root.right.right = TreeNode(8)
-lca_root.left.right.left = TreeNode(7)
-lca_root.left.right.right = TreeNode(4)
+lca_root = TreeNode(3, TreeNode(5, TreeNode(6), TreeNode(2, TreeNode(7), TreeNode(4))), TreeNode(1, TreeNode(0), TreeNode(8)))
 
-lca = LCA()
-result = lca.lowestCommonAncestor(lca_root, lca_root.left, lca_root.right)  # nodes 5 and 1
-print("LCA of 5 and 1:", result.val if result else None)  # 3
+lowestCommonAncestor(lca_root, lca_root.left, lca_root.right)  # 3
+lowestCommonAncestor(lca_root, lca_root.left, lca_root.left.right.right)  # 5
 
-class GoodNodes:
-    def goodNodes(self, root):
-        """
-        Pattern: Conditional counting with path context
-        Time: O(n), Space: O(h)
+# ================================================================
+# PATTERN 6: TOP-DOWN CONTEXT PASSING
+# PATTERN EXPLANATION: Pass path-specific information down from parent to children.
+# Key insight: Each node makes decisions based on accumulated context from ancestors.
+# Applications: Path validation, constraint checking, ancestor-dependent counting, resource tracking.
+# ================================================================
+
+def goodNodes(root):
+    """
+    # Given a binary tree root, a node X in the tree is named good if in the path from root to X there are no nodes with a value greater than X. Return the number of good nodes in the binary tree.
+    """
+    def dfs(node, max_val):
+        if not node: 
+            return 0
         
-        How it works:
-        1. Pass down the maximum value seen on current path
-        2. For each node, check if it's >= max_so_far (good node condition)
-        3. Update max value and continue to children
-        4. Sum up good nodes from current node and both subtrees
-        """
-        def dfs(node, max_val):
-            if not node:
-                return 0
-            
-            # Check if current node is good
-            good_count = 1 if node.val >= max_val else 0
-            
-            # Update max value for children
-            new_max = max(max_val, node.val)
-            
-            # Add good nodes from subtrees
-            good_count += dfs(node.left, new_max)
-            good_count += dfs(node.right, new_max)
-            
-            return good_count
+        # Check if current node is good (curr node > root)
+        good_count = 1 if node.val >= max_val else 0
         
-        return dfs(root, root.val)
+        # Update max path value for children 
+        new_max = max(max_val, node.val)
+        
+        # Add good nodes from subtrees
+        good_count = good_count + dfs(node.left, new_max)
+        good_count = good_count + dfs(node.right, new_max)
+        
+        return good_count
+    
+    return dfs(root, root.val) # Pass in the 
+
+#                3
+#               / \
+#              /   \
+#             1     4
+#            /     / \
+#           /     /   \
+#          3     1     5
+#
+# Output: 4
+# Root Node (3) is always a good node.
+# Node 4 -> (3,4) is the maximum value in the path starting from the root.
+# Node 5 -> (3,4,5) is the maximum value in the path
+# Node 3 -> (3,1,3) is the maximum value in the path.
 
 # Test good nodes
-good_root = TreeNode(3)
-good_root.left = TreeNode(1)
-good_root.right = TreeNode(4)
-good_root.left.left = TreeNode(3)
-good_root.right.left = TreeNode(1)
-good_root.right.right = TreeNode(5)
+good_root = TreeNode(3, TreeNode(1, TreeNode(3), None), TreeNode(4, TreeNode(1), TreeNode(5)))
 
-good_nodes = GoodNodes()
-print("Number of good nodes:", good_nodes.goodNodes(good_root))  # 4
+print("Number of good nodes:", goodNodes(good_root))  # 4
