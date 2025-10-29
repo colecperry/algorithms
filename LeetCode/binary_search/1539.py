@@ -41,7 +41,6 @@
                     # Actual number at index 1 = 3
                     # Missing count: 3 - (1 + 1) = 1
 
-
 # How to Solve: O(log N) -> Binary Search - Code
     # Create l and r pointers -> initialize to idx 0 and idx len - 1
     # Create binary search while loop

@@ -158,14 +158,9 @@ print(search_rotated([1], 0))              # -1
 
 def min_eating_speed(piles, h):  # LC 875
     """
-    Problem: Koko loves bananas and wants to eat all piles before guards return.
-    She can choose her eating speed K (bananas per hour) and eats from one pile 
-    at a time. If a pile has fewer bananas than K, she still takes the full hour.
-    Find the minimum speed K such that she can eat all bananas within h hours.
+    Problem: Koko loves bananas and wants to eat all piles before guards return. She can choose her eating speed K (bananas per hour) and eats from one pile at a time. If a pile has fewer bananas than K, she still takes the full hour. Find the minimum speed K such that she can eat all bananas within h hours.
 
-    Key insight: Instead of searching in a given array, search the range of 
-    possible answers and use a helper function to test if each candidate works.
-    Find the minimum value that satisfies the constraint.
+    Key insight: Instead of searching in a given array, search the range of possible answers and use a helper function to test if each candidate works. Find the minimum value that satisfies the constraint.
 
     Pattern:
     1. Define answer range [min_possible, max_possible]
@@ -255,6 +250,47 @@ def search_matrix(matrix, target):  # LC 74
 # Test cases
 print(search_matrix([[1,3,5,7],[10,11,16,20],[23,30,34,60]], 3))   # True
 print(search_matrix([[1,3,5,7],[10,11,16,20],[23,30,34,60]], 13))  # False
+
+# ================================================================
+# PATTERN 5: BINARY SEARCH BY ELIMINATION LOGIC
+# PATTERN EXPLANATION: Search in unsorted arrays using problem-specific logic to eliminate half the search space based on comparisons, not traditional sorted order.
+# KEY INSIGHT: Even without a sorted array, you can use binary search if you have a way to determine which half cannot contain your answer through directional logic or monotonic properties.
+# Applications: Finding peaks/valleys, searching bitonic arrays, rotated min/max finding, any problem where comparison logic can eliminate half the possibilities.
+# ================================================================
+
+def find_peak_element(nums):  # LC 162
+    """
+    Problem: Find any peak element where nums[i] > nums[i-1] and nums[i] > nums[i+1].
+    Array is not sorted, but we can still use binary search.
+    
+    Examples: [1,2,3,1] → index 2 (value 3 is peak)
+              [1,2,1,3,5,6,4] → index 1 or 5 (values 2 or 6 are peaks)
+    
+    Key insight: Compare mid with neighbor to decide direction:
+        - If nums[mid] < nums[mid + 1]: slope is increasing, peak guarenteed if we keep searching right because either one element goes down (peak found) or we hit OOB (ele at OOB is less than last ele)
+        - If nums[mid] > nums[mid + 1]: slope is decreasing, peak guarenteed at mid or if we keep searching left because either one element goes up (peak found) or we hit OOB (ele at OOB is less than first ele)
+
+    TC: O(log n) - eliminates half the search space each iteration
+    SC: O(1) - only using pointer variables
+    """
+    left, right = 0, len(nums) - 1
+    
+    while left < right:  # Note: use < not <= for convergence to single answer
+        mid = left + (right - left) // 2
+        
+        if nums[mid] < nums[mid + 1]:
+            # We're on upward slope, peak must be to the right
+            left = mid + 1
+        else:
+            # We're on downward slope, peak could be at mid or to the left  
+            right = mid
+    
+    return left  # left == right, pointing to a peak
+
+# Test cases
+print(find_peak_element([1,2,3,1]))        # 2
+print(find_peak_element([1,2,1,3,5,6,4]))  # 5
+print(find_peak_element([1]))              # 0
 
 # =============================================================================
 # CRITICAL NUANCES

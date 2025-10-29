@@ -35,8 +35,8 @@ def pickGifts(gifts, k):
     gifts = [-g for g in gifts] # Convert arr negative nums for max heap
     heapq.heapify(gifts) # Heapify the arr
 
-    for i in range(k):
-        if gifts[0] == -1: # If the pile gets to 1, we do nothing
+    for _ in range(k):
+        if gifts[0] == -1: # If the largest pile ever gets to 1, our operation does nothing
             break
         else:
             val = heapq.heappop(gifts) # Pop off the root

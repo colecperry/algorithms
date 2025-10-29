@@ -5,15 +5,28 @@ DEPTH-FIRST SEARCH (DFS) COMPLETE GUIDE
 
 WHAT IS DFS?
 -----------
-Depth-First Search (DFS) is a graph traversal algorithm that explores as far as possible
-along each branch before backtracking. It "goes deep" before going wide.
+Depth-First Search (DFS) explores as far as possible along each branch before backtracking. It "goes deep" before going wide.
 
 Key characteristics:
-- Uses a STACK (LIFO - Last In, First Out) data structure
-- Explores one path completely before trying another path
-- Can be implemented recursively (using call stack) or iteratively (using explicit stack)
-- Time complexity: O(n) for trees
-- Space complexity: O(h) where h is height/depth of recursion
+- Uses a STACK (LIFO - Last In, First Out) or recursion
+- Explores one complete path before trying another
+- Time: O(n) for trees, O(V + E) for graphs
+- Space: O(h) where h is height/depth
+
+WHEN TO USE DFS
+---------------
+1. PATH PROBLEMS: Finding paths, detecting cycles, backtracking (permutations, combinations, N-Queens)
+2. TREE TRAVERSALS: Preorder/inorder/postorder, tree validation, path sums
+3. EXHAUSTIVE SEARCH: Generate all subsets, word search, Sudoku solver
+4. CONNECTED COMPONENTS: Count islands, check reachability, graph validation
+
+COMMON PATTERNS:
+- "Find all possible..." → DFS with backtracking
+- "Does a path exist..." → DFS with early return
+- "Traverse the tree..." → DFS traversal
+- "Count paths/islands..." → DFS with counter
+
+DFS vs BFS: Use DFS for exploring ALL paths or going DEEP. Use BFS for SHORTEST path or LEVEL-BY-LEVEL.
 
 DFS CORE TEMPLATES
 ==================
@@ -43,7 +56,7 @@ def dfs_recursive_template(node):
     left_result = dfs_recursive_template(node.left)
     right_result = dfs_recursive_template(node.right)
     
-    # Combine results and return (post-order processing)
+    # Combine results and return (post-order processing) to prev callstack
     return 1 + max(left_result, right_result)
 
 #         3
@@ -83,7 +96,7 @@ def dfs_iterative_template(root):
         # Process current node
         result.append(node.val)
         
-        # Add children (right then left ensures correct processing from back of the stack)
+        # Add children (right then left ensures correct processing as we would pop the left side first) 
         if node.right:
             stack.append(node.right)
         if node.left:
@@ -106,47 +119,44 @@ print("Iterative DFS Template:", dfs_iterative_template(template_root)) # [3,9,2
 
 def matrix_dfs_template(matrix, start_row, start_col):
     """
-    Matrix DFS template - Perform a DFS matrix traversal and return a list of values from the visited cells in the order they were explored
+    Matrix DFS template with visited tracking
     
     EXPLORATION PATTERN: DFS explores in "deep dive" paths
     - Picks one direction and goes as far as possible before backtracking
     - Like following a single hallway to its end, then returning to try other hallways
     - Path might be: (0,0) → (0,1) → (0,2) → (1,2) → (2,2) → backtrack → try new path
     - Does NOT guarantee shortest path, but explores all reachable cells
+    
+    TC: O(rows * cols) - each cell visited at most once
+    SC: O(rows * cols) - visited set + stack can grow to this size
     """
-    # Edge case: empty matrix or invalid starting position
-    if not matrix or not matrix[0] or start_row < 0 or start_col < 0 or start_row >= len(matrix) or start_col >= len(matrix[0]):
+    # Edge case: empty matrix
+    if not matrix or not matrix[0]:
         return []
     
-    # Initialize stack with starting position and tracking structures
-    stack = [(start_row, start_col)]
-    visited = set()
+    rows, cols = len(matrix), len(matrix[0])
+    stack = [(start_row, start_col)] # DFS uses a stack (.pop())
+    visited = set([(start_row, start_col)])
     result = []
     
-    # Define 4 directions: up, down, left, right
-    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # up, down, left, right
     
     while stack:
-        # Get next position (LIFO: Append to end, pop from end)
-        row, col = stack.pop()
+        row, col = stack.pop() # <- DFS line pops from end and explores newest first (LIFO)
         
-        # Skip if already visited
-        if (row, col) in visited:
-            continue
-            
-        # Mark as visited and process current cell
-        visited.add((row, col))
+        # Process current cell
         result.append(matrix[row][col])
         
-        # DFS - explore 4 directions for each popped cell (cells that are 1 step away)
-        for dr, dc in directions: 
-            new_row, new_col = row + dr, col + dc # compute matrix cell
+        # Add valid neighbors
+        for dr, dc in directions:
+            new_row, new_col = row + dr, col + dc
             
-            # Check bounds valid and if unvisited for new cell
-            if (0 <= new_row < len(matrix) and 
-                0 <= new_col < len(matrix[0]) and 
+            if (0 <= new_row < rows and 
+                0 <= new_col < cols and 
                 (new_row, new_col) not in visited):
-                stack.append((new_row, new_col))  # Add to top of stack (will be processed next - creates depth)
+                
+                visited.add((new_row, new_col))
+                stack.append((new_row, new_col))  # Add to END (will be processed next - creates depth)
     
     return result
 
@@ -253,7 +263,7 @@ class InorderTraversal:
                 curr = curr.left
             
             # Step 2: Once we can't go any further, process deepest left node
-            curr = stack.pop() # Go back to last unprocessed node
+            curr = stack.pop() # Go back to last unprocessed node (end of stack)
             res.append(curr.val) # Append node (follows in order principle)
             
             # Step 3: Move to right subtree and continue traversal

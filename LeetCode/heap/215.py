@@ -6,7 +6,6 @@
 
 # Can you solve it without sorting?
 
-
 # Example 1:
 # Input: nums = [3,2,1,5,6,4], k = 2
 # Output: 5

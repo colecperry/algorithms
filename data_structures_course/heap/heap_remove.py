@@ -32,40 +32,55 @@ class MaxHeap:
             self.swap(current, self.parent(current)) # Swap the current node with the parent node
             current = self.parent(current) # Move current pointer to the parent node
     
-    def remove(self):
-        if len(self.heap) == 0: # Edge case for when the heap is empty
-            return None
-        
-        if len(self.heap) == 1: # Edge c ase for when heap is only 1 element
-            return self.heap.pop() # Pop the element off the list and return it
-        
-        max_value = self.heap[0] # set max_value equal to the element initially at index 0
-        self.heap[0] = self.heap.pop() # set the element at index 0 equal to the popped element (which comes from the last index)
-        self.sink_down(0) # Call helper method to put element into correct position
-        return max_value # Return the value we initially had at index 0
+def remove(self):
+    """Remove and return the root (max element in max-heap)"""
+    if len(self.heap) == 0: 
+        return None  # Empty heap - nothing to remove
     
-    def sink_down(self, index):
-        max_index = index # Create variable max_index to start our loop
-        while True: # Create an infinite loop
-            left_index = self.left_child(index) # Get the index of the left and right children
-            right_index = self.right_child(index)
+    if len(self.heap) == 1: 
+        return self.heap.pop()  # Only one element - just pop and return it
+    
+    # Step 1: Save the root value (what we're actually removing and will return)
+    max_value = self.heap[0]
+    
+    # Step 2: Move the LAST element to the ROOT position (index 0)
+    # This temporarily breaks the heap property but is O(1)
+    self.heap[0] = self.heap.pop()
+    
+    # Step 3: Restore heap property by sinking the new root down
+    self.sink_down(0)
+    
+    # Step 4: Return the original root (the max value we removed)
+    return max_value
 
-            if (left_index < len(self.heap) and self.heap[left_index] > self.heap[max_index]): 
-                # Make sure left index has an element (tree can be complete with no children on parent node)
-                # & compare val at left_child to max_index
-                max_index = left_index # If true move max index to left index
-            
-            if (right_index < len(self.heap) and self.heap[right_index] > self.heap[max_index]): 
-            # Make sure right index has an element(tree can be complete without a final right child)
-            # & compare the val at right child to max_index
-                max_index = right_index # If true move max index to right index
-            
-            # This code helps stop the code if the element is in the correct spot (if the two pointers are equal, we don't run the code)
-            if max_index != index: # If max_index is not equal to index
-                self.swap(index, max_index) # Swap index and max_index
-                index = max_index # Move index down to max_index
-            else: # If they are equal, stop the code
-                return
+def sink_down(self, index):
+    """
+    Restore heap property by moving element at 'index' down the tree.
+    Compares with children and swaps with larger child until heap property restored.
+    """
+    max_index = index  # Track the index of the largest value among parent and children
+    
+    while True:
+        left_index = self.left_child(index)
+        right_index = self.right_child(index)
+
+        # Check if left child exists AND is larger than current max
+        if (left_index < len(self.heap) and 
+            self.heap[left_index] > self.heap[max_index]): 
+            max_index = left_index  # Left child is larger
+        
+        # Check if right child exists AND is larger than current max
+        if (right_index < len(self.heap) and 
+            self.heap[right_index] > self.heap[max_index]): 
+            max_index = right_index  # Right child is larger
+        
+        # If max_index changed, we found a larger child - swap and continue
+        if max_index != index:
+            self.swap(index, max_index)  # Swap parent with larger child
+            index = max_index  # Move down to child's position and check again
+        else:
+            # max_index == index means element is in correct position
+            return  # Heap property restored - done!
 
 
 myheap = MaxHeap()

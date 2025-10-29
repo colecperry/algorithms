@@ -21,14 +21,16 @@ class MaxHeap:
     def swap(self, index1, index2): # Helper method swaps the two elements we pass in
         self.heap[index1], self.heap[index2] = self.heap[index2], self.heap[index1]
 
+    # Insert a node at the end of the list and bubble the node up to satisfy the heap property
     def insert(self, value):
         self.heap.append(value) # Append value to the end of the list
         current = len(self.heap) - 1 # Create a pointer starting at the last index
 
-        while current > 0 and self.heap[current] > self.heap[self.parent(current)]: # Create a while loop that runs as long as current index > 0 and the value at current is greater than the value at the parent element
+        while current > 0 and self.heap[current] > self.heap[self.parent(current)]: # Create a while loop that runs as long as current index > 0 and the value at current is greater than the value of it's parent element
             self.swap(current, self.parent(current)) # Swap the current node with the parent node
             current = self.parent(current) # Move current pointer to the parent node
 
+# Create the heap
 myheap = MaxHeap()
 myheap.insert(99)
 myheap.insert(72)
@@ -37,11 +39,11 @@ myheap.insert(58)
 
 print(myheap.heap)
 
+# Bubble up 100 via insert
 myheap.insert(100)
-
 print(myheap.heap)
 
+# Bubble up 75 via insert
 myheap.insert(75)
-
 print(myheap.heap)
 

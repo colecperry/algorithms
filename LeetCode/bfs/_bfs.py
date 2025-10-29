@@ -5,8 +5,7 @@ BREADTH-FIRST SEARCH (BFS) COMPLETE GUIDE
 
 WHAT IS BFS?
 -----------
-Breadth-First Search (BFS) is a graph traversal algorithm that explores nodes level by level,
-visiting all nodes at distance d before visiting nodes at distance d+1.
+Breadth-First Search (BFS) is a graph traversal algorithm that explores nodes level by level, visiting all nodes at distance d before visiting nodes at distance d+1.
 
 Key characteristics:
 - Uses a QUEUE (FIFO - First In, First Out) data structure
@@ -32,8 +31,8 @@ class TreeNode:
 def bfs_tree_template(root):
     """
     Basic tree BFS template - no visited set needed (trees have no cycles)
-    - Time complexity: O(n) -> n = number ot total nodes -> BFS visits each node exactly once and not revisited (trees have no cycles)
-    - Space complexity: O(w) -> w is maximum width of any level of a tree since BFS queues store all nodes from current level before moving to next level
+    - TC: O(n) -> n = number or total nodes -> BFS visits each node exactly once and not revisited (trees have no cycles)
+    - SC: O(w) -> w is maximum width of any level of a tree since BFS queues store all nodes from current level before moving to next level
     """
     if not root:
         return []
@@ -64,18 +63,18 @@ def bfs_matrix_template(matrix, start_row, start_col):
     - TC: O(rows * cols) -> each cell in the matrix is visited at most once due to visited set tracking
     - SC: O(rows * cols) -> visited set can store up to (rows * cols) tuples, queue can store up to O(min(rows, cols)) worst case per BFS level
     """
-    if not matrix or not matrix[0]:
+    if not matrix or not matrix[0]: # Empty matrix or empty data in first row
         return []
     
     rows, cols = len(matrix), len(matrix[0])
-    queue = deque([(start_row, start_col)])
+    queue = deque([(start_row, start_col)]) # Use a queue for BFS (.popleft)
     visited = set([(start_row, start_col)])
     result = []
     
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # up, down, left, right
     
     while queue:
-        row, col = queue.popleft()
+        row, col = queue.popleft() # <- BFS line pops from front and explores oldest first (FIFO)
         
         # Process current cell
         result.append(matrix[row][col])
@@ -136,8 +135,8 @@ def levelOrder(root: Optional[TreeNode]) -> List[List[int]]: # LC 102
     while queue:
         inner = [] # collect BFS level
         for _ in range(len(queue)): # travese full BFS level
-            node = queue.popleft()
-            inner.append(node.val)
+            node = queue.popleft() # Pop and process curr node
+            inner.append(node.val) 
             if node.left: # Append children if non null (next level)
                 queue.append(node.left)
             if node.right:
@@ -228,17 +227,17 @@ def orangesRotting(grid: List[List[int]]) -> int:
     for r in range(rows):
         for c in range(cols):
             if grid[r][c] == 2:
-                queue.append((r, c, 0))
+                queue.append((r, c, 0)) # row, col, time elapsed
     
     max_time = 0   # Track max time elapsed to spread rot to max area
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)] # Matrix BFS goes 4 directions
     
     # BFS to spread rot
     while queue:
-        row, col, time = queue.popleft()
-        max_time = max(max_time, time)
+        row, col, time = queue.popleft() # Explore multi-direction level
+        max_time = max(max_time, time) # Update max time
         
-        for dr, dc in directions:
+        for dr, dc in directions: # Explore 4 directions from curr 
             new_row, new_col = row + dr, col + dc
             
             if (0 <= new_row < rows and # OOB check
@@ -310,7 +309,7 @@ def numIslands(grid: List[List[str]]) -> int:
                     queue.append((neighbor_row, neighbor_col)) # append neighbor if land is connected
                     visited.add((neighbor_row, neighbor_col)) # add the node to visited
 
-    for row in range(num_rows): # iterate through each ele in the matrix ([row][col])
+    for row in range(num_rows): # iterate through each ele in the matrix ([row][col]) and explore if we find new unvisited land
         for col in range(num_cols):
             if grid[row][col] == '1' and (row, col) not in visited: # if we find a new land
                 bfs(row, col) # explore it's neighbors until we can't go further
