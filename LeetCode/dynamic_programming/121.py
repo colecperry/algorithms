@@ -14,16 +14,19 @@
 # Output: 0
 # Explanation: In this case, no transactions are done and the max profit = 0.
 
-# Solution 1 -> O(n) time complexity
-# Create variables for min price and max profit
-# Iterate through prices array:
-    # Update min price on each iteration
-    # Calculate profit on each iteration
-    # Update max profit on each iteration
 class Solution(object):
+    """
+    This is a greedy algorithm - not dynamic programming. At each step, we make the locally optimal choice (update min, calculate profit). This works because the problem has optimal substructure (solving smaller versions of the problem optimally leads to solving the full problem optimally).
+
+    KEY INSIGHT: You don't need to check every buy sell pair - Realize the only thing we need to calculate the profit is the min so far. 
+
+    TC:
+        - One iteration through the prices array: O(n)
+    SC:
+        - O(1) -> only need to track variables
+
+    """
     def maxProfit(self, prices):
-        if not prices: # If the prices array is empty return 0
-            return 0
         min_price = float('inf') # Create variable to track min price
         max_profit = 0 # Create variable to track max profit
 
@@ -35,7 +38,7 @@ class Solution(object):
         return max_profit
 
 
-# Solution 2 -> O(n^2) will get time limit exceeded
+# Solution 2 -> BRUTE FORCE
 # Step 1: Create the first "for" loop that loops through the array starting at index 0
 # Step 2: Create a second "for" loop that loops through the array starting at index 1, and once it finishes it adds i+1 and loops through again
 # Step 3: Since i is always one ahead in the j loop, subtract prices[j] - prices[i] in each loop
@@ -54,20 +57,3 @@ class Solution(object):
 solution = Solution()
 print(solution.maxProfit2([7,1,5,3,6,4]))
 
-# -- FASTER -- 
-# class Solution(object):
-#     def maxProfit(self, prices):
-#         min_price = prices[0]
-#         max_profit = 0
-
-#         for price in prices:
-#             profit = price - min_price
-#             min_price = min(min_price, price)
-#             max_profit = max(max_profit, profit)
-#               print("profit", profit)
-#               print("min_price", min_price)
-#               print("max_profit", max_profit)
-#         return max_profit
-
-# solution = Solution()
-# print(solution.maxProfit([7,1,5,3,6,4]))

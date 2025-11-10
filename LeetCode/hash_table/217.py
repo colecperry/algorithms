@@ -16,21 +16,19 @@
 # Input: nums = [1,1,1,3,3,4,3,2,4,2]
 # Output: true
 
-# How to solve
-# Create a dictionary
-# Iterate through the dictionary
-    # If the value is not in the dict, add it to the dict
-    # If the value is in the dict, return true
-# If we iterate all the way through, we have all different numbers, return false
-
 class Solution(object):
+    """
+    TC:
+        - O(n) due to iterating through the nums dict once
+    SC:
+        - O(n) due to storing worst case each num in nums in numdict
+    """
     def containsDuplicate(self, nums):
-        numdict = {}
+        numdict = {} # dictionary to store nums we've seen
         for i, n in enumerate(nums):
-            if n in numdict:
+            if n in numdict: # If num already in dict it's a duplicate
                 return True
-            numdict[n] = i
-            print(numdict[n])
+            numdict[n] = i # If not add it
         return False
     
 # Also viable solution

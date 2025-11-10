@@ -13,12 +13,18 @@
 # Example 3: Input: nums = [1,3,5,6], target = 7
 # Output: 4
 
-
 #  Binary Search
 class Solution(object):
+    """
+    KEY INSIGHT: binary search ensures that the start ptr always ends up at the smallest index where the target could be inserted
+    
+    TC:
+        - O(log n) -> binary search halves the search space each iteration
+    SC:
+        - O(1) - just pointers
+    """
     def searchInsert(self, nums, target):
-        start = 0
-        end = len(nums) - 1
+        start, end = 0, len(nums) - 1 # binary search ptrs
         while start <= end:
             middle = start + (end - start) // 2
             if nums[middle] == target:
@@ -27,9 +33,6 @@ class Solution(object):
                 start = middle + 1
             else:
                 end = middle - 1
-            print("start", start)
-            print('middle', middle)
-            print('end', end)
         return start
     
 solution = Solution()

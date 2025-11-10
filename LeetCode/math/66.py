@@ -27,13 +27,23 @@
 
 class Solution(object):
     def plusOne(self, digits):
-        ds = int(''.join(str(d) for d in digits))
-        ds = ds + 1
-        return [int(i) for i in str(ds)]
+        """
+        TC: O(n) where n is the length of digits
+            - O(n) to join digits into string
+            - O(n) to parse string to integer
+            - O(n) to convert integer back to string
+            - O(n) to build result list
+            Total: O(n)
+        
+        SC: O(n) where n is the length of digits
+            - O(n) to hold temp string from join before turning to an int
+            - O(n) to hold temp string from str(ds) before turning back to a list
+            - O(n) for output list
+            Total auxiliary space: O(n)
+        """
+        ds = int(''.join(str(d) for d in digits)) # Turn the arr into a string of digits then to an int
+        ds = ds + 1 # Add one
+        return [int(i) for i in str(ds)] # Use a list comprehension to turn the int back into a list of string digits then to an int
 
 solution = Solution()
 print(solution.plusOne([1, 2, 3]))
-
-# class Solution(object):
-#     def plusOne(self, digits):
-#         return [int(digit) for digit in str(int(''.join(map(str, digits))) + 1)]
