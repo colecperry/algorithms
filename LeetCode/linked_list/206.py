@@ -25,11 +25,12 @@
 class ListNode(object):
     def __init__(self, value=0, next=None):
         self.value = value
-        self.next = None
+        self.next = next
 
+class Solution:
     def reverseListIterative(self, head):
         pre = None # Two pointers: Point pre at None (before the first node in the list)
-        current = self.head # Point current to the head
+        current = head # Point current to the head
 
         while current: # Loop until current becomes None
             after = current.next # Create a variable to save current's next node (so we can move it forward since we break the link by pointing it backwards)
@@ -39,5 +40,9 @@ class ListNode(object):
 
         return pre # Return pre because it ends on the last node (current was set to None)
     
-    
+
+head = ListNode(1, ListNode(2, ListNode(3, ListNode(4, ListNode(5, )))))
+sol = Solution()
+print(sol.reverseListIterative(head))
+
 

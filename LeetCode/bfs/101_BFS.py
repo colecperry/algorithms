@@ -59,14 +59,14 @@ class TreeNode:
         self.right = right
 class Solution:
     def isSymmetric(self, root: Optional[TreeNode]) -> bool:
-        if not root: # edge case
+        if not root: # edge case -> empty tree is symmetric
             return True
         queue = deque([(root.left, root.right)]) # start on second level (first is always symmetric)
         while queue:
             node1, node2 = queue.popleft()
-            if not node1 and not node2: # both nodes are none -> symmetric
-                continue
-            if not node1 or not node2: # one node is none but other isn't -> asymmetric
+            if not node1 and not node2: # both nodes null -> symmetric
+                continue # Skip adding children (None) to queue
+            if not node1 or not node2: # only one node is none -> asymmetric
                 return False
             if node1.val != node2.val: # vals are differet -> asymmetric
                 return False
@@ -74,6 +74,11 @@ class Solution:
             queue.append((node1.right, node2.left))
         return True
 
+# #           1
+# #         /   \
+# #        2     2
+# #       / \   / \
+# #      3   4 4   3
 
 sol = Solution()
 # Tree 1

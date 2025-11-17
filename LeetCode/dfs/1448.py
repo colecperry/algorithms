@@ -38,28 +38,75 @@
 # Output: 1
 # Explanation: Root is considered as good.
 
-# How to solve:
-# Use Preorder traversal - process each node before we recursively traverse to the left and right nodes
-# As we traverse to each child, we want to keep track of the largest node value we have seen so far along that path
-# When we get to each node, check if we have seen any value greater than the value of the node we are currently on, if we do, don't count that node as a good node, if we do not, count that node as a good node
-
-# Defintion for binary tree node
-# class TreeNode:
-#      def __init__(self, val=0, left=None, right=None)
-#           self.val = val
-#           self.left = left
-#           self.right = right
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
 
 class Solution:
-    def goodNodes(self, root):
-        def dfs(node, max): # Define another function b/c need to pass in more than root
-            if not node: # Base case
-                return 0 # An empty tree has zero good nodes
+    def goodNodesRecursive(self, root):
+        def dfs(node, path_max):
+            # Base case: empty node contributes nothing
+            if not node:
+                return 0
+            
+            # Check if current node is "good"
+            is_good = 1 if node.val >= path_max else 0
+            
+            # Update the max value for the path going forward
+            new_max = max(path_max, node.val)
+            
+            # Count good nodes in left and right subtrees
+            left_count = dfs(node.left, new_max)
+            right_count = dfs(node.right, new_max)
+            
+            # Total = current node (if good) + left subtree + right subtree
+            return is_good + left_count + right_count
         
-            res = 1 if node.val >= max else 0# Now we got to a non-empty node - is this node a good node?
-            max = max(max, node.val) # Take max of the current max val & current node val
-            res += dfs(node.left, max) # Recursive call on left child & update res
-            res += dfs(node.right, max) # Recursive call on right child & update res
-            return res
+        return dfs(root, root.val)
+    
+#                3
+#               / \
+#              /   \
+#             1     4
+#            /     / \
+#           /     /   \
+#          3     1     5
+
+    def goodNodesIterative(self, root):
+        if not root:
+            return 0
         
-        return dfs(root, root.val) # Call dfs on the root node, pass in root.val as the max b/c it will count as long it is greater than or equal to the max val so far
+        # Stack stores tuples of (node, max_value_on_path_so_far)
+        stack = [(root, root.val)]
+        good_count = 0
+        
+        while stack:
+            node, path_max = stack.pop()
+            
+            # Check if current node is good
+            if node.val >= path_max:
+                good_count += 1
+            
+            # Update the max for children
+            new_max = max(path_max, node.val)
+            
+            # Add children to stack with updated max
+            if node.right: # Add RIGHT first (so left gets popped first)
+                stack.append((node.right, new_max))
+            if node.left:
+                stack.append((node.left, new_max))
+        
+        return good_count
+
+t1 = TreeNode(3)
+t1.left = TreeNode(1)
+t1.right = TreeNode(4)
+t1.left.left = TreeNode(3)
+t1.right.left = TreeNode(1)
+t1.right.right = TreeNode(5)
+
+sol = Solution()
+print(sol.goodNodesRecursive(t1)) # 4
+print(sol.goodNodesIterative(t1)) # 4

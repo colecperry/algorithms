@@ -49,14 +49,11 @@ def dfs_recursive_template(node):
     if not node:
         return 0
     
-    # Process current node (pre-order processing)
-    print(f"Processing node with value: {node.val}")  # Example: print node value
-    
     # Recursive calls to explore children/neighbors
     left_result = dfs_recursive_template(node.left)
     right_result = dfs_recursive_template(node.right)
     
-    # Combine results and return (post-order processing) to prev callstack
+    # MY height = 1 (me) + max(their heights)
     return 1 + max(left_result, right_result)
 
 #         3
@@ -96,7 +93,7 @@ def dfs_iterative_template(root):
         # Process current node
         result.append(node.val)
         
-        # Add children (right then left ensures correct processing as we would pop the left side first) 
+        # Add children (right then left ensures correct processing as we would pop and process the left side first - DFS) 
         if node.right:
             stack.append(node.right)
         if node.left:
@@ -156,7 +153,7 @@ def matrix_dfs_template(matrix, start_row, start_col):
                 (new_row, new_col) not in visited):
                 
                 visited.add((new_row, new_col))
-                stack.append((new_row, new_col))  # Add to END (will be processed next - creates depth)
+                stack.append((new_row, new_col))  # Add to END (will be processed next when popped - creates DFS depth)
     
     return result
 
@@ -169,6 +166,105 @@ test_matrix = [
 
 # Run the function
 print("Matrix DFS from (0,0):", matrix_dfs_template(test_matrix, 0, 0))
+
+# ================================================================
+# GRAPH DFS TEMPLATE
+# ================================================================
+
+def graph_dfs_template(graph, start_node):
+    """
+    Graph DFS template with visited tracking using adjacency list
+    
+    EXPLORATION PATTERN: DFS explores in "deep dive" paths
+    - Follows one path completely before trying alternatives
+    - Like exploring one tunnel system fully before checking other tunnels
+    - Path might be: A → B → D → E → backtrack → C → F
+    - Does NOT guarantee shortest path, but visits all reachable nodes
+    
+    Graph format: {node: [list of neighbors]}
+    Example: {'A': ['B', 'C'], 'B': ['D'], 'C': ['F'], ...}
+    
+    TC: O(V + E) - visit each vertex once, explore each edge once
+    SC: O(V) - visited set + stack can grow to number of vertices
+    """
+    # Edge case: empty graph or start not in graph
+    if not graph or start_node not in graph:
+        return []
+    
+    stack = [start_node]  # DFS uses a stack (.pop())
+    visited = set([start_node])
+    result = []
+    
+    while stack:
+        node = stack.pop()  # <- DFS line: pops from end (LIFO - Last In First Out)
+        
+        # Process current node
+        result.append(node)
+        
+        # Add unvisited neighbors to stack
+        for neighbor in graph[node]:
+            if neighbor not in visited:
+                visited.add(neighbor)
+                stack.append(neighbor)  # Add to END (will be processed next - creates DFS depth)
+    
+    return result
+
+
+def graph_dfs_recursive(graph, start_node):
+    """
+    Recursive DFS template - cleaner for many problems
+    
+    Same exploration pattern but uses call stack instead of explicit stack
+    Often preferred for tree problems and clearer logic
+    """
+    visited = set()
+    result = []
+    
+    def dfs(node):
+        if node in visited:
+            return
+        
+        visited.add(node)
+        result.append(node)  # Process node
+        
+        # Recursively visit all neighbors
+        for neighbor in graph[node]:
+            dfs(neighbor)
+    
+    dfs(start_node)
+    return result
+
+
+# ================================================================
+# TEST GRAPH
+# ================================================================
+
+# Graph visualization:
+#       A
+#      / \
+#     B   C
+#    /     \
+#   D       F
+#    \     /
+#     E - G
+
+test_graph = {
+    'A': ['B', 'C'],
+    'B': ['A', 'D'],
+    'C': ['A', 'F'],
+    'D': ['B', 'E'],
+    'E': ['D', 'G'],
+    'F': ['C', 'G'],
+    'G': ['E', 'F']
+}
+
+print("Iterative DFS from 'A':", graph_dfs_template(test_graph, 'A'))
+# Possible output: ['A', 'C', 'F', 'G', 'E', 'D', 'B']
+# (order depends on which neighbor added to stack last)
+
+print("Recursive DFS from 'A':", graph_dfs_recursive(test_graph, 'A'))
+# Possible output: ['A', 'B', 'D', 'E', 'G', 'F', 'C']
+# (visits first neighbor completely before second)
 
 """
 DFS VARIANTS & WHEN TO USE
@@ -195,433 +291,451 @@ COMMON LEETCODE PATTERNS
 """
 
 # ================================================================
-# PATTERN 1: SYSTEMATIC NODE VISITATION
-# PATTERN EXPLANATION: Visit every node in a tree following a predetermined order.
-# Key insight: Choose traversal order based on when you need to process data.
-# Applications: Data collection, validation, transformation, serialization.
+# PATTERN 1: TREE DFS - BUILD UP (POST-ORDER)
+# PATTERN EXPLANATION: Recursively process children nodes before processing the current node, then combine information from children to compute the parent's result. This bottom-up approach allows each node to make decisions based on complete information from its subtrees. Values flow upward through the tree as the recursion unwinds.
+#
+# TYPICAL STEPS:
+# 1. Base case: handle null nodes (usually return 0, None, or default value)
+# 2. Recursively call on left child and get result
+# 3. Recursively call on right child and get result
+# 4. Process current node using children's results
+# 5. Return computed value to parent
+#
+# Applications: Height calculation, diameter, balanced tree check, LCA, subtree properties.
 # ================================================================
 
-class TreeNode(object):
+class TreeNode:
     def __init__(self, val=0, left=None, right=None):
         self.val = val
         self.left = left
         self.right = right
 
-class InorderTraversal:
-    # RECURSIVE SOLUTION 
-    def inorderTraversal(self, root): # LC 94 - Binary Tree Inorder Traversal
-        """
-        Pattern: Tree traversal with result collection
-        Time: O(n), Space: O(h) where h is height
-        
-        How it works:
-        1. Base case: if node is None, return (end of branch)
-        2. Recurse left subtree completely
-        3. Process current node (add to result)
-        4. Recurse right subtree completely
-        """
-        res = []
-        
-        def dfs(root):
-            if root is None:  # Base case - hit end 
-                return
-            dfs(root.left)    # Keep going left until base case
-            res.append(root.val)  # Process root
-            dfs(root.right)   # Go right
-        
-        dfs(root)
-        return res
-    
-        #           1
-        #         /   \
-        #        /     \
-        #       2       3
-        #      / \       \
-        #     4   5       8
-        #        / \     /
-        #       6   7   9
-    
-    # ITERATIVE SOLUTION
-    def inorderTraversalIterative(self, root):
-        """
-        Pattern: Controlled traversal with stack
-        Key insight: Go left as much as possible, then process and go right
-        
-        How it works:
-        1. Push all left nodes to stack while going left
-        2. When can't go left anymore, pop and process node
-        3. Move to right child and repeat
-        """
-        res = []
-        stack = [] # Store nodes we need to return to after exploring left subtrees
-        curr = root # Current node we are exploring
-        
-        while curr or stack: # Continue while we have a current node or nodes to explore
-            # Step 1: Go left as far as possible
-            while curr:
-                stack.append(curr) # Save node for later processing
-                curr = curr.left
-            
-            # Step 2: Once we can't go any further, process deepest left node
-            curr = stack.pop() # Go back to last unprocessed node (end of stack)
-            res.append(curr.val) # Append node (follows in order principle)
-            
-            # Step 3: Move to right subtree and continue traversal
-            curr = curr.right
-        
-        return res
-
-    #           1
-    #         /   \
-    #        /     \
-    #       2       3
-    #      / \       \
-    #     4   5       8
-    #        / \     /
-    #       6   7   9
-
-# Test the inorder traversal
-root = TreeNode(1, TreeNode(2, TreeNode(4), TreeNode(5, TreeNode(6), TreeNode(7))), TreeNode(3, None, TreeNode(8, TreeNode(9), None)))
-
-solution = InorderTraversal()
-print("Recursive inorder:", solution.inorderTraversal(root))  # [4,2,6,5,7,1,3,9,8]
-print("Iterative inorder:", solution.inorderTraversalIterative(root))  # [4,2,6,5,7,1,3,9,8]
-
-# ================================================================
-# PATTERN 2: SIMULTANEOUS DUAL TRAVERSAL
-# PATTERN EXPLANATION: This pattern traverses two parts of a tree (or two trees) 
-# simultaneously to compare their structure, values, or relationships.
-# Key insight: Instead of traversing once and storing results, traverse both 
-# sides at the same time making comparisons at each step.
-# Applications: Tree symmetry, tree equality, subtree matching, mirror validation.
-# ================================================================
-
-# RECURSIVE SOLUTION
-def isSymmetric(root): # LC 101
+def maxDepth(root):  # LC 104 - Maximum Depth of Binary Tree
     """
-    Problem: Given the root of a binary tree, check whether it is a mirror of itself
+    Find the maximum depth (height) of a binary tree.
+    Depth = number of nodes from root to furthest leaf.
+    
+    #      3
+    #     / \
+    #    9  20
+    #      /  \
+    #     15   7
+    #
+    # Depth = 3 (path: 3 -> 20 -> 15)
+    
+    TC: O(n) - visit each node once
+    SC: O(h) - recursion stack depth
     
     How it works:
-    1. Helper function compares two nodes for symmetry
-    2. Base cases: both null (symmetric), one null (not symmetric), different values (not symmetric)
-    3. For symmetry: values must match AND subtrees must be mirrors
-    4. Mirror check: left.left vs right.right, left.right vs right.left
+    1. Get depth from left subtree
+    2. Get depth from right subtree
+    3. Current depth = 1 + max of children depths
+    4. Return to parent (who uses it in their calculation)
     """
-    def dfs(left, right):
-        if not left and not right: # Both null -> Symmetric
-            return True
-        if not left or not right: # One node null -> Not symmetric
-            return False
-        if left.val != right.val: # Nodes have diff vals -> Not symmetric
-            return False
-        
-        # Mirror comparison: left.left with right.right, left.right with right.left
-        return (dfs(left.left, right.right) and 
-                dfs(left.right, right.left))
+    # Base case: empty tree has depth 0
+    if not root:
+        return 0
     
-    return dfs(root.left, root.right) if root else True # Pass in child nodes to start fn call if not empty tree, if empty Tree return True (empty tree is symmetric)
+    # Step 1: Get result from left child (build up from bottom)
+    left_depth = maxDepth(root.left)
+    
+    # Step 2: Get result from right child
+    right_depth = maxDepth(root.right)
+    
+    # Step 3: Process current node using children's results
+    # Current depth = 1 (for this node) + max of children
+    current_depth = 1 + max(left_depth, right_depth)
+    
+    # Step 4: Return to parent
+    return current_depth
 
-#               1                  1
-#              / \                / \
-#             /   \              /   \
-#            2     2            2     2
-#           / \   / \            \     \
-#          3   4 4   3            3     3
+    #      3
+    #     / \
+    #    9  20
+    #      /  \
+    #     15   7
+    #
+    # Depth = 3 (path: 3 -> 20 -> 15)
+    # 
+    # How it builds up:
+    # - Node 9: depth = 1 (leaf)
+    # - Node 15: depth = 1 (leaf)
+    # - Node 7: depth = 1 (leaf)
+    # - Node 20: depth = 1 + max(1, 1) = 2
+    # - Node 3: depth = 1 + max(1, 2) = 3
 
-# ITERATIVE SOLUTION
-def isSymmetricIterative(root):
+# Test
+root = TreeNode(3, 
+    TreeNode(9), 
+    TreeNode(20, TreeNode(15), TreeNode(7)))
+
+print("Max Depth:", maxDepth(root))  # Output: 3
+
+# Another test - single node
+single = TreeNode(1)
+print("Max Depth (single):", maxDepth(single))  # Output: 1
+
+# Empty tree
+print("Max Depth (empty):", maxDepth(None))  # Output: 0
+
+# ================================================================
+# PATTERN 2: TREE DFS - PASS DOWN (PRE-ORDER)
+# PATTERN EXPLANATION: Pass information downward from parent to children during traversal. Each node receives accumulated context from its ancestors (such as path sum, depth, or constraints) and uses this information to make decisions or check conditions. State is updated as you descend and passed to recursive calls.
+#
+# TYPICAL STEPS:
+# 1. Base case: handle null nodes or leaf nodes
+# 2. Process/check current node with accumulated state
+# 3. Update state based on current node's value
+# 4. Recursively call on left child with updated state
+# 5. Recursively call on right child with updated state
+# 6. Combine results from both subtrees if needed
+#
+# Applications: Path sum validation, path finding, ancestor-dependent counting, level tracking.
+# ================================================================
+
+def hasPathSum(root, targetSum):  # LC 112 - Path Sum
     """
-    Pattern: Mirror node pairs in stack
+    Determine if tree has root-to-leaf path that sums to targetSum.
+    
+    #        5
+    #       / \
+    #      4   8
+    #     /   / \
+    #    11  13  4
+    #   /  \      \
+    #  7    2      1
+    #
+    # targetSum = 22
+    # Path: 5->4->11->2 = 22 ✓
+    # Output: True
+    
+    TC: O(n) - visit each node once
+    SC: O(h) - recursion stack depth
     
     How it works:
-    1. Stack stores pairs of nodes that should be mirrors
-    2. For each pair, verify they match for symmetry
-    3. Add their mirror children pairs to stack
+    1. At each node, subtract current value from targetSum
+    2. Pass the REMAINING sum down to children
+    3. At leaf nodes, check if remaining sum equals node value
+    4. Return True if any path works
     """
-    if not root: # Base Case -> empty Tree is symmetric
-        return True
-    
-    stack = [(root.left, root.right)] # Iterative stack starts at root's l and r subtrees
-    
-    while stack:
-        left, right = stack.pop() # Pop the pair of nodes 
-        
-        if not left and not right: # Both null -> Symmetric 
-            continue # do not add children
-        if not left or not right: # One node null -> Not symmetric
-            return False # Return False immediately
-        if left.val != right.val: # Nodes have diff vals -> Not symmetric
-            return False # Return False immediately
-        
-        # Add mirror pairs to continue search
-        stack.append((left.left, right.right))
-        stack.append((left.right, right.left))
-    
-    return True # Return True if we explore all nodes and no pairs are asymmetric
-
-#               1                  1
-#              / \                / \
-#             /   \              /   \
-#            2     2            2     2
-#           / \   / \            \     \
-#          3   4 4   3            3     3
-
-# Symmetric tree
-symmetric_root = TreeNode(1, TreeNode(2, TreeNode(3), TreeNode(4)), TreeNode(2, TreeNode(4), TreeNode(3)))
-
-# Asymmetric tree  
-asymmetric_root = TreeNode(1, TreeNode(2, None, TreeNode(3)), TreeNode(2, None, TreeNode(3)))
-
-print("Symmetric tree (recursive):", isSymmetric(symmetric_root))  # True
-print("Asymmetric tree (recursive):", isSymmetric(asymmetric_root))  # False
-print("Symmetric tree (iterative):", isSymmetricIterative(symmetric_root))  # True
-print("Asymmetric tree (iterative):", isSymmetricIterative(asymmetric_root))  # False
-
-# ================================================================
-# PATTERN 3: ACCUMULATIVE PATH TRACKING
-# PATTERN EXPLANATION: Track running values while traversing paths to meet conditions.
-# Key insight: Update target/sum at each node and check condition at path endpoints.
-# Applications: Path sum validation, counting paths, finding target sequences.
-# ================================================================
-
-# RECURSIVE SOLUTION
-def hasPathSum(root, targetSum): # LC 112 - Path Sum
-    """
-    # Given the root of a binary tree and an integer targetSum, return true if the tree has a root-to-leaf path such that adding up all the values along the path equals targetSum.
-    """
-    if not root: # Edge case for null tree -> cannot rearch target 
+    # Base case 1: empty tree has no paths
+    if not root:
         return False
     
-    # Base Case -> Found a leaf node
+    # Base case 2: Leaf node: check if this completes a valid path
     if not root.left and not root.right:
-        return targetSum == root.val # Check if we reached our target
+        return root.val == targetSum # Return boolean to caller
     
-    # Recursive calls with updated sum for children
-    remaining = targetSum - root.val # Update sum we are looking for
-    return (hasPathSum(root.left, remaining) or 
-            hasPathSum(root.right, remaining)) # If any point we return True, no need to check second part -> True propogates up the call stack
-
-# Ex. 1 - target = 22
-#
-#               5 x
-#              / \
-#             /   \
-#            4 x   8
-#           /     / \
-#          /     /   \
-#         11 x  13    4
-#        /  \          \
-#       7    2 x        1
-
-# ITERATIVE SOLUTION
-def hasPathSumIterative(root, targetSum):
-    if not root: # Edge case null tree
-        return False
+    # Update state: calculate remaining sum after this node
+    remaining = targetSum - root.val
     
-    stack = [(root, targetSum)] # Iterative DFS stack
+    # Pass down to children: check if either subtree has valid path
+    left_has_path = hasPathSum(root.left, remaining)
+    right_has_path = hasPathSum(root.right, remaining)
     
-    while stack:
-        node, curr_sum = stack.pop() # Pop the node and check the needed sum
-        remaining = curr_sum - node.val # Update remaining sum for children
-        
-        # Check leaf node
-        if not node.left and not node.right and remaining == 0:
-            return True
-        
-        # Add children with updated sum -> adding R first follows DFS property
-        if node.right:
-            stack.append((node.right, remaining))
-        if node.left:
-            stack.append((node.left, remaining))
-    
-    return False
+    return left_has_path or right_has_path
 
-# Ex. 1 - target = 22
-#
-#               5 x
-#              / \
-#             /   \
-#            4 x   8
-#           /     / \
-#          /     /   \
-#         11 x  13    4
-#        /  \          \
-#       7    2 x        1
+        #        5
+        #       / \
+        #      4   8
+        #     /   / \
+        #    11  13  4
+        #   /  \      \
+        #  7    2      1
+        #
+        # targetSum = 22
+        # Path: 5->4->11->2 = 22 ✓
+        # Output: True
 
-# Test path sum
-path_root = TreeNode(5, TreeNode(4, TreeNode(11, TreeNode(7), TreeNode(2)), None), TreeNode(8, TreeNode(13), TreeNode(4, None, TreeNode(1))))
+# Test
+root = TreeNode(5, 
+    TreeNode(4, 
+        TreeNode(11, TreeNode(7), TreeNode(2))),
+    TreeNode(8, 
+        TreeNode(13), 
+        TreeNode(4, None, TreeNode(1))))
 
-print("Has path sum 22 (recursive):", hasPathSum(path_root, 22))  # True
-print("Has path sum 22 (iterative):", hasPathSumIterative(path_root, 22))  # True
+print("Has Path Sum (22):", hasPathSum(root, 22))  # True
+print("Has Path Sum (100):", hasPathSum(root, 100))  # False
+
 
 # ================================================================
-# PATTERN 4: STRUCTURAL TRANSFORMATION
-# PATTERN EXPLANATION: Modify tree structure or node values during traversal.
-# Key insight: Timing of changes matters - modify before recursion or after based on needs.
-# Applications: Tree inversion, flattening, value updates, structural rebuilding.
+# PATTERN 3: GRAPH DFS WITH VISITED
+# PATTERN EXPLANATION: Traverse a graph represented as an adjacency list while maintaining a visited set to track already-explored nodes. This prevents infinite loops in cyclic graphs and avoids redundant processing. Can be implemented recursively (using call stack) or iteratively (using explicit stack).
+#
+# TYPICAL STEPS:
+# 1. Initialize visited set/map
+# 2. Start DFS from source node (or try all nodes for disconnected graphs)
+# 3. Mark current node as visited
+# 4. Process current node
+# 5. For each unvisited neighbor:
+#    - Mark as visited
+#    - Recursively explore neighbor (or add to stack)
+# 6. Return or aggregate results
+#
+# Applications: Graph traversal, reachability, connected components, cycle detection.
 # ================================================================
 
-# RECURSIVE SOLUTION
-def invertTree(root): # LC 226 - Invert Binary Tree
+def canVisitAllRooms(rooms):  # LC 841 - Keys and Rooms
     """
-    # Given the root of a binary tree, invert the tree, and return its root.
-    Time: O(n), Space: O(h)
+    There are n rooms labeled 0 to n-1. All rooms are locked except room 0. Your goal is to visit all rooms. When you visit a room, you get all keys in that room. Can you visit all rooms?
+    
+    Example 1:
+        rooms = [[1],[2],[3],[]]
+        
+        Visual: 0 -> 1 -> 2 -> 3
+        
+        Start in room 0, get key to room 1
+        Visit room 1, get key to room 2
+        Visit room 2, get key to room 3
+        Visit room 3
+        
+        Output: True (visited all 4 rooms)
+    
+    TC: O(n + e) - visit each room once, check each key once
+    SC: O(n) - visited set stores up to n rooms
     
     How it works:
-    1. Base case: null node needs no inversion
-    2. Swap current node's children
-    3. Recursively invert both subtrees
-    4. Return modified root
+    1. Use visited set to track which rooms we've entered
+    2. Start DFS from room 0 (only unlocked room)
+    3. When visiting a room, mark it as visited
+    4. For each key in the room, visit that room if not already visited
+    5. After DFS completes, check if visited all rooms
     """
-    if not root: # Base case -> reach end of tree path
-        return None # Edge case -> empty tree
+    visited = set()  # Track which rooms we've visited
     
-    # Swap children
-    root.left, root.right = root.right, root.left
+    def dfs(room):
+        """Visit a room and recursively visit all reachable rooms"""
+        # Mark current room as visited (before processing neighbors)
+        visited.add(room)
+        
+        # For each key (neighbor) in this room
+        for key in rooms[room]:
+            if key not in visited:  # Only visit unvisited rooms
+                dfs(key)
     
-    # Recursively invert subtrees
-    invertTree(root.left)
-    invertTree(root.right)
+    # Start DFS from room 0 (the only unlocked room)
+    dfs(0)
     
-    return root # Return modified root of each recursive call back to caller (parent) and return the tree of the original root with it's updated subtrees
-#
-#               4                    4
-#              / \                  / \
-#             /   \                /   \
-#            2     7      ->      7     2
-#           / \   / \            / \   / \
-#          1   3 6   9          9   6 3   1
+    # Check if we visited all rooms
+    return len(visited) == len(rooms)
 
-# ITERATIVE SOLUTION
-def invertTreeIterative(root):
-    if not root: # Empty Tree
-        return None
+
+# ITERATIVE SOLUTION (using explicit stack)
+def canVisitAllRoomsIterative(rooms):
+    """
+    Pattern: DFS with explicit stack and visited set
     
-    stack = [root] # Iterative DFS stack
+    How it works:
+    1. Use stack for DFS traversal (instead of recursion)
+    2. visited set tracks which rooms we've entered
+    3. Process each room: mark visited, add unvisited neighbors to stack
+    """
+    visited = set([0])  # Start with room 0
+    stack = [0]
     
     while stack:
-        node = stack.pop()
+        room = stack.pop()
         
-        # Swap children
-        node.left, node.right = node.right, node.left
-        
-        # Add children to stack to swap their subtrees later
-        if node.left:
-            stack.append(node.left)
-        if node.right:
-            stack.append(node.right)
+        # Process each key in current room
+        for key in rooms[room]:
+            if key not in visited:  # Haven't visited this room yet
+                visited.add(key)
+                stack.append(key)
     
-    return root
-
-#
-#               4                    4
-#              / \                  / \
-#             /   \                /   \
-#            2     7      ->      7     2
-#           / \   / \            / \   / \
-#          1   3 6   9          9   6 3   1
-
-invert_root = TreeNode(4, TreeNode(2, TreeNode(1), TreeNode(3)), TreeNode(7, TreeNode(6), TreeNode(9)))
+    return len(visited) == len(rooms)
 
 
-print(invertTree(invert_root))
-print(invertTreeIterative(invert_root))
+# Test case 1: Can visit all rooms
+rooms1 = [[1],[2],[3],[]]
+print("Can visit all rooms:", canVisitAllRooms(rooms1))  # True
+print("Can visit all rooms (iterative):", canVisitAllRoomsIterative(rooms1))  # True
+
+# Test case 2: Cannot visit all rooms (room 2 unreachable)
+rooms2 = [[1,3],[3,0,1],[2],[0]]
+print("Can visit all rooms:", canVisitAllRooms(rooms2))  # False
+print("Can visit all rooms (iterative):", canVisitAllRoomsIterative(rooms2))  # False
+
+# Test case 3: Single room
+rooms3 = [[]]
+print("Can visit all rooms:", canVisitAllRooms(rooms3))  # True
 
 
 # ================================================================
-# PATTERN 5: BOTTOM-UP INFORMATION PROPAGATION
-# PATTERN EXPLANATION: Gather info from children and propagate it up to parents.
-# Key insight: Child results determine parent behavior - process children first, then parent.
-# Applications: LCA finding, tree validation, height calculation, subtree properties.
+# PATTERN 4: MATRIX DFS - FLOOD FILL
+# PATTERN EXPLANATION: Explore connected regions in a 2D grid by recursively visiting adjacent cells. The grid represents an implicit graph where each cell's neighbors are the adjacent cells (4 or 8 directions). Track visited cells to avoid infinite recursion, either using a separate set or by modifying the grid in-place.
+#
+# TYPICAL STEPS:
+# 1. Start DFS from a cell
+# 2. Check boundary conditions and visited status
+# 3. Mark current cell as visited (or change its value)
+# 4. Recursively explore adjacent cells in 4 directions
+# 5. Return modified grid
+#
+# Applications: Fill regions, change colors, connected components in grid, islands.
 # ================================================================
 
-# RECURSIVE SOLUTION 
-def lowestCommonAncestor(root, p, q): # LC 236
+def floodFill(image, sr, sc, color):  # LC 733 - Flood Fill
     """
-    # Given a binary tree, find the lowest common ancestor (LCA) of two given nodes in the tree. The lowest common ancestor is defined between two nodes p and q as the lowest node (lowest depth on tree) in T that has both p and q as descendants (where we allow a node to be a descendant of itself).
+    Perform flood fill starting from pixel (sr, sc). Change the color
+    of the starting pixel and all connected pixels of the same color
+    to the new color.
+    
+    Connected = 4-directionally adjacent (up, down, left, right).
+    
+    Example:
+        image = [[1,1,1],
+                 [1,1,0],
+                 [1,0,1]]
+        sr = 1, sc = 1, color = 2
+        
+        Starting pixel is 1, all connected 1's become 2:
+        
+        Output: [[2,2,2],
+                 [2,2,0],
+                 [2,0,1]]
+    
+    TC: O(m * n) - visit each pixel at most once
+    SC: O(m * n) - recursion stack in worst case
+    
+    How it works:
+    1. Save the original color of starting pixel
+    2. DFS from starting position
+    3. For each cell, check if it matches original color
+    4. Change color and recursively fill neighbors
+    5. Cells are "marked visited" by changing their color
     """
-    if not root: # Base Case: Reached end of path OR empty tree
-        return None # No node found in this direction
+    original_color = image[sr][sc]
     
-    if root == p or root == q: # If we find p or q
-        return root # Return that node to the caller (parent)
+    # Edge case: already the target color (would cause infinite recursion!)
+    if original_color == color:
+        return image
     
-    # DFS: # If we do not find p or q, 
-    l = lowestCommonAncestor(root.left, p, q) # Child reports back
-    r = lowestCommonAncestor(root.right, p, q) # a target node or nothing
+    rows, cols = len(image), len(image[0])
+    
+    def dfs(r, c):
+        """Fill cell at (r,c) and all connected cells"""
+        # Boundary check and color check
+        if (r < 0 or r >= rows or c < 0 or c >= cols or 
+            image[r][c] != original_color):
+            return
+        
+        # Change color (marks as visited)
+        image[r][c] = color
+        
+        # Explore 4 directions
+        dfs(r + 1, c)  # Down
+        dfs(r - 1, c)  # Up
+        dfs(r, c + 1)  # Right
+        dfs(r, c - 1)  # Left
+    
+    dfs(sr, sc)
+    return image
 
-    if l and r: # Case 1: p & q on opposite sides of subtree
-        return root # current node we are at is the LCA
-    else: # Case 2: only p or q returns a target
-        return l or r # Return whatever was found (target node/ LCA from subtree or None if we reach the end of path or target not found in this subtree)
 
-#                3                  
-#              /   \             
-#             /     \
-#            /       \
-#           5         1
-#          / \       / \
-#         /   \     /   \
-#        6     2   0     8
-#             / \ 
-#            7   4
-#
-#      ex.1  p = 5, q = 1
-#            output = 3
-#
-#      ex.2  p = 5, q = 4
-#            output = 5
+# Test
+image = [[1,1,1],
+         [1,1,0],
+         [1,0,1]]
 
-# Test LCA
-lca_root = TreeNode(3, TreeNode(5, TreeNode(6), TreeNode(2, TreeNode(7), TreeNode(4))), TreeNode(1, TreeNode(0), TreeNode(8)))
+print(floodFill(image, 1, 1, 2))
+# Output: [[2,2,2],
+#          [2,2,0],
+#          [2,0,1]]
 
-lowestCommonAncestor(lca_root, lca_root.left, lca_root.right)  # 3
-lowestCommonAncestor(lca_root, lca_root.left, lca_root.left.right.right)  # 5
 
 # ================================================================
-# PATTERN 6: TOP-DOWN CONTEXT PASSING
-# PATTERN EXPLANATION: Pass path-specific information down from parent to children.
-# Key insight: Each node makes decisions based on accumulated context from ancestors.
-# Applications: Path validation, constraint checking, ancestor-dependent counting, resource tracking.
+# PATTERN 5: DFS + MEMOIZATION (TOP-DOWN DYNAMIC PROGRAMMING)
+# PATTERN EXPLANATION: Optimize recursive DFS by caching results of subproblems to avoid redundant computation. When a recursive function is called multiple times with the same parameters (overlapping subproblems), store the result after first computation and reuse it for subsequent calls. This transforms exponential time complexity into polynomial by trading space for time.
+#
+# TYPICAL STEPS:
+# 1. Define state/parameters that uniquely identify a subproblem
+# 2. Create memoization structure (dict/array) to cache results
+# 3. At start of recursive function, check if result already cached
+# 4. If cached, return stored result immediately
+# 5. Otherwise, compute result recursively
+# 6. Store result in cache before returning
+# 7. Return result
+#
+# Applications: Word break, coin change, decode ways, partition problems, subsequence problems.
 # ================================================================
 
-def goodNodes(root):
+def wordBreak(s, wordDict): # LC 139 - Word Break
     """
-    # Given a binary tree root, a node X in the tree is named good if in the path from root to X there are no nodes with a value greater than X. Return the number of good nodes in the binary tree.
-    """
-    def dfs(node, max_val):
-        if not node: 
-            return 0
-        
-        # Check if current node is good (curr node > root)
-        good_count = 1 if node.val >= max_val else 0
-        
-        # Update max path value for children 
-        new_max = max(max_val, node.val)
-        
-        # Add good nodes from subtrees
-        good_count = good_count + dfs(node.left, new_max)
-        good_count = good_count + dfs(node.right, new_max)
-        
-        return good_count
+    Given a string s and a dictionary of strings wordDict, return true if s can be segmented into a space-separated sequence of dictionary words.
     
-    return dfs(root, root.val) # Pass in the 
+    TC: O(n² * m) where n = len(s), m = avg word length (without memo: exponential)
+    SC: O(n) - memoization cache + recursion depth
+    
+    How it works:
+    1. Try to match words from dictionary at current position
+    2. If word matches, recursively check if rest of string can be broken
+    3. Cache results for each starting index to avoid recomputation
+    4. Return true if any path successfully breaks entire string
+    """
+    word_set = set(wordDict)  # O(1) lookup
+    memo = {}  # Cache: index -> can_break
+    
+    def dfs(start):
+        # Base case - reached end of string
+        if start == len(s):
+            return True
+        
+        # Check cache
+        if start in memo:
+            return memo[start]
+        
+        # Try all possible words starting at this position
+        for end in range(start + 1, len(s) + 1):
+            word = s[start:end]
+            
+            # If current word exists AND rest can be broken
+            if word in word_set and dfs(end):
+                memo[start] = True
+                return True
+        
+        # No valid break found from this position
+        memo[start] = False
+        return False
+    
+    return dfs(0)
 
-#                3
-#               / \
-#              /   \
-#             1     4
-#            /     / \
-#           /     /   \
-#          3     1     5
-#
-# Output: 4
-# Root Node (3) is always a good node.
-# Node 4 -> (3,4) is the maximum value in the path starting from the root.
-# Node 5 -> (3,4,5) is the maximum value in the path
-# Node 3 -> (3,1,3) is the maximum value in the path.
+# ITERATIVE SOLUTION (Bottom-up DP)
+def wordBreakIterative(s, wordDict):
+    """
+    Pattern: Dynamic programming with boolean array
+    
+    How it works:
+    1. dp[i] = can we break s[0:i]?
+    2. For each position, check if any word ends at that position
+    3. If word matches AND string before it can be broken, mark position as breakable
+    """
+    word_set = set(wordDict)
+    dp = [False] * (len(s) + 1)
+    dp[0] = True  # Empty string can always be broken
+    
+    for i in range(1, len(s) + 1):
+        for j in range(i):
+            # If s[0:j] can be broken AND s[j:i] is a word
+            if dp[j] and s[j:i] in word_set:
+                dp[i] = True
+                break
+    
+    return dp[len(s)]
 
-# Test good nodes
-good_root = TreeNode(3, TreeNode(1, TreeNode(3), None), TreeNode(4, TreeNode(1), TreeNode(5)))
+# Example:
+# s = "leetcode"
+# wordDict = ["leet", "code"]
+# 
+# DFS without memo: checks "leet" + "code" multiple times
+# DFS with memo: cache result for index 4 (start of "code")
+# 
+# Output: True
 
-print("Number of good nodes:", goodNodes(good_root))  # 4
+# Test word break
+print("Can break 'leetcode':", wordBreak("leetcode", ["leet", "code"]))  # True
+print("Can break 'applepenapple':", wordBreak("applepenapple", ["apple", "pen"]))  # True
+print("Can break 'catsandog':", wordBreak("catsandog", ["cats", "dog", "sand", "and", "cat"]))  # False
+print("Can break 'leetcode' (iterative):", wordBreakIterative("leetcode", ["leet", "code"]))  # True
+
+

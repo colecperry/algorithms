@@ -1,619 +1,805 @@
-import heapq
-from typing import List
-from collections import Counter
-from math import sqrt
-
-# =============================================================================
-# WHAT IS A HEAP?
-# =============================================================================
 """
-A heap is a binary tree data structure where:
-- Parent node is always smaller (min-heap) or larger (max-heap) than children
-- Tree is complete (filled left to right, level by level)
-- Root contains the minimum (min-heap) or maximum (max-heap) element
-- Heap is not fully sorted -> only root is guaranteed min/max
-- Array Based Storage - We store heaps in arrays/lists, not with node ptrs
-- Index relationships: For any node at index 'i':
-    - Left child: 2 * i + 1
-    - Right child: 2 * i + 2
-    - Parent: (i - 1) // 2
+=================================================================
+HEAP/PRIORITY QUEUE COMPLETE GUIDE
+=================================================================
 
-Heap Visual Examples - 3 Levels Each
+WHAT IS A HEAP?
+--------------
+A heap is a complete binary tree data structure that maintains a specific ordering property:
+- Min Heap: Parent node is always smaller than or equal to children
+- Max Heap: Parent node is always greater than or equal to children
+- Root contains the minimum (min heap) or maximum (max heap) element
+- NOT fully sorted - only root is guaranteed to be min/max
 
-MIN-HEAP (parent <= children):
+Array representation (zero-indexed):
+- Parent of node at index i: (i - 1) // 2
+- Left child of node at index i: 2 * i + 1
+- Right child of node at index i: 2 * i + 2
+
+Example Min Heap:
       1
      / \
     3   2
    / \ / \
   7  5 4  6
 
-Array representation: [1, 3, 2, 7, 5, 4, 6]
-- Root (1) is smallest element
-- Parent at index i, children at 2i+1 and 2i+2
-- 3 <= 7,5 and 2 <= 4,6 (heap property satisfied)
-- Python's heapq implements min-heap by default
+Array: [1, 3, 2, 7, 5, 4, 6]
 
-MAX-HEAP (parent >= children):
-      10
-     /  \
-    8    9
-   / \  / \
-  4  6 5   3
+Heap Properties:
+- Insert: O(log n) - add to end, bubble up
+- Remove min/max: O(log n) - swap root with last, sink down
+- Peek min/max: O(1) - just check root
+- Heapify: O(n) - convert unsorted array to heap
 
-Array representation: [10, 8, 9, 4, 6, 5, 3]
-- Root (10) is largest element  
-- 8 >= 4,6 and 9 >= 5,3 (heap property satisfied)
-- Python heapq default min heap simulates this with negatives: [-10, -8, -9, -4, -6, -5, -3]
+When to use Heap:
+- Need repeated access to min/max element
+- Priority queue operations
+- Top k elements problems
+- K-way merge problems
 
-## Example with Key Operations
-
-### Max Heap Example:
-
-Initial array: [95, 75, 80, 55, 60, 50, 65]
-
-Visual representation:
-        95
-       /  \
-      75   80
-     / \   / \
-    55 60 50 65
-
+HEAP CORE TEMPLATES
+===================
 """
 
-# =============================================================================
-# HEAP ADVANTAGES
-# =============================================================================
-"""
-- Heaps provide O(1) access to min/max + O(log n) insert/delete.
-- Perfect for: repeated access to extremes, priority queues, top k problems.
-- Better than sorting when data changes frequently.
-
-    Operation       | Heap     | Sorted Array | Unsorted Array
-    ----------------|----------|--------------|----------------
-    Find min/max    | O(1)     | O(1)         | O(n)
-    Insert          | O(log n) | O(n)         | O(1)
-    Remove min/max  | O(log n) | O(n)         | O(n)
-
-"""
-
-# =============================================================================
-# KEY OPERATIONS
-# =============================================================================
-"""
-1. **Insert(90)**: Add to end, then "bubble up" ele to correct level by comparing to parent
-    - Add 90 to end: [95, 75, 80, 55, 60, 50, 65, 90]
-    - Compare with parent (75): 90 > 75, swap
-    - Compare with parent (95): 90 < 95, stop
-    - Result: [95, 90, 80, 75, 60, 50, 65, 55]
-
-2. **Remove()**: Remove root, move last ele to root, then "sink down" by comparing to children
-    - Remove 95, move 65 to root: [65, 75, 80, 55, 60, 50]
-    - Compare 65 with children (75, 80): 80 is largest, swap
-    - Compare 65 with children (50): 65 > 50, stop
-    - Result: [80, 75, 65, 55, 60, 50]
-
-3. **Heapify**: Convert unsorted array into valid heap
-    - Start from last non-leaf node, sink down each element
-    - Works bottom-up to ensure heap property
-"""
-
-# =============================================================================
-# TIME COMPLEXITY
-# =============================================================================
-"""
-| Operation                  | Time Complexity | Explanation                           |
-|----------------------------|-----------------|---------------------------------------|
-| Insert                     | O(log n)        | Insert node at the bottom and bubble up at most the height of tree  |
-| Remove (extract max/min)   | O(log n)        | Swap last node with root & sink down at most the height of tree  |
-| Peek (get max/min)         | O(1)            | Just return first element             |
-| Heapify                    | O(n)            | Converts unsorted array to valid heap by working bottom up from last parent to the root (leaf nodes cannot voilate heap property) |
-| Search                     | O(n)            | Must check all elements   
-"""
-
-# =============================================================================
-# WHEN TO USE HEAPS
-# =============================================================================
-
-# When heaps shine:
-    # Dynamic data - Elements constantly being added/removed
-    # Priority matters - Always need the "best" element
-    # Don't need full sorting - Only care about extremes, not complete order
-
-# Real-world use cases:
-    # Task scheduling: Always grab highest priority task
-    # Event simulation: Always process next event in time order
-    # Top K problems: Maintain k best elements efficiently
-    # Streaming data: Handle continuous input, always know current min/max
-
-# ============================================================================
-# CORE TEMPLATE 1: MIN HEAP IMPLEMENTATION WITHOUT HEAPQ LIBRARY
-# ============================================================================
-
-class MinHeap:
-    def __init__(self):
-        self.heap = []
-    
-    def left_child(self, index):
-        return 2 * index + 1
-    
-    def right_child(self, index):
-        return 2 * index + 2
-    
-    def parent(self, index):
-        return (index - 1) // 2
-    
-    def swap(self, index1, index2):
-        self.heap[index1], self.heap[index2] = self.heap[index2], self.heap[index1]
-    
-    # Insert: Add element and bubble up
-    def insert(self, value):
-        self.heap.append(value)
-        current = len(self.heap) - 1
-        
-        # Bubble up: swap with parent if current is SMALLER
-        while current > 0 and self.heap[current] < self.heap[self.parent(current)]: # Max heap uses >
-            self.swap(current, self.parent(current))
-            current = self.parent(current)
-    
-    # Remove: Extract min element (root)
-    def remove(self):
-        if len(self.heap) == 0:
-            return None
-        
-        if len(self.heap) == 1:
-            return self.heap.pop()
-        
-        min_value = self.heap[0]
-        self.heap[0] = self.heap.pop() # Moving last ele to first index removes min
-        self.sink_down(0) # Then sink it down to correct place
-        return min_value
-    
-    # Sink down: Move element down to correct position
-    def sink_down(self, index):
-        min_index = index # Track smallest pos between curr and children
-        
-        while True:
-            left_index = self.left_child(index) # Get children indexes
-            right_index = self.right_child(index)
-            
-            # Check if left child exists and is SMALLER
-            if left_index < len(self.heap) and self.heap[left_index] < self.heap[min_index]: # Max heap uses >
-                min_index = left_index
-            
-            # Check if right child exists and is SMALLER
-            if right_index < len(self.heap) and self.heap[right_index] < self.heap[min_index]: # Max heap >
-                min_index = right_index
-            
-            # If min_index changed, swap and continue
-            if min_index != index:
-                self.swap(index, min_index)
-                index = min_index # Update idx of node we're sinking down & continue
-            else:
-                return 
-    
-    # Peek: Get min without removing
-    def peek(self):
-        return self.heap[0] if self.heap else None
-    
-    # Heapify: Convert unsorted array to valid heap
-    def heapify(self, arr):
-        self.heap = arr
-        # Work from bottom to top b/c sink down assumes children are valid heaps
-        for i in range(len(self.heap) // 2 - 1, -1, -1): # (len // 2 - 1) gives us last parent node (last node that has children) and works backwards to the root
-            self.sink_down(i)
-
-
-# Create and build min heap
-min_heap = MinHeap()
-values = [50, 30, 40, 10, 20, 35, 25]
-
-# Insert
-for val in values:
-    min_heap.insert(val)
-
-# Peek at min
-print(f"\nPeek (min value): {min_heap.peek()}")
-
-# Remove operations
-print(f"\nRemove min: {min_heap.remove()}")
-print(f"\nRemove min: {min_heap.remove()}")
-
-# Heapify an unsorted array
-unsorted = [3, 9, 2, 1, 4, 5]
-min_heap_heapify = MinHeap()
-
-min_heap_heapify.heapify(unsorted.copy())
-
-# ============================================================================
-# CORE TEMPLATE 2: MIN HEAP IMPLEMENTATION USING PYTHON'S HEAPQ LIBRARY (LEETCODE STANDARD)
-# ============================================================================
-"""
-Python's heapq library implements a MIN HEAP by default.
-All operations work on regular Python lists.
-
-Key functions:
-- heapq.heappush(heap, item)      # Insert item, O(log n)
-- heapq.heappop(heap)             # Remove and return smallest, O(log n) 
-- heapq.heapify(list)             # Convert list to heap in-place, O(n)
-- heap[0]                         # Peek at smallest (don't use heapq function), O(1)
-- heapq.heappushpop(heap, item)   # Push then pop, O(log n)
-- heapq.heapreplace(heap, item)   # Pop then push, O(log n)
-
-PYTHON HEAPQ SPECIFICS:
-- Only implements min-heap
-- Use negative values for max-heap: heappush(-x), -heappop()
-- heapify() is O(n), faster than n insertions
-- Heap property: parent <= children, but siblings unordered
-"""
-
-# ============================================================================
-# MIN HEAP EXAMPLES
-# ============================================================================
-
-# Create empty min heap (just a regular list)
-min_heap = []
-
-# Insert elements
-values = [50, 30, 40, 10, 20, 35, 25]
-for val in values:
-    heapq.heappush(min_heap, val) # heappush inserts an item to end of the list & bubbles it up
-
-# Peek at minimum (just access index 0)
-min_val = min_heap[0]
-
-# Remove minimum
-removed = heapq.heappop(min_heap) # heappop removes root (min or max) by swapping with last node and sinking down last node to correct spot
-
-# Insert new value and bubble it up to correct place
-heapq.heappush(min_heap, 15)
-
-# ============================================================================
-# HEAPIFY EXAMPLE
-# ============================================================================
-
-# Convert unsorted list to heap in-place
-unsorted = [3, 9, 2, 1, 4, 5]
-heapq.heapify(unsorted) # Heapifies the whole list
-
-# ============================================================================
-# MAX HEAP WORKAROUND (Negate values)
-# ============================================================================
-
-"""
-heapq only supports min heap, so for max heap:
-1. Negate values when inserting: push(-value)
-2. Negate values when removing: -pop()
-"""
-
-max_heap = []
-values = [95, 75, 80, 55, 60, 50, 65]
-
-for val in values:
-    heapq.heappush(max_heap, -val)  # Negate to simulate max heap
-
-# Peek at maximum (negate the first element so it's not negative)
-max_val = -max_heap[0]
-
-# Remove maximum (negate the popped value)
-removed_max = -heapq.heappop(max_heap)
-
-# =============================================================================
-                        # COMMON HEAP PATTERNS
-# =============================================================================
+from typing import List, Optional
+import heapq
+from collections import Counter
 
 # ================================================================
-# PATTERN 1: TOP K ELEMENTS (Heap of Size K)
-# PATTERN EXPLANATION: Maintain a min heap of size k to track the k "best" elements.
+# MIN HEAP TEMPLATE (Python heapq) -> python implements a MIN HEAP by default
+# ================================================================
+def min_heap_template():
+    """
+    Template for min heap operations using Python's heapq
+    
+    TC: Insert O(log n), Remove O(log n), Peek O(1), Heapify O(n)
+    SC: O(n) for heap storage
+    
+    WHEN TO USE:
+    - Need to repeatedly access smallest element
+    - Priority queue with ascending priority
+    - K smallest elements
+    
+    KEY OPERATIONS:
+    - heappush(heap, item): Insert and bubble up
+    - heappop(heap): Remove min and sink down
+    - heap[0]: Peek at minimum (don't pop)
+    - heapify(list): Convert list to heap in-place
+    """
+    heap = []
+    
+    # Insert elements
+    heapq.heappush(heap, 5)
+    heapq.heappush(heap, 3)
+    heapq.heappush(heap, 7)
+    
+    # Peek at minimum
+    min_val = heap[0]  # 3
+    
+    # Remove minimum
+    removed = heapq.heappop(heap)  # 3
+    
+    # Heapify an array
+    arr = [9, 5, 6, 2, 3]
+    heapq.heapify(arr)  # arr becomes valid min heap
+    
+    return heap
+
+# ================================================================
+# MAX HEAP TEMPLATE (Python 3.14+)
+# ================================================================
+def max_heap_template():
+    """
+    Template for max heap using Python 3.14+ native support
+    
+    TC: Insert O(log n), Remove O(log n), Peek O(1), Heapify O(n)
+    SC: O(n) for heap storage
+    
+    WHEN TO USE:
+    - Need to repeatedly access largest element
+    - Priority queue with descending priority
+    - K largest elements
+    
+    KEY OPERATIONS (Python 3.14+):
+    - heappush_max(heap, item): Insert and bubble up
+    - heappop_max(heap): Remove max and sink down
+    - heap[0]: Peek at maximum (don't pop)
+    - heapify_max(list): Convert list to max heap in-place
+    
+    NOTE: Requires Python 3.14 or later!
+    For older versions, use negation approach (see below)
+    """
+    heap = []
+    
+    # Insert elements
+    heapq.heappush_max(heap, 5)
+    heapq.heappush_max(heap, 3)
+    heapq.heappush_max(heap, 7)
+    
+    # Peek at maximum
+    max_val = heap[0]  # 7 (no negation needed!)
+    
+    # Remove maximum
+    removed = heapq.heappop_max(heap)  # 7
+    
+    # Heapify an array into max heap
+    arr = [9, 5, 6, 2, 3]
+    heapq.heapify_max(arr)  # arr becomes valid max heap
+    
+    return heap
+
+# ================================================================
+# MAX HEAP TEMPLATE (Legacy - Negation for Python < 3.14)
+# ================================================================
+def max_heap_legacy():
+    """
+    Legacy approach using negation for Python < 3.14
+    
+    USE THIS IF:
+    - Python version < 3.14
+    - LeetCode hasn't updated to 3.14 yet
+    - Need backward compatibility
+    """
+    heap = []
+    
+    # Insert (negate when pushing)
+    heapq.heappush(heap, -5)
+    heapq.heappush(heap, -3)
+    heapq.heappush(heap, -7)
+    
+    # Peek at maximum (negate to get original)
+    max_val = -heap[0]  # 7
+    
+    # Remove maximum (negate result)
+    removed = -heapq.heappop(heap)  # 7
+    
+    return heap
+
+# ================================================================
+# COMPARISON: MIN HEAP VS MAX HEAP
+# ================================================================
+"""
+MIN HEAP (heapq default):
+    heapq.heappush(heap, item)
+    heapq.heappop(heap)
+    heapq.heapify(heap)
+    min_val = heap[0]
+
+MAX HEAP (Python 3.14+):
+    heapq.heappush_max(heap, item)
+    heapq.heappop_max(heap)
+    heapq.heapify_max(heap)
+    max_val = heap[0]
+
+MAX HEAP (Legacy - Python < 3.14):
+    heapq.heappush(heap, -item)
+    -heapq.heappop(heap)
+    heapify with negated values
+    max_val = -heap[0]
+"""
+
+# ================================================================
+# FIXED SIZE HEAP TEMPLATE (Top K Pattern)
+# ================================================================
+def fixed_size_heap_template(nums, k):
+    """
+    Template for maintaining heap of size k
+    
+    TC: O(n log k) where n = total elements
+    SC: O(k) for heap storage
+    
+    WHEN TO USE:
+    - Find k largest/smallest elements
+    - Top k frequent elements
+    - K closest points
+    
+    KEY INSIGHT:
+    - For k LARGEST: use MIN heap of size k
+      Root is kth largest (smallest of the k largest)
+    - For k SMALLEST: use MAX heap of size k
+      Root is kth smallest (largest of the k smallest)
+    """
+    # For k LARGEST: use min heap
+    heap = []
+    for num in nums:
+        heapq.heappush(heap, num)
+        if len(heap) > k:
+            heapq.heappop(heap)
+    return heap  # Contains k largest
+
+    # For k SMALLEST: use max heap (Python 3.14+)
+    heap = []
+    for num in nums:
+        heapq.heappush_max(heap, num)
+        if len(heap) > k:
+            heapq.heappop_max(heap)
+    return heap  # Contains k smallest
+
+# ================================================================
+# TWO HEAPS TEMPLATE (Median Pattern)
+# ================================================================
+def two_heaps_template():
+    """
+    Template for balancing two heaps (Python 3.14+)
+    
+    TC: Insert O(log n), Get median O(1)
+    SC: O(n) for both heaps
+    
+    WHEN TO USE:
+    - Find median in stream
+    - Balance left and right halves
+    
+    KEY INSIGHT:
+    - Max heap stores smaller half (left side)
+    - Min heap stores larger half (right side)
+    - Keep heaps balanced: |size_diff| <= 1
+    """
+    max_heap = []  # Smaller half - now native max heap!
+    min_heap = []  # Larger half
+    
+    def add_num(num):
+        # Add to max heap first
+        heapq.heappush_max(max_heap, num)
+        
+        # Balance: move largest from max to min
+        heapq.heappush(min_heap, heapq.heappop_max(max_heap))
+        
+        # Keep max_heap size >= min_heap size
+        if len(min_heap) > len(max_heap):
+            heapq.heappush_max(max_heap, heapq.heappop(min_heap))
+    
+    def find_median():
+        if len(max_heap) > len(min_heap):
+            return max_heap[0]  # No negation needed!
+        return (max_heap[0] + min_heap[0]) / 2
+    
+    return add_num, find_median
+"""
+HEAP PATTERNS
+=============
+"""
+
+# ================================================================
+# PATTERN 1: TOP K ELEMENTS (FIXED SIZE HEAP)
+# PATTERN EXPLANATION: Maintain a heap of size k to efficiently track the k "best" elements.
 # Key insight: 
-#   - For k LARGEST: Use MIN heap of size k
-#     → Root is kth largest (smallest of the k largest)
-#     → Remove smallest when heap > k
-#   - For k SMALLEST: Use MAX heap of size k (negate values)
-#     → Root is kth smallest (largest of the k smallest)
-#     → Remove largest when heap > k
-# Applications: Top k frequent, k closest points, kth largest/smallest
-# Time Complexity: O(n log k) - better than sorting O(n log n) when k << n
+    # - For k largest, use MIN heap of size k. Root is kth largest (smallest of the k largest). When heap exceeds k, remove the smallest
+    # - For k smallest, use MAX heap - root is kth smallest (largest of the k smallest). This is more efficient than full sorting when k << n.
+#
+# TYPICAL STEPS:
+# 1. Create empty heap
+# 2. For each element:
+#    - Add element to heap
+#    - If heap size > k, remove root
+# 3. Heap now contains k best elements
+# 4. Extract elements from heap
+#
+# Applications: Top k frequent, k closest points, kth largest/smallest, top k scores.
 # ================================================================
 
-# PROBLEM 1A: LC 347 - Top K Frequent Elements
-# Key Insight: Use min heap of size k with frequency as priority to maintain k most frequent
+class TopKPattern:
+    """
+    Problem: Given an integer array nums and an integer k, return the k most frequent elements.
 
-class TopKFrequent:
-    '''
-    Given an integer array nums and an integer k, return the k most frequent elements. 
-    You may return the answer in any order.
-
-    Ex. 1
+    Example 1:
     Input: nums = [1,1,1,2,2,3], k = 2
     Output: [1,2]
-
-    TC: 
-        - Counting: O(n)
-        - Iterating through freq dict: O(m) where m = unique elements
-        - heappush() and heappop(): O(log k) for sink down/bubble up
-        - Extracting result: O(k)
-        - Total TC: O(n + m log k) → O(n log k)
-    SC: 
-        - Storing freq dict: O(m) where m = unique elements
-        - Storing the heap: O(k)
-        - Output list: O(k)
-        - Total SC: O(m + k) → O(n) worst case
-    '''
-    def topKFrequent(self, nums, k):
-        # Step 1: Count frequencies & create dict
-        count = Counter(nums)
+    
+    TC: O(n log k) - n elements, each heap operation O(log k)
+        - Count frequencies: O(n)
+        - Process m unique elements: O(m log k)
+        - Extract result: O(k)
+        - Total: O(n + m log k) which simplifies to O(n log k)
+    SC: O(n) - frequency map O(m), heap O(k), result O(k)
+    
+    How it works:
+    1. Count frequency of each element
+    2. Use MIN heap of size k (key = frequency)
+    3. For each unique element:
+       - Add (frequency, element) to heap
+       - If heap size > k, remove minimum frequency
+    4. Result: k most frequent elements remain in heap
+    
+    Why min heap for k LARGEST frequencies:
+    - Root has smallest frequency among k most frequent
+    - When new element arrives, compare with root
+    - If new freq > root, remove root and add new
+    - Heap maintains k highest frequencies
+    """
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]: # LC 347
+        # Count frequencies
+        freq_map = Counter(nums)
         
-        # Step 2: Use min heap of size k (key = frequency)
+        # Min heap of size k: (frequency, number)
         heap = []
-        for num, freq in count.items():
-            heapq.heappush(heap, (freq, num))  # Python compares by first ele in tuple
-            if len(heap) > k:
-                heapq.heappop(heap)  # Remove element with smallest frequency (root)
+        for num, freq in freq_map.items():
+            heapq.heappush(heap, (freq, num)) # Heap sorted by freq
+            if len(heap) > k: # Make heap size k
+                heapq.heappop(heap)  # Remove lowest frequency
         
-        # Step 3: Extract all k elements from heap
-        return [num for freq, num in heap]  # Loop through tuples, unpack, only take num
+        # Extract the k elements -> unpack a tuple into freq and num and only keeps num
+        return [num for freq, num in heap]
 
-sol = TopKFrequent()
-print(sol.topKFrequent([1,1,1,2,2,3], 2))  # [1,2]
-print(sol.topKFrequent([1], 1))  # [1]
-print(sol.topKFrequent([1,2,1,2,1,2,3,1,3,2], 2))  # [1,2]
+# Example:
+# nums = [1,1,1,2,2,3], k = 2
+#
+# Frequencies: {1:3, 2:2, 3:1}
+#
+# Process 1 (freq=3): heap = [(3,1)]
+# Process 2 (freq=2): heap = [(2,2), (3,1)]
+# Process 3 (freq=1): heap = [(2,2), (3,1), (1,3)]
+#   Heap size > 2, pop (1,3): heap = [(2,2), (3,1)]
+#
+# Result: [2, 1] (order may vary)
+# Output: [1,2]
 
+sol = TopKPattern()
+print("Top 2 frequent:", sol.topKFrequent([1,1,1,2,2,3], 2))  # [1,2]
+print("Top 1 frequent:", sol.topKFrequent([1], 1))  # [1]
 
-# PROBLEM 1B: LC 973 - K Closest Points to Origin
-# Key Insight: Use max heap of size k with distance as priority to maintain k closest
-
-class KClosest:
-    '''
-    Find the k closest points to the origin (0, 0) on a 2D plane.
-    Distance from origin: sqrt(x² + y²)
-    Return the k closest points in any order.
-
-    Example:
-    Input: points = [[1,3],[-2,2]], k = 1
-    Output: [[-2,2]]
-    Explanation: Distance (1,3) = sqrt(10) ≈ 3.16, distance (-2,2) = sqrt(8) ≈ 2.82
-                    Since k=1, return the closest point
-
-    TC:
-        - heappush() → O(log k): Insert distance and coords, bubble up, heap size ≤ k
-        - heappop() → O(log k): Remove root, sink down, heap size ≤ k
-        - Loop n times → O(n log k)
-        - Total: O(n log k)
-    SC:
-        - O(k) → heap stores at most k points
-    '''
-    def kClosest(self, points, k):
-        max_heap = []  # Max heap of size k guarantees root is kth smallest distance
-        
-        for x, y in points:
-            distance = sqrt((x ** 2) + (y ** 2))
-            heapq.heappush(max_heap, (-distance, [x, y]))  # Negate for max heap
-            if len(max_heap) > k:
-                heapq.heappop(max_heap)  # Remove point with largest distance
-        
-        # Extract points (ignore distances)
-        return [point for dist, point in max_heap]
-
-sol = KClosest()
-print(sol.kClosest([[1,3],[-2,2]], 1))  # [[-2,2]]
-print(sol.kClosest([[3,3],[5,-1],[-2,4]], 2))  # [[3,3],[-2,4]]
 
 # ================================================================
-# PATTERN 2: SIMULATION with Repeated Max/Min Operations (Extract → Process → Re-insert)
-# PATTERN EXPLANATION: Repeatedly extract the largest/smallest elements and process them.
-# Key insight: Use heap to efficiently get extremes, simulate game/process, push results back.
-# Applications: Stone games, gift reduction, task scheduling, rope connection cost.
+# PATTERN 2: K-WAY MERGE
+# PATTERN EXPLANATION: Efficiently merge k sorted data structures into one sorted output.
+# Use min heap to track the smallest unprocessed element from each source. Always extract
+# minimum (guaranteed smallest across all sources), add to result, then push next element
+# from same source. Heap maintains "frontier" of k candidates.
+#
+# TYPICAL STEPS:
+# 1. Initialize heap with first element from each source
+#    Store: (value, source_id, position_in_source)
+# 2. While heap not empty:
+#    - Extract minimum element
+#    - Add to result
+#    - Push next element from same source (if exists)
+# 3. Result is fully merged sorted output
+#
+# Applications: Merge k sorted lists/arrays, smallest range, kth smallest in matrix.
 # ================================================================
-
-# PROBLEM 2: LC 2558 - Take Gifts From the Richest Pile
-# Extract max, transform (sqrt), re-insert - continues for k iterations
-
-class Simulation:
-    '''
-    # You are given an integer array gifts denoting the number of gifts in various piles and an integer k. Every second, you choose the pile with the maximum number of gifts and take the floor of the square root of the gifts in that pile, leaving the rest behind. Return the number of gifts remaining after k seconds.
-
-    # Example:
-    # Input: gifts = [25,64,9,4,100], k = 4
-    # Output: 29
-    # Explanation: 
-    # Second 1: Choose pile with 100 gifts, take sqrt(100) = 10, leave 10 gifts
-    # Second 2: Choose pile with 64 gifts, take sqrt(64) = 8, leave 8 gifts  
-    # Second 3: Choose pile with 25 gifts, take sqrt(25) = 5, leave 5 gifts
-    # Second 4: Choose pile with 10 gifts, take sqrt(10) = 3, leave 3 gifts
-    # Remaining gifts: 3 + 8 + 5 + 4 + 9 = 29
-
-    # TC:
-    #     - Initial heapify -> O(n)
-    #     - heappop() -> O(log n): Remove root (largest value), sink down
-    #     - heappush() -> O(log n): Insert negative value (max heap simulation), bubble up
-    #     - Loop k times -> O(k log n)
-    #     - Total -> O(n + k log n)
-    # SC:
-    #     - O(n) -> heap stores all n piles
-    '''
-    def pickGifts(self, gifts, k):
-        gifts = [-g for g in gifts]  # Max heap using negatives
-        heapq.heapify(gifts) # Heapify the arr
-        
-        for _ in range(k):
-            if gifts[0] == -1:  # If the pile gets to 1, we do nothing 
-                break
-            val = heapq.heappop(gifts) # Pop off the root
-            val = (int(abs(val) ** 0.5)) * -1  # Take the square root (keep it negative)
-            heapq.heappush(gifts, val) # Push the val back onto the heap
-        
-        return abs(sum(gifts)) # Return the absolute value of sum of the gifts arr
-
-sol = Simulation()
-print(sol.pickGifts([25,64,9,4,100], 4))
-print(sol.pickGifts([1,1,1,1], 1))
-
-# ================================================================
-# PATTERN 3: MERGE K SORTED LISTS/ARRAYS (K-Way Merge)
-# PATTERN EXPLANATION: Efficiently merge k sorted data sources into one sorted output.
-# Key insight: 
-#   1. Initialize heap with first element from each source
-#   2. Always extract minimum element (guaranteed smallest across all sources)
-#   3. Add extracted element to result
-#   4. Push next element from same source into heap
-#   5. Repeat until all sources exhausted
-# Why it works: Heap maintains "frontier" of smallest unprocessed element from each source.
-# Applications: Merge k sorted lists/arrays, smallest range covering k lists, kth element in matrix.
-# Time Complexity: O(N log k) where N = total elements, k = number of sources
-# ================================================================
-
-# PROBLEM: LC 23 - Merge k Sorted Lists
-# Key Insight: Use min heap to track the smallest current element from each list.
-#              Pop smallest, add to result, push next node from same list.
 
 class ListNode:
     def __init__(self, val=0, next=None):
         self.val = val
         self.next = next
 
-class MergeK:
-    def mergeKLists(self, lists):
-        '''
-        You are given an array of k linked-lists lists, each linked-list is sorted in ascending order. Merge all the linked-lists into one sorted linked-list and return it.
-
-        Ex. 1
-            Input: lists = [[1,4,5],[1,3,4],[2,6]]
-            Output: [1,1,2,3,4,4,5,6]
-            Explanation: The linked-lists are:
-            [
-            1->4->5,
-            1->3->4,
-            2->6
-            ]
-            merging them into one sorted linked list:
-            1->1->2->3->4->4->5->6
-        
-        TC:
-            - O(k log k) - initial heap setup pushes k nodes into heap using heappush (log k)
-            - O(n) for iterating through the heap (one iteration for each node)
-            - Each iteration: O(log k) to pop + O(log k) to push
-            - Total: O(k log k) + O(N log k) = O(N log k)
-        SC: 
-            - O(k) - the heap only stores at nost k nodes at once (one from each list)
-        '''
+class KWayMergePattern:
+    """
+    Problem: Merge k sorted linked lists and return it as one sorted list.
+    
+    TC: O(N log k) where N = total elements across all lists, k = number of lists
+        - Initialize heap: O(k log k) - add first node from each list
+        - Process N elements: O(N log k) - each pop and push is O(log k)
+        - Total: O(k log k + N log k) = O(N log k)
+    SC: O(k) - heap stores at most k nodes (one from each list)
+    
+    How it works:
+    1. Add first node from each list to min heap
+       Tuple: (node_value, list_index, node_reference)
+    2. Extract minimum node (smallest across all lists)
+    3. Add to result linked list
+    4. Push next node from same list into heap
+    5. Repeat until heap empty
+    
+    Why heap size stays k:
+    - Always have at most one element from each list in heap
+    - Extract one, add one from same list
+    - Heap represents current "frontier" across all lists
+    """
+    def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]: # LC 23
         heap = []
         
-        # Step 1: Add first node from each list to heap
-        # Tuple: (node_value, list_index, node (head is a reference to list1, list2, etc))
+        # Step 1: Add first node from each list
         for i, head in enumerate(lists):
             if head:
-                heapq.heappush(heap, (head.val, i, head)) # head is a pointer to the first node
+                heapq.heappush(heap, (head.val, i, head))
         
-        dummy = ListNode(0) # Start LL after dummy node
+        # Dummy node for result list
+        dummy = ListNode(0)
         current = dummy
         
         # Step 2: Extract min, add to result, push next from same list
-        while heap: # Continue building merged LL until no more nodes
-            val, list_idx, node = heapq.heappop(heap) # pop min val & destructure tuple
+        while heap:
+            val, list_idx, node = heapq.heappop(heap)
             
-            # Add node to merged LL
+            # Add to result list
             current.next = node
-            current = current.next # Move pointer forward
+            current = current.next
             
             # Push next node from same list
             if node.next:
-                heapq.heappush(heap, (node.next.val, list_idx, node.next)) 
+                heapq.heappush(heap, (node.next.val, list_idx, node.next))
         
-        return dummy.next # Return first node in merged LL
+        return dummy.next
 
-# Example 1: lists = [[1,4,5],[1,3,4],[2,6]]
-list1 = ListNode(1)
-list1.next = ListNode(4)
-list1.next.next = ListNode(5)
+# Example:
+# lists = [[1,4,5], [1,3,4], [2,6]]
+#
+# Initial heap: [(1,0,L0), (1,1,L1), (2,2,L2)]
+#   L0=list0, L1=list1, L2=list2
+#
+# Extract (1,0,L0): result=[1]
+#   Push (4,0,L0): heap=[(1,1,L1), (2,2,L2), (4,0,L0)]
+#
+# Extract (1,1,L1): result=[1,1]
+#   Push (3,1,L1): heap=[(2,2,L2), (3,1,L1), (4,0,L0)]
+#
+# Extract (2,2,L2): result=[1,1,2]
+#   Push (6,2,L2): heap=[(3,1,L1), (4,0,L0), (6,2,L2)]
+#
+# Continue until heap empty...
+# Final result: [1,1,2,3,4,4,5,6]
 
-list2 = ListNode(1)
-list2.next = ListNode(3)
-list2.next.next = ListNode(4)
+sol = KWayMergePattern()
+# Create test lists
+l1 = ListNode(1, ListNode(4, ListNode(5)))
+l2 = ListNode(1, ListNode(3, ListNode(4)))
+l3 = ListNode(2, ListNode(6))
+result = sol.mergeKLists([l1, l2, l3])
+print("Merged k lists:", result)  # 1->1->2->3->4->4->5->6
 
-list3 = ListNode(2)
-list3.next = ListNode(6)
-
-sol = MergeK()
-print(sol.mergeKLists([list1, list2, list3]))
-# Expected output: 1 -> 1 -> 2 -> 3 -> 4 -> 4 -> 5 -> 6
 
 # ================================================================
-# PATTERN 4: INTERVAL SCHEDULING (Min Heap for Event Processing)
-# PATTERN EXPLANATION: Process time-based events efficiently using a min heap.
-# Key insight: 
-#   1. Sort events by start time (process in chronological order)
-#   2. Use min heap to track ongoing events by their end times
-#   3. When processing new event: remove expired events (heap top ≤ current time)
-#   4. Heap size = number of overlapping/active events at current time
-# Applications: Meeting rooms, resource allocation, task scheduling, capacity planning.
-# Time Complexity: O(n log n) - sorting + heap operations
+# PATTERN 3: TWO HEAPS (MEDIAN MAINTENANCE)
+# PATTERN EXPLANATION: Balance two heaps to efficiently track median in a stream. Use max
+# heap for smaller half (left) and min heap for larger half (right). Keep heaps balanced
+# with size difference at most 1. Median is the root of larger heap (odd total) or average
+# of both roots (even total). This allows O(1) median access with O(log n) insertions.
+#
+# TYPICAL STEPS:
+# 1. Max heap (left) stores smaller half - negate values for heapq
+# 2. Min heap (right) stores larger half
+# 3. To add number:
+#    - Add to max heap first
+#    - Move largest from max to min (balance)
+#    - If min larger, move smallest from min to max
+# 4. To get median:
+#    - If odd count: return root of larger heap
+#    - If even count: return average of both roots
+#
+# Applications: Find median in stream, balance two halves, sliding window median.
 # ================================================================
 
-# PROBLEM: LC 253 - Meeting Rooms II
-# Key Insight: Sort meetings by start time, use min heap to track end times of ongoing meetings.
-# Heap size at any point = minimum rooms needed.
+class TwoHeapsPattern:
+    """
+    Problem: Design a data structure that supports:
+    - addNum(num): Add integer from stream to data structure
+    - findMedian(): Return median of all elements so far
+    
+    TC: addNum O(log n), findMedian O(1)
+    SC: O(n) for storing all elements in two heaps
+    
+    How it works:
+    1. Max heap (left) has smaller half of numbers
+    2. Min heap (right) has larger half of numbers
+    3. Keep heaps balanced: |left_size - right_size| <= 1
+    4. Median comes from root(s) of heaps
+    
+    Why it works:
+    - Max heap root = largest of smaller half
+    - Min heap root = smallest of larger half
+    - These are the middle elements!
+    - Balanced heaps ensure middle stays in O(1) reach
+    
+    Example with [1,2,3,4,5]:
+    Left (max): [2,1]  Right (min): [3,4,5]
+    Median = root of larger heap = 3
+    """
+    def __init__(self): # LC 295
+        self.small = []  # Max heap (negate values)
+        self.large = []  # Min heap
+    
+    def addNum(self, num: int) -> None:
+        # Add to max heap (small half)
+        heapq.heappush(self.small, -num)
+        
+        # Balance: move largest from small to large
+        heapq.heappush(self.large, -heapq.heappop(self.small))
+        
+        # Keep small heap size >= large heap size
+        if len(self.large) > len(self.small):
+            heapq.heappush(self.small, -heapq.heappop(self.large))
+    
+    def findMedian(self) -> float:
+        if len(self.small) > len(self.large):
+            return -self.small[0]
+        return (-self.small[0] + self.large[0]) / 2.0
 
-class MeetingRooms:
-    '''
-    Given an array of meeting time intervals where intervals[i] = [start_i, end_i],
+# Example:
+# Stream: [1, 2, 3]
+#
+# Add 1:
+#   small = [-1], large = []
+#   Move to large: small = [], large = [1]
+#   Rebalance: small = [-1], large = []
+#   Median = -small[0] = 1
+#
+# Add 2:
+#   small = [-2, -1], large = []
+#   Move to large: small = [-1], large = [2]
+#   Sizes equal
+#   Median = (-(-1) + 2) / 2 = 1.5
+#
+# Add 3:
+#   small = [-2, -1], large = [2]
+#   Move to large: small = [-1], large = [2, 3]
+#   Rebalance: small = [-2, -1], large = [3]
+#   Median = -small[0] = 2
+
+sol = TwoHeapsPattern()
+sol.addNum(1)
+print("Median after [1]:", sol.findMedian())  # 1.0
+sol.addNum(2)
+print("Median after [1,2]:", sol.findMedian())  # 1.5
+sol.addNum(3)
+print("Median after [1,2,3]:", sol.findMedian())  # 2.0
+
+
+# ================================================================
+# PATTERN 4: INTERVAL/EVENT PROCESSING
+# PATTERN EXPLANATION: Process time-based events efficiently using min heap to track active
+# events. Sort events by start time, use heap to store end times of ongoing events. When
+# processing new event, remove expired events (end time <= new start time) from heap. Heap
+# size represents number of concurrent/overlapping events at any point.
+#
+# TYPICAL STEPS:
+# 1. Sort events by start time (process chronologically)
+# 2. Create min heap to track end times of active events
+# 3. For each event:
+#    - Remove expired events (heap top <= current start)
+#    - Add current event's end time to heap
+#    - Heap size = active events at this moment
+# 4. Track maximum heap size seen
+#
+# Applications: Meeting rooms, resource allocation, CPU scheduling, capacity planning.
+# ================================================================
+
+class IntervalProcessingPattern:
+    """
+    Problem: Given array of meeting time intervals where intervals[i] = [start_i, end_i],
     return the minimum number of conference rooms required.
     
-    Example:
-    Input: intervals = [[0,30],[5,10],[15,20]]
-    Output: 2
-    Explanation:
-    - Meeting 1: 0-30 (needs room 1)
-    - Meeting 2: 5-10 (starts while meeting 1 ongoing, needs room 2)
-    - Meeting 3: 15-20 (meeting 2 ended at 10, can reuse room 2)
-    Maximum rooms needed simultaneously: 2
+    TC: O(n log n) - sorting intervals + n heap operations (each O(log n))
+    SC: O(n) - heap can store all n meeting end times in worst case
     
-    Strategy:
-    1. Sort intervals by start time
+    How it works:
+    1. Sort meetings by start time
     2. Use min heap to track end times of active meetings
     3. For each meeting:
-        - Remove ended meetings (pop if heap top <= current start)
-        - Add current meeting's end time
-        - Heap size = rooms needed at this moment
-    4. Return maximum heap size seen
+       - Pop expired meetings (end <= current start)
+       - Add current end time
+       - Heap size = rooms needed now
+    4. Max heap size = minimum rooms needed
     
-        Visual Timeline:
-        Time:  0    5    10   15   20   30
-            |----Meeting 1------------| Room 1
-                    |--M2--| Room 2
-                        |-M3-| Room 2 (reused)
-    
-    Heap states:
-    After M1: [30]           → 1 room
-    After M2: [10, 30]       → 2 rooms (max!)
-    After M3: [20, 30]       → 2 rooms
-    
-    TC: O(n log n) - sorting intervals + n heap operations (each O(log n))
-    SC: O(n) - heap can store up to n meeting end times in worst case
-    '''
-    
-    def minMeetingRooms(self, intervals):
-        if not intervals: # Edge case for empty interval
+    Why it works:
+    - Heap always contains end times of currently active meetings
+    - Heap size = number of overlapping meetings
+    - Must have room for each overlapping meeting
+    - Max concurrent meetings = minimum rooms needed
+    """
+    def minMeetingRooms(self, intervals: List[List[int]]) -> int: # LC 253
+        if not intervals:
             return 0
         
-        # Sort meetings by start time to process them in order chronologically
+        # Sort by start time
         intervals.sort(key=lambda x: x[0])
         
-        # Use min heap to track end times of ongoing meetings
+        # Min heap tracks end times of active meetings
         heap = []
+        max_rooms = 0
         
         for start, end in intervals:
-            # Check if earliest meeting's end time is less than new start time
-            if heap and heap[0] <= start: 
+            # Remove meetings that have ended
+            while heap and heap[0] <= start:
                 heapq.heappop(heap)
             
             # Add current meeting's end time
             heapq.heappush(heap, end)
-            max_rooms = max(max_rooms, len(heap)) # Max # of rooms seen
+            
+            # Track maximum concurrent meetings
+            max_rooms = max(max_rooms, len(heap))
         
         return max_rooms
 
-sol = MeetingRooms()
-print(sol.minMeetingRooms([[0,30],[5,10],[15,20]]))  # 2
-print(sol.minMeetingRooms([[7,10],[2,4]]))  # 1
-print(sol.minMeetingRooms([[1,5],[8,9],[8,9]]))  # 2
+# Example:
+# intervals = [[0,30],[5,10],[15,20]]
+#
+# Sort by start: [[0,30],[5,10],[15,20]]
+#
+# Process [0,30]:
+#   Heap empty, add 30: heap=[30]
+#   max_rooms = 1
+#
+# Process [5,10]:
+#   5 < 30, meeting ongoing
+#   Add 10: heap=[10,30]
+#   max_rooms = 2
+#
+# Process [15,20]:
+#   15 > 10, remove 10: heap=[30]
+#   Add 20: heap=[20,30]
+#   max_rooms = 2 (stays 2)
+#
+# Timeline:
+# 0    5    10   15   20   30
+# |----M1------------------| Room 1
+#      |--M2--|              Room 2
+#                |-M3-|      Room 2 (reused)
+#
+# Maximum concurrent = 2
+# Output: 2
 
+sol = IntervalProcessingPattern()
+print("Min rooms:", sol.minMeetingRooms([[0,30],[5,10],[15,20]]))  # 2
+print("Min rooms:", sol.minMeetingRooms([[7,10],[2,4]]))  # 1
+
+
+# ================================================================
+# PATTERN 5: SIMULATION (EXTRACT-PROCESS-REINSERT)
+# PATTERN EXPLANATION: Repeatedly extract max/min element, apply transformation, and reinsert
+# the result. Use heap to efficiently get extremes for processing. Common in game simulations,
+# resource reduction, or iterative transformations. Continue for k iterations or until condition met.
+#
+# TYPICAL STEPS:
+# 1. Create heap from initial elements
+# 2. For k iterations (or while condition holds):
+#    - Extract max/min element
+#    - Transform element (sqrt, divide, reduce, etc.)
+#    - Reinsert transformed value (if non-zero)
+# 3. Return final sum, count, or state
+#
+# Applications: Stone games, gift pile reduction, rope costs, last stone weight.
+# ================================================================
+
+class SimulationPattern:
+    """
+    Problem: Given array of integers 'gifts' and integer k. Every second, choose the pile
+    with maximum gifts and take floor(sqrt(gifts)) from it, leaving the rest. Return total
+    gifts remaining after k seconds.
+    
+    TC: O(n + k log n)
+        - Initial heapify: O(n)
+        - k iterations: O(k log n) - each pop/push is O(log n)
+        - Final sum: O(n)
+        - Total: O(n + k log n)
+    SC: O(n) - heap stores all n piles
+    
+    How it works:
+    1. Create max heap from gifts (negate for heapq)
+    2. For k seconds:
+       - Extract maximum pile
+       - Take sqrt, leave remainder
+       - Reinsert remainder into heap
+    3. Sum remaining gifts
+    
+    Why heap:
+    - Need to repeatedly find maximum pile
+    - After transformation, need to reinsert efficiently
+    - Heap gives O(log n) for both operations
+    - Better than repeated sorting: O(k log n) vs O(k n log n)
+    """
+    def pickGifts(self, gifts: List[int], k: int) -> int: # LC 2558
+        # Create max heap (negate values)
+        heap = [-g for g in gifts]
+        heapq.heapify(heap)
+        
+        for _ in range(k):
+            if heap[0] == -1:  # If max is 1, no more reduction possible
+                break
+            
+            # Extract max, take sqrt, reinsert
+            max_pile = -heapq.heappop(heap)
+            remaining = int(max_pile ** 0.5)
+            heapq.heappush(heap, -remaining)
+        
+        # Return sum of remaining gifts (negate back to positive)
+        return -sum(heap)
+
+# Example:
+# gifts = [25,64,9,4,100], k = 4
+#
+# Heap (negated): [-100,-64,-25,-9,-4]
+#
+# Second 1: Extract 100
+#   sqrt(100) = 10, reinsert 10
+#   Heap: [-64,-25,-10,-9,-4]
+#
+# Second 2: Extract 64
+#   sqrt(64) = 8, reinsert 8
+#   Heap: [-25,-10,-9,-8,-4]
+#
+# Second 3: Extract 25
+#   sqrt(25) = 5, reinsert 5
+#   Heap: [-10,-9,-8,-5,-4]
+#
+# Second 4: Extract 10
+#   sqrt(10) = 3, reinsert 3
+#   Heap: [-9,-8,-5,-4,-3]
+#
+# Final sum: 9+8+5+4+3 = 29
+# Output: 29
+
+sol = SimulationPattern()
+print("Gifts remaining:", sol.pickGifts([25,64,9,4,100], 4))  # 29
+print("Gifts remaining:", sol.pickGifts([1,1,1,1], 4))  # 4
+
+
+# ================================================================
+# PATTERN 6: HEAP + GREEDY
+# PATTERN EXPLANATION: Combine heap with greedy strategy to make locally optimal choices
+# based on priority. Heap maintains candidates sorted by priority, greedy algorithm always
+# picks best available option. Common in scheduling, resource allocation, and optimization
+# problems where order of selection matters.
+#
+# TYPICAL STEPS:
+# 1. Sort items by one criterion (e.g., deadline, start time)
+# 2. Use heap to track priorities dynamically
+# 3. Greedily select from heap based on priority
+# 4. Update heap as you process elements
+# 5. Continue until goal met or heap empty
+#
+# Applications: Task scheduling with deadlines, maximize value within constraints.
+# ================================================================
+
+class HeapGreedyPattern:
+    """
+    Problem: Given array of integers 'stones', in each turn we choose the two heaviest stones
+    and smash them together. If stones have weights x and y with x <= y:
+    - If x == y, both stones destroyed
+    - If x != y, stone of weight x destroyed, stone of weight y-x remains
+    Return weight of last remaining stone, or 0 if none remain.
+    
+    TC: O(n log n) - heapify O(n), each operation O(log n), up to n operations
+    SC: O(n) - heap stores stones
+    
+    How it works:
+    1. Create max heap of all stones
+    2. Greedily pick two heaviest stones
+    3. Smash them: keep difference
+    4. Reinsert difference into heap
+    5. Continue until 0 or 1 stone remains
+    
+    Why greedy works:
+    - Smashing heaviest stones reduces total weight most
+    - Difference is smaller, gives more options later
+    - Heap ensures we always get two heaviest efficiently
+    """
+    def lastStoneWeight(self, stones: List[int]) -> int: # LC 1046
+        # Create max heap (negate for heapq)
+        heap = [-s for s in stones]
+        heapq.heapify(heap)
+        
+        while len(heap) > 1:
+            # Extract two heaviest stones
+            first = -heapq.heappop(heap)
+            second = -heapq.heappop(heap)
+            
+            # If different weights, keep difference
+            if first != second:
+                heapq.heappush(heap, -(first - second))
+        
+        # Return last stone weight or 0
+        return -heap[0] if heap else 0
+
+# Example:
+# stones = [2,7,4,1,8,1]
+#
+# Heap (negated): [-8,-7,-4,-2,-1,-1]
+#
+# Smash 8 and 7: difference = 1
+#   Heap: [-4,-2,-1,-1,-1]
+#
+# Smash 4 and 2: difference = 2
+#   Heap: [-2,-1,-1,-1]
+#
+# Smash 2 and 1: difference = 1
+#   Heap: [-1,-1,-1]
+#
+# Smash 1 and 1: both destroyed
+#   Heap: [-1]
+#
+# Last stone: 1
+# Output: 1
+
+sol = HeapGreedyPattern()
+print("Last stone weight:", sol.lastStoneWeight([2,7,4,1,8,1]))  # 1
+print("Last stone weight:", sol.lastStoneWeight([1]))  # 1

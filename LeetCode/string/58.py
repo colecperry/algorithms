@@ -48,7 +48,7 @@ class Solution(object):
         while s[i] == " ": # Loop from end until we reach a non-space
             i -= 1 # Decrement the index
         
-        while i >= 0 and s[i] != " ": # Continue loop as long as index >= 0 or ele != " "
+        while i >= 0 and s[i] != " ": # i >= 0 to prevent index error
             length += 1 # Increase the length each iteration
             i -= 1 # Decrement the index
         

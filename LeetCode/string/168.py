@@ -28,17 +28,27 @@
 # Output: "ZY"
 
     
-class Solution(object):
-    def convertToTitle(self, columnNumber):
-        output = ""
+class Solution:
+    def convertToTitle(self, columnNumber: int) -> str:
+        result = []
+        
         while columnNumber > 0:
-            output = chr(ord('A') + (columnNumber - 1) % 26) + output
-            print(ord('A'))
-            print(chr(ord('A') + (columnNumber - 1) % 26))
-            columnNumber = (columnNumber - 1) // 26
-        return output
-
+            # Convert from 1-indexed (Excel) to 0-indexed (programming)
+            columnNumber -= 1
+            
+            # Find letter position: 0=A, 1=B, 2=C, ..., 25=Z
+            letter_index = columnNumber % 26
+            
+            # Convert index to actual letter
+            letter = chr(ord('A') + letter_index)
+            result.append(letter)
+            
+            # Move to the next digit position (like dividing by 10 in base-10)
+            columnNumber //= 26
+        
+        # We built right-to-left, so reverse to get correct order
+        return ''.join(reversed(result))
 
 solution = Solution()
-print(solution.convertToTitle(27))
+print(solution.convertToTitle(28))  # Output: "AB"
 
