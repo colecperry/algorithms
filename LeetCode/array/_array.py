@@ -121,7 +121,11 @@ print(result)
 """
 # ==================================================================
 # PATTERN 1: BOYER-MOORE VOTING ALGORITHM
-# PATTERN EXPLANATION: Find majority element (appears >n/2 times) using cancellation/voting concept. Maintain a candidate and counter. When count reaches 0, switch candidate. The majority element will survive because it outnumbers all others combined. Works in O(n) time with O(1) space.
+# PATTERN EXPLANATION: Find majority element (appears >n/2 times) using
+# cancellation/voting concept. Maintain a candidate and counter. When 
+# count reaches 0, switch candidate. The majority element will survive 
+# because it outnumbers all others combined. Works in O(n) time with 
+# O(1) space.
 #
 # RECOGNITION TRIGGERS:
 # - Find element appearing more than n/2 times (or n/3, n/k)
@@ -233,7 +237,8 @@ def merge(intervals: List[List[int]]) -> List[List[int]]: # LC 56
     result.append([start, end]) # Append to res after no more overlaps
     return result
 
-print("Merge Intervals:", merge([[1,3],[2,6],[8,10],[15,18]]))  # [[1,6],[8,10],[15,18]]
+print("Merge Intervals:", merge([[1,3],[2,6],[8,10],[15,18]]))  
+# [[1,6],[8,10],[15,18]]
 """
 # ==================================================================
 # PATTERN 3: ARRAY ROTATION TECHNIQUES
