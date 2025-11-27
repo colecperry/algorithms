@@ -245,7 +245,8 @@ print("Merge Intervals:", merge([[1,3],[2,6],[8,10],[15,18]]))
 # PATTERN EXPLANATION: Rotate array by k positions efficiently using 
 # the reversal method. Key insight: rotating [1,2,3,4,5] right by 2 
 # gives [4,5,1,2,3]. This is equivalent to: reverse all, reverse first 
-# k, reverse rest. Works in O(n) time with O(1) space through in-place reversals.
+# k, reverse rest. Works in O(n) time with O(1) space through in-place
+# reversals.
 #
 # RECOGNITION TRIGGERS:
 # - "Rotate array left/right by k positions"
