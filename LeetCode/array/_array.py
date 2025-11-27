@@ -1,12 +1,12 @@
 """
-=================================================================
+=====================================================================
 ARRAY DATA STRUCTURE COMPLETE GUIDE
-=================================================================
+=====================================================================
 
 WHAT ARE ARRAYS?
 ----------------
-Arrays are contiguous memory structures that store elements of the same type, 
-accessible by index in O(1) time.
+Arrays are contiguous memory structures that store elements of the 
+same type, accessible by index in O(1) time.
 
 Key characteristics:
 - Direct access by index: arr[i] in O(1)
@@ -94,7 +94,7 @@ def array_operations_template():
     # ============ COMMON PATTERNS ============
     # Initialize array with default values
     zeros = [0] * 5  # [0, 0, 0, 0, 0]
-    matrix = [[0] * 3 for _ in range(2)]  # 2x3 matrix of zeros
+    matrix = [[0] * 3 for _ in range(2)] # 2x3 matrix of zeros
     
     # List comprehension
     squares = [x**2 for x in range(5)]  # [0, 1, 4, 9, 16]
@@ -118,7 +118,8 @@ print("Array operations:")
 result = array_operations_template()
 print(result)
 
-# ================================================================
+"""
+# ==================================================================
 # PATTERN 1: BOYER-MOORE VOTING ALGORITHM
 # PATTERN EXPLANATION: Find majority element (appears >n/2 times) using cancellation/voting concept. Maintain a candidate and counter. When count reaches 0, switch candidate. The majority element will survive because it outnumbers all others combined. Works in O(n) time with O(1) space.
 #
@@ -131,13 +132,14 @@ print(result)
 #
 # Applications: Majority element, majority element II (>n/3), finding
 # elements with specific frequency thresholds.
-# ================================================================
+# ===================================================================
+"""
 
 def majorityElement(nums: List[int]) -> int: # LC 169
     """
-    Problem: Given array of size n, find the majority element. The majority
-    element is the element that appears more than ⌊n/2⌋ times.
-    You may assume the majority element always exists.
+    Problem: Given array of size n, find the majority element. 
+    The majority element is the element that appears more than 
+    ⌊n/2⌋ times. You may assume the majority element always exists.
     
     Example 1:
     Input: nums = [3,2,3]
@@ -147,11 +149,13 @@ def majorityElement(nums: List[int]) -> int: # LC 169
     SC: O(1) - only two variables
     
     How it works:
-    1. Think of it as a voting system where majority "cancels out" minorities
+    1. Think of it as a voting system where majority "cancels out" 
+    minorities
     2. Candidate represents current potential majority
     3. Count tracks how many "votes ahead" candidate is
     4. When count=0, no element has advantage, switch candidate
-    5. Majority element survives because it outnumbers all others combined
+    5. Majority element survives because it outnumbers all others 
+    combined
     """
     candidate = None
     count = 0
@@ -173,9 +177,14 @@ def majorityElement(nums: List[int]) -> int: # LC 169
 print("Majority Element:", majorityElement([2,2,1,1,1,2,2]))  # 2
 print("Majority Element:", majorityElement([3,2,3]))  # 3
 
-# ================================================================
+"""
+# ==================================================================
 # PATTERN 2: MERGE INTERVALS
-# PATTERN EXPLANATION: Sort intervals by start time, then merge overlapping ones in single pass. Two intervals [a,b] and [c,d] overlap if b ≥ c (first's end reaches or exceeds second's start). Merged interval is [a, max(b,d)]. Sorting ensures we only need to compare consecutive intervals.
+# PATTERN EXPLANATION: Sort intervals by start time, then merge 
+# overlapping ones in single pass. Two intervals [a,b] and [c,d] 
+# overlap if b ≥ c (first's end reaches or exceeds second's start). 
+# Merged interval is [a, max(b,d)]. Sorting ensures we only need to 
+# compare consecutive intervals.
 #
 # RECOGNITION TRIGGERS:
 # - Problem involves intervals/ranges: [start, end]
@@ -184,21 +193,24 @@ print("Majority Element:", majorityElement([3,2,3]))  # 3
 # - "Find meeting rooms needed"
 # - "Non-overlapping intervals"
 #
-# Applications: Merge intervals, insert interval, meeting rooms, non-overlapping
-# intervals, interval list intersections.
-# ================================================================
-
+# Applications: Merge intervals, insert interval, meeting rooms, 
+# non-overlapping intervals, interval list intersections.
+# ==================================================================
+"""
 def merge(intervals: List[List[int]]) -> List[List[int]]: # LC 56
     """
-    Problem: Given array of intervals [start, end], merge all overlapping intervals and return array of non-overlapping intervals.
+    Problem: Given array of intervals [start, end], merge all 
+    overlapping intervals and return array of non-overlapping intervals.
 
     Example 1:
     Input: intervals = [[1,3],[2,6],[8,10],[15,18]]
     Output: [[1,6],[8,10],[15,18]]
-    Explanation: Since intervals [1,3] and [2,6] overlap, merge them into [1,6].
+    Explanation: Since intervals [1,3] and [2,6] overlap, merge them 
+    into [1,6].
     
     TC: O(n log n) - dominated by sorting
-    SC: O(n) - output array (or O(log n) for sorting if we don't count output)
+    SC: O(n) - output array (or O(log n) for sorting if we don't count 
+    output)
     
     How it works:
     1. Sort intervals by start time
@@ -222,10 +234,13 @@ def merge(intervals: List[List[int]]) -> List[List[int]]: # LC 56
     return result
 
 print("Merge Intervals:", merge([[1,3],[2,6],[8,10],[15,18]]))  # [[1,6],[8,10],[15,18]]
-
-# ================================================================
+"""
+# ==================================================================
 # PATTERN 3: ARRAY ROTATION TECHNIQUES
-# PATTERN EXPLANATION: Rotate array by k positions efficiently using the reversal method. Key insight: rotating [1,2,3,4,5] right by 2 gives [4,5,1,2,3]. This is equivalent to: reverse all, reverse first k, reverse rest. Works in O(n) time with O(1) space through in-place reversals.
+# PATTERN EXPLANATION: Rotate array by k positions efficiently using 
+# the reversal method. Key insight: rotating [1,2,3,4,5] right by 2 
+# gives [4,5,1,2,3]. This is equivalent to: reverse all, reverse first 
+# k, reverse rest. Works in O(n) time with O(1) space through in-place reversals.
 #
 # RECOGNITION TRIGGERS:
 # - "Rotate array left/right by k positions"
@@ -235,11 +250,13 @@ print("Merge Intervals:", merge([[1,3],[2,6],[8,10],[15,18]]))  # [[1,6],[8,10],
 #
 # Applications: Rotate array, rotate string, circular array problems,
 # shift operations.
-# ================================================================
-
+# ===================================================================
+"""
 def rotate(nums: List[int], k: int) -> None: # LC 189
     """
-    Problem: Given an integer array, rotate the array to the right by k steps where k is non-negative. Modify the array in-place with O(1) extra space.
+    Problem: Given an integer array, rotate the array to the right by 
+    k steps where k is non-negative. Modify the array in-place with 
+    O(1) extra space.
 
     Example 1:
     Input: nums = [1,2,3,4,5,6,7], k = 3
