@@ -67,7 +67,6 @@ class Solution:
     # - O(n) in the worst case, if no intervals overlap and each interval is added to the result
     # - Additional space is minimal beyond the output list
 
-
     def merge2(self, intervals: List[List[int]]) -> List[List[int]]: # for loop
         intervals.sort(key=lambda x:x[0]) # sort intervals by start of interval
         result = []

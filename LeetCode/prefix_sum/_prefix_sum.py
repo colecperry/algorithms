@@ -1094,6 +1094,95 @@ print("Running Sum:", sol.runningSum([1,2,3,4]))  # [1,3,6,10]
 print("Max Subarray Sum:", sol.maxSubArray([-2,1,-3,4,-1,2,1,-5,4]))  # 6
 print("XOR Queries:", sol.xorQueries([1,3,4,8], [[0,1],[1,2],[0,3],[3,3]]))  # [2,7,14,8]
 
+# ================================================================
+# PATTERN 4: PRODUCT PATTERNS (WITHOUT DIVISION)
+# PATTERN EXPLANATION: When you can't use division, build result through
+# multiple passes. Use prefix products (product of all elements before i)
+# and suffix products (product of all elements after i). Final answer at
+# each position is prefix[i] × suffix[i]. Can optimize to O(1) space by
+# computing products on-the-fly in the output array.
+#
+# RECOGNITION TRIGGERS:
+# - "Product of all elements except current"
+# - "Cannot use division operation"
+# - "Multiply all elements except self"
+# - Need O(n) time, O(1) space solution
+#
+# TYPICAL STEPS:
+# 1. First pass: compute prefix products (left to right)
+# 2. Store prefix products in result array
+# 3. Second pass: compute suffix products (right to left) on-the-fly
+# 4. Multiply with existing prefix to get final answer
+#
+# Applications: Product of array except self, construct product matrix,
+# range product queries.
+# ================================================================
+
+def productExceptSelf(nums: List[int]) -> List[int]:
+    """
+    Problem: Given integer array, return array where answer[i] equals the
+    product of all elements except nums[i]. Solve in O(n) time without
+    using division operation and with O(1) extra space (output doesn't count).
+    
+    LC 238: Product of Array Except Self
+    
+    TC: O(n) - two passes through array
+    SC: O(1) - output array doesn't count, only use constant extra space
+    
+    How it works:
+    1. First pass (left to right): build prefix products in result array
+       result[i] = product of all elements before index i
+    2. Second pass (right to left): multiply by suffix products
+       suffix = product of all elements after index i
+    3. result[i] = prefix[i] × suffix[i] = product except self
+    
+    Why this problem: The definitive product pattern problem. Teaches the
+    prefix-suffix technique without division, a common interview follow-up.
+    """
+    n = len(nums)
+    result = [1] * n
+    
+    # First pass: compute prefix products
+    # result[i] = product of all elements before i
+    prefix = 1
+    for i in range(n):
+        result[i] = prefix  # Product of everything before i
+        prefix *= nums[i]  # Update prefix for next iteration
+    
+    # Second pass: multiply by suffix products
+    # suffix = product of all elements after i
+    suffix = 1
+    for i in range(n - 1, -1, -1):
+        result[i] *= suffix  # Multiply with product of everything after i
+        suffix *= nums[i]  # Update suffix for next iteration
+    
+    return result
+
+# Example walkthrough: nums = [1,2,3,4]
+# Expected: [24,12,8,6]
+#   result[0] = 2*3*4 = 24
+#   result[1] = 1*3*4 = 12
+#   result[2] = 1*2*4 = 8
+#   result[3] = 1*2*3 = 6
+#
+# First pass (prefix products):
+# i=0: result[0]=1 (nothing before), prefix becomes 1
+# i=1: result[1]=1 (1 before index 1), prefix becomes 1*2=2
+# i=2: result[2]=2 (1*2 before index 2), prefix becomes 2*3=6
+# i=3: result[3]=6 (1*2*3 before index 3), prefix becomes 6*4=24
+# After first pass: result = [1, 1, 2, 6]
+#                            ↑  ↑  ↑  ↑
+#                            1  1  1*2  1*2*3
+#
+# Second pass (suffix products):
+# i=3: result[3]=6*1=6 (nothing after), suffix becomes 4
+# i=2: result[2]=2*4=8 (4 after index 2), suffix becomes 4*3=12
+# i=1: result[1]=1*12=12 (3*4 after index 1), suffix becomes 12*2=24
+# i=0: result[0]=1*24=24 (2*3*4 after index 0), suffix becomes 24*1=24
+# After second pass: result = [24, 12, 8, 6] ✓
+
+print("Product Except Self:", productExceptSelf([1,2,3,4]))  # [24,12,8,6]
+
 
 # ================================================================
 # SUMMARY OF PREFIX SUM PATTERNS

@@ -1093,6 +1093,73 @@ nums1 = [1,2,3,0,0,0]
 sol.mergeSortedArray(nums1, 3, [2,5,6], 3)
 print("Merge Sorted Array:", nums1)  # [1,2,2,3,5,6]
 
+# ================================================================
+# PATTERN 1: CYCLIC SORT
+# PATTERN EXPLANATION: When array contains numbers in range [1, n] or [0, n-1], place each number at its "correct" index (num at index num-1 for 1-indexed). Use swapping to achieve O(n) time with O(1) space. Key insight: each number has exactly one correct position, so at most n swaps needed.
+#
+# RECOGNITION TRIGGERS:
+# - Array of n elements with values in range [1, n] or [0, n-1]
+# - Find missing/duplicate/smallest missing number
+# - O(1) space requirement mentioned
+# - Numbers "should" map to indices
+#
+# TYPICAL STEPS:
+# 1. Iterate through array
+# 2. For each position, check if current number is at correct index
+# 3. If not, swap it to its correct position
+# 4. Keep swapping until current position has correct number or can't swap
+# 5. Second pass finds anomalies (missing, duplicate, etc.)
+#
+# Applications: Find missing number, find duplicate, first missing positive,
+# find all duplicates, find all missing numbers.
+# ================================================================
+
+def findDuplicates(nums: List[int]) -> List[int]: # LC 442
+    """
+    Problem: Given array of n integers where 1 ≤ nums[i] ≤ n, some elements 
+    appear twice and others once. Find all elements that appear twice.
+    Do this in O(n) time and O(1) space (output array doesn't count).
+
+    Example 1:
+    Input: nums = [4,3,2,7,8,2,3,1]
+    Output: [2,3]
+    
+    TC: O(n) - each number swapped at most once to correct position
+    SC: O(1) - only swap operations, output doesn't count
+    
+    How it works:
+    1. Each number should be at index (number - 1)
+    2. Swap numbers to correct positions using cyclic sort
+    3. After sorting, duplicates will be where incorrect numbers remain
+    4. If nums[i] != i+1, then nums[i] is a duplicate
+    
+    Why this problem: Best demonstrates cyclic sort core concept. Shows how
+    to leverage the [1,n] range property to achieve O(1) space solution.
+    """
+    result = []
+    
+    # Cyclic sort: place each number at its correct index
+    i = 0
+    while i < len(nums):
+        correct_idx = nums[i] - 1  # Where this number should be (0-indexed)
+        
+        # If number not at correct position and target position has different number
+        if nums[i] != nums[correct_idx]:
+            # Swap to correct position
+            nums[i], nums[correct_idx] = nums[correct_idx], nums[i]
+        else:
+            # Current position correct or found duplicate, move forward
+            i += 1
+    
+    # Find duplicates: numbers not at their correct positions
+    for i in range(len(nums)):
+        if nums[i] != i + 1:
+            result.append(nums[i])
+    
+    return result
+
+print("Find Duplicates:", findDuplicates([4,3,2,7,8,2,3,1]))  # [3, 2]
+
 
 # ================================================================
 # PATTERN 5: MERGE SORTED ARRAYS/LISTS
