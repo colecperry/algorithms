@@ -119,24 +119,24 @@ result = array_operations_template()
 print(result)
 
 """
-# ==================================================================
-# PATTERN 1: BOYER-MOORE VOTING ALGORITHM
-# PATTERN EXPLANATION: Find majority element (appears >n/2 times) using
-# cancellation/voting concept. Maintain a candidate and counter. When 
-# count reaches 0, switch candidate. The majority element will survive 
-# because it outnumbers all others combined. Works in O(n) time with 
-# O(1) space.
-#
-# RECOGNITION TRIGGERS:
-# - Find element appearing more than n/2 times (or n/3, n/k)
-# - "Majority element" in problem title
-# - Guaranteed majority exists
-# - Need O(1) space solution
-#
-#
-# Applications: Majority element, majority element II (>n/3), finding
-# elements with specific frequency thresholds.
-# ===================================================================
+==================================================================
+PATTERN 1: BOYER-MOORE VOTING ALGORITHM
+PATTERN EXPLANATION: Find majority element (appears >n/2 times) using
+cancellation/voting concept. Maintain a candidate and counter. When 
+count reaches 0, switch candidate. The majority element will survive 
+because it outnumbers all others combined. Works in O(n) time with 
+O(1) space.
+
+RECOGNITION TRIGGERS:
+- Find element appearing more than n/2 times (or n/3, n/k)
+- "Majority element" in problem title
+- Guaranteed majority exists
+- Need O(1) space solution
+
+
+Applications: Majority element, majority element II (>n/3), finding
+elements with specific frequency thresholds.
+===================================================================
 """
 
 def majorityElement(nums: List[int]) -> int: # LC 169
@@ -182,24 +182,24 @@ print("Majority Element:", majorityElement([2,2,1,1,1,2,2]))  # 2
 print("Majority Element:", majorityElement([3,2,3]))  # 3
 
 """
-# ==================================================================
-# PATTERN 2: MERGE INTERVALS
-# PATTERN EXPLANATION: Sort intervals by start time, then merge 
-# overlapping ones in single pass. Two intervals [a,b] and [c,d] 
-# overlap if b ≥ c (first's end reaches or exceeds second's start). 
-# Merged interval is [a, max(b,d)]. Sorting ensures we only need to 
-# compare consecutive intervals.
-#
-# RECOGNITION TRIGGERS:
-# - Problem involves intervals/ranges: [start, end]
-# - "Merge overlapping intervals"
-# - "Insert interval into sorted intervals"
-# - "Find meeting rooms needed"
-# - "Non-overlapping intervals"
-#
-# Applications: Merge intervals, insert interval, meeting rooms, 
-# non-overlapping intervals, interval list intersections.
-# ==================================================================
+==================================================================
+PATTERN 2: MERGE INTERVALS
+PATTERN EXPLANATION: Sort intervals by start time, then merge 
+overlapping ones in single pass. Two intervals [a,b] and [c,d] 
+overlap if b ≥ c (first's end reaches or exceeds second's start). 
+Merged interval is [a, max(b,d)]. Sorting ensures we only need to 
+compare consecutive intervals.
+
+RECOGNITION TRIGGERS:
+- Problem involves intervals/ranges: [start, end]
+- "Merge overlapping intervals"
+- "Insert interval into sorted intervals"
+- "Find meeting rooms needed"
+- "Non-overlapping intervals"
+
+Applications: Merge intervals, insert interval, meeting rooms, 
+non-overlapping intervals, interval list intersections.
+==================================================================
 """
 def merge(intervals: List[List[int]]) -> List[List[int]]: # LC 56
     """
@@ -240,23 +240,23 @@ def merge(intervals: List[List[int]]) -> List[List[int]]: # LC 56
 print("Merge Intervals:", merge([[1,3],[2,6],[8,10],[15,18]]))  
 # [[1,6],[8,10],[15,18]]
 """
-# ==================================================================
-# PATTERN 3: ARRAY ROTATION TECHNIQUES
-# PATTERN EXPLANATION: Rotate array by k positions efficiently using 
-# the reversal method. Key insight: rotating [1,2,3,4,5] right by 2 
-# gives [4,5,1,2,3]. This is equivalent to: reverse all, reverse first 
-# k, reverse rest. Works in O(n) time with O(1) space through in-place
-# reversals.
-#
-# RECOGNITION TRIGGERS:
-# - "Rotate array left/right by k positions"
-# - "Shift elements circularly"
-# - O(1) space requirement
-# - In-place modification required
-#
-# Applications: Rotate array, rotate string, circular array problems,
-# shift operations.
-# ===================================================================
+==================================================================
+PATTERN 3: ARRAY ROTATION TECHNIQUES
+PATTERN EXPLANATION: Rotate array by k positions efficiently using 
+the reversal method. Key insight: rotating [1,2,3,4,5] right by 2 
+gives [4,5,1,2,3]. This is equivalent to: reverse all, reverse first 
+k, reverse rest. Works in O(n) time with O(1) space through in-place
+reversals.
+
+RECOGNITION TRIGGERS:
+- "Rotate array left/right by k positions"
+- "Shift elements circularly"
+- O(1) space requirement
+- In-place modification required
+
+Applications: Rotate array, rotate string, circular array problems,
+shift operations.
+===================================================================
 """
 def rotate(nums: List[int], k: int) -> None: # LC 189
     """

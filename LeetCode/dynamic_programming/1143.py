@@ -32,24 +32,19 @@ class LongestCommonSubsequence:
     def longestCommonSubsequence(self, text1, text2):
         m, n = len(text1), len(text2)
         
-        # Matrix DP table stores LCS from only the first "i" chars of text1 and first "j" chars of text2
-        # dp[i][j] = LCS length for text1[0:i] and text2[0:j]
+        # dp[i][j] = LCS length for first i chars of text1 and first j chars of text2
         dp = [[0] * (n + 1) for _ in range(m + 1)]
         
-        # Base cases already initialized for empty str -> dp[0][j] = 0 for all j, dp[i][0] = 0 for all i
+        # Base case: empty string comparisons are already 0
         
-        # Fill DP table
         for i in range(1, m + 1):
             for j in range(1, n + 1):
                 if text1[i-1] == text2[j-1]:
-                    # Characters match, add 1 to whatever LCS we had without both these chars
+                    # Characters match: extend the LCS without both characters
                     dp[i][j] = 1 + dp[i-1][j-1]
                 else:
-                    # Characters don't match, take best from excluding either char
-                    dp[i][j] = max(
-                        dp[i-1][j],   # Exclude char from text1
-                        dp[i][j-1]    # Exclude char from text2
-                    )
+                    # No match: take best result from excluding one character
+                    dp[i][j] = max(dp[i-1][j], dp[i][j-1])
         
         return dp[m][n]
 

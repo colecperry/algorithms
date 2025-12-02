@@ -20,10 +20,8 @@ from typing import List
 
 class Solution:
     """
-    TC:
-        - O(n) -> iterate through dp array once
-    SC:
-        - O(n) -> store n values in the DP array
+    TC: O(n) -> iterate through dp array once
+    SC: O(n) -> store n values in the DP array
     """
     def rob(self, nums: List[int]) -> int: # O(n) space
         n = len(nums)
