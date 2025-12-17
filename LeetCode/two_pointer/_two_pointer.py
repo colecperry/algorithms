@@ -5,9 +5,7 @@ TWO POINTERS COMPLETE GUIDE
 
 WHAT IS THE TWO POINTERS PATTERN?
 ---------------------------------
-Two pointers is a technique where we use two references (pointers/indices) to traverse
-a data structure, typically an array or string. The pointers can move in various ways to
-efficiently solve problems that would otherwise require nested loops.
+Two pointers is a technique where we use two references (pointers/indices) to traverse a data structure, typically an array or string. The pointers can move in various ways to efficiently solve problems that would otherwise require nested loops.
 
 Key characteristics:
 - Uses two index variables to traverse data structure
@@ -25,7 +23,7 @@ Example: Find pair with target sum in sorted array of size n
   TC: O(n²) - outer loop n times, inner loop n times
   For each pair (i,j), check if arr[i] + arr[j] == target
   
-- Two Pointers: Start at ends, converge based on sum comparison
+- Two Pointers (array must be sorted): Start at ends, converge based on sum 
   TC: O(n) - each pointer moves at most n times total
   Single pass, pointers meet in middle
   
@@ -117,271 +115,15 @@ KEY INSIGHT:
 SORTED = Can make intelligent decisions about which direction to move based on value comparisons
 NOT SORTED = Movement based on position, structure, or other logic
 
-============================================================
-                TWO POINTERS CORE TEMPLATES
-============================================================
+# ==============================================
+#             TWO POINTERS PATTERNS
+# ============================================== 
 """
-
-from typing import List, Optional
-
-# ================================================================
-# OPPOSITE DIRECTION TEMPLATE
-# ================================================================
-def opposite_direction_template(arr, target):
-    """
-    Template for converging pointers from both ends
-    
-    PROBLEM CONTEXT:
-    Given a sorted array and a target sum, find two numbers that add up to the target.
-    Example: arr = [2,7,11,15], target = 9 → return [0,1] (2 + 7 = 9)
-    
-    TC: O(n) - each element visited at most once
-    SC: O(1) - only two pointer variables
-    
-    WHEN TO USE:
-    - Problem involves sorted array
-    - Need to find pairs with specific sum/property
-    - Optimize by choosing from both ends
-    - Validate symmetry (palindromes)
-    
-    MOVEMENT PATTERN:
-    - Start: left=0, right=len(arr)-1
-    - Compare/process elements at both pointers
-    - Move left right or right left based on condition
-    - Stop when left >= right
-    """
-    left, right = 0, len(arr) - 1
-    
-    while left < right:
-        # Calculate sum of elements at both pointers
-        current = arr[left] + arr[right]
-        
-        # Make decision about which pointer to move
-        if current == target:
-            return [left, right]  # Found the pair
-        elif current < target:
-            left += 1  # Need larger value, move left right
-        else:
-            right -= 1  # Need smaller value, move right left
-    
-    return []  # No pair found
-
-# Example usage
-arr = [2, 7, 11, 15]
-target = 9
-result = opposite_direction_template(arr, target)
-print(f"Indices: {result}")  # Output: [0, 1]
-
-
-# ================================================================
-# SAME DIRECTION TEMPLATE (PARTITION)
-# ================================================================
-def same_direction_template(arr):
-    """
-    Remove duplicates from a sorted array in-place, return new length.
-
-    Example: arr = [1,1,2,2,3] → modify to [1,2,3,_,_], return 3
-    The underscores represent values we don't care about after the new length.
-
-    WHEN TO USE:
-    - Remove duplicates in-place
-    - Partition array by condition
-    - Rearrange elements
-    - In-place modifications
-    
-    TC: O(n) - single pass through array
-    SC: O(1) - in-place modification
-    
-    MOVEMENT PATTERN:
-    - Slow: tracks write position (boundary)
-    - Fast: explores and finds valid elements
-    - Fast always moves, slow moves conditionally
-    """
-    if not arr:
-        return 0
-    
-    slow = 1  # Write position (start at index 1 since first element always stays)
-    
-    for fast in range(1, len(arr)): # Read position (start at i=1)
-        # Check if current element is different from previous
-        if arr[fast] != arr[fast - 1]: # Found new unique ele
-            arr[slow] = arr[fast]  # Write unique element
-            slow += 1  # Move write position forward
-    
-    return slow  # New length of modified array
-
-# Example usage
-arr = [1, 1, 2, 2, 3]
-new_length = same_direction_template(arr)
-print(f"New length: {new_length}, Array: {arr[:new_length]}")  # Output: 3, [1, 2, 3]
-
-
-# ================================================================
-# FAST/SLOW TEMPLATE (CYCLE DETECTION)
-# ================================================================
 class ListNode:
     def __init__(self, val=0, next=None):
         self.val = val
         self.next = next
-
-def fast_slow_template(head):
-    """
-    Template for fast/slow pointers (Floyd's algorithm)
-    
-    PROBLEM CONTEXT:
-    Detect if a linked list has a cycle (a node's next pointer points back to a previous node).
-    Example: 3→2→0→-4→(back to 2) → return True (cycle exists)
-    Example: 1→2→3→None → return False (no cycle)
-    
-    TC: O(n) - fast pointer visits at most 2n nodes
-    SC: O(1) - only two pointer variables
-    
-    WHEN TO USE:
-    - Detect cycles in linked list
-    - Find middle element
-    - Find nth from end
-    - Linked list problems
-    
-    MOVEMENT PATTERN:
-    - Slow: moves 1 step at a time
-    - Fast: moves 2 steps at a time
-    - If cycle exists, they meet eventually
-    - If no cycle, fast reaches end
-    """
-    slow = head  # Tortoise - moves 1 step
-    fast = head  # Hare - moves 2 steps
-    
-    while fast and fast.next:
-        slow = slow.next        # Move slow 1 step
-        fast = fast.next.next   # Move fast 2 steps
-        
-        if slow == fast:
-            return True  # Pointers met - cycle detected
-    
-    return False  # Fast reached end - no cycle
-
-# Example usage
-# Create linked list with cycle: 3→2→0→-4→(back to 2)
-node1 = ListNode(3)
-node2 = ListNode(2, ListNode(0, ListNode(-4)))
-node1.next = node2
-node2.next.next.next = node2  # Creates cycle
-result = fast_slow_template(node1)
-print(f"Has cycle: {result}")  # Output: True
-
-
-# ================================================================
-# MULTI-ARRAY MERGE TEMPLATE
-# ================================================================
-def merge_arrays_template(arr1, arr2):
-    """
-    Template for merging multiple sorted arrays
-    
-    PROBLEM CONTEXT:
-    Merge two sorted arrays into one sorted array.
-    Example: arr1 = [1,3,5], arr2 = [2,4,6] → return [1,2,3,4,5,6]
-    
-    TC: O(m + n) - process all elements from both arrays
-    SC: O(1) - in-place or O(m+n) for new array
-    
-    WHEN TO USE:
-    - Merge sorted arrays
-    - Find common elements
-    - Merge intervals
-    - Union/intersection of sorted arrays
-    
-    MOVEMENT PATTERN:
-    - One pointer per array
-    - Compare current elements
-    - Move pointer of selected element
-    - Continue until all arrays exhausted
-    """
-    i, j = 0, 0  # Pointers for arr1 and arr2
-    result = []
-    
-    # Merge while both arrays have elements
-    while i < len(arr1) and j < len(arr2):
-        if arr1[i] <= arr2[j]:
-            result.append(arr1[i])  # Take from arr1
-            i += 1  # Move arr1 pointer forward
-        else:
-            result.append(arr2[j])  # Take from arr2
-            j += 1  # Move arr2 pointer forward
-    
-    # Add remaining elements from either array
-    result.extend(arr1[i:])  # Remaining from arr1
-    result.extend(arr2[j:])  # Remaining from arr2
-    
-    return result
-
-# Example usage
-arr1 = [1, 3, 5]
-arr2 = [2, 4, 6]
-merged = merge_arrays_template(arr1, arr2)
-print(f"Merged array: {merged}")  # Output: [1, 2, 3, 4, 5, 6]
-
-
-# ================================================================
-# K-SUM TEMPLATE (FIX + CONVERGE)
-# ================================================================
-def k_sum_template(arr, target):
-    """
-    Template for k-sum problems
-    
-    PROBLEM CONTEXT:
-    Find all unique triplets in array that sum to target (3Sum problem).
-    Example: arr = [-1,0,1,2,-1,-4], target = 0 → return [[-1,-1,2], [-1,0,1]]
-    Note: Each triplet must be unique (no duplicates in result).
-    
-    TC: O(n²) for 3sum, O(n³) for 4sum, etc.
-    SC: O(1) - only pointer variables (excluding result storage)
-    
-    WHEN TO USE:
-    - Find triplets/quadruplets with target sum
-    - k-sum variants
-    - Multiple element selection from sorted array
-    
-    MOVEMENT PATTERN:
-    - Fix first k-2 elements with loops
-    - Use two pointers for last 2 elements
-    - Reduces k-sum to 2-sum problem
-    """
-    arr.sort()  # Sort array for two-pointer technique
-    result = []
-    
-    # Fix first element (loop through array)
-    for i in range(len(arr) - 2):
-        # Skip duplicates for first element
-        if i > 0 and arr[i] == arr[i - 1]:
-            continue
-            
-        # Two pointers for remaining elements
-        left, right = i + 1, len(arr) - 1
-        
-        while left < right:
-            # Calculate sum of triplet
-            current_sum = arr[i] + arr[left] + arr[right]
-            
-            if current_sum == target:
-                result.append([arr[i], arr[left], arr[right]])  # Found triplet
-                left += 1
-                right -= 1
-            elif current_sum < target:
-                left += 1  # Need larger sum
-            else:
-                right -= 1  # Need smaller sum
-    
-    return result
-
-# Example usage
-arr = [-1, 0, 1, 2, -1, -4]
-target = 0
-triplets = k_sum_template(arr, target)
-print(f"Triplets: {triplets}")  # Output: [[-1, -1, 2], [-1, 0, 1]]
-
-# ==============================================
-#             TWO POINTERS PATTERNS
-# ============================================== 
+"""
 
 # ================================================================
 # PATTERN 1: OPPOSITE DIRECTION (CONVERGING)
@@ -398,15 +140,14 @@ print(f"Triplets: {triplets}")  # Output: [[-1, -1, 2], [-1, 0, 1]]
 #
 # Applications: Two sum in sorted array, pair finding, palindrome validation, container optimization.
 # ================================================================
+"""
+from typing import List, Optional
 
 class OppositeDirectionPattern:
     """
     Problem: Given a 1-indexed array of integers numbers that is already sorted in non-decreasing order, find two numbers such that they add up to a specific target.
 
     Return the indices (1-indexed) of the two numbers.
-    
-    TC: O(n) - single pass with two pointers moving toward center
-    SC: O(1) - only two pointer variables
     
     How it works:
     1. Start with pointers at both ends
@@ -421,6 +162,10 @@ class OppositeDirectionPattern:
     - This allows us to "navigate" to the target sum efficiently
     """
     def twoSum(self, numbers: List[int], target: int) -> List[int]: # LC 167
+        """
+        - TC: O(n) - single pass with two pointers moving inwards
+        - SC: O(1) - only two pointer variables
+        """
         left, right = 0, len(numbers) - 1
         
         while left < right:
@@ -456,28 +201,26 @@ sol = OppositeDirectionPattern()
 print("Two sum:", sol.twoSum([2,7,11,15], 9))  # [1,2]
 print("Two sum:", sol.twoSum([2,3,4], 6))  # [1,3]
 
-# ================================================================
-# PATTERN 2: SAME DIRECTION (PARTITION/WRITE)
-# PATTERN EXPLANATION: Both pointers move in the same direction, with one (slow) tracking the write/boundary position and the other (fast) exploring to find valid elements. Slow pointer marks where the next valid element should be written, while fast pointer scans ahead. This pattern enables in-place modifications without extra space.
-#
-# TYPICAL STEPS:
-# 1. Initialize slow=0 (or 1), fast=0 (or 1)
-# 2. While fast < len(arr):
-#    - Check if arr[fast] is valid
-#    - If valid, write to arr[slow] and increment slow
-#    - Always increment fast
-# 3. Return slow (new length) or modified array
-#
-# Applications: Remove duplicates, remove elements, move zeros, partition array.
-# ================================================================
+"""
+================================================================
+PATTERN 2: SAME DIRECTION (PARTITION/WRITE)
+PATTERN EXPLANATION: Both pointers move in the same direction, with one (slow) tracking the write/boundary position and the other (fast) exploring to find valid elements. Slow pointer marks where the next valid element should be written, while fast pointer scans ahead. This pattern enables in-place modifications without extra space.
+
+TYPICAL STEPS:
+1. Initialize slow=0 (or 1), fast=0 (or 1)
+2. While fast < len(arr):
+   - Check if arr[fast] is valid
+   - If valid, write to arr[slow] and increment slow
+   - Always increment fast
+3. Return slow (new length) or modified array
+
+Applications: Remove duplicates, remove elements, move zeros, partition array.
+================================================================
+"""
 
 class SameDirectionPattern:
     """
-    Problem: Given an integer array nums sorted in non-decreasing order, remove duplicates in-place such that each unique element appears only once. Return the number of unique
-    elements k. First k elements of nums should contain unique elements in order.
-    
-    TC: O(n) - single pass through array with fast pointer
-    SC: O(1) - in-place modification, only pointer variables
+    Problem: Given an integer array nums sorted in non-decreasing order, remove duplicates in-place such that each unique element appears only once. Return the number of unique elements k. First k elements of nums should contain unique elements in order.
     
     How it works:
     1. Slow pointer tracks where to write next unique element
@@ -491,15 +234,19 @@ class SameDirectionPattern:
     - Fast finds next unique, slow marks where to place it
     """
     def removeDuplicates(self, nums: List[int]) -> int: # LC 26
-        if not nums:
+        """
+        - TC: O(n) - single pass through array with fast pointer
+        - SC: O(1) - in-place modification, only pointer vars
+        """
+        if not nums: # Edge Case -> empty array has 0 unique ele
             return 0
         
         slow = 1  # Write position for next unique element (first element always unique)
         
         for fast in range(1, len(nums)):  # Explore from index 1
-            # If current element different from previous, it's unique
+            # If curr ele different from prev, it's unique
             if nums[fast] != nums[fast - 1]:
-                nums[slow] = nums[fast]  # Write unique element
+                nums[slow] = nums[fast]  # Write unique ele
                 slow += 1  # Move write position
         
         return slow  # Number of unique elements
@@ -533,28 +280,26 @@ test_nums = [0,0,1,1,1,2,2,3,3,4]
 print("Unique count:", sol.removeDuplicates(test_nums))  # 5
 print("Modified array:", test_nums[:5])  # [0,1,2,3,4]
 
-# ================================================================
-# PATTERN 3: FAST/SLOW (DIFFERENT SPEEDS)
-# PATTERN EXPLANATION: Two pointers start at same position but move at different speeds. Slow moves 1 step at a time, fast moves 2 steps. If there's a cycle, fast will eventually catch up to slow (they'll meet). If no cycle, fast reaches end first. Also used to find middle element (when fast reaches end, slow is at middle) or maintain fixed gap.
-#
-# TYPICAL STEPS (Cycle Detection):
-# 1. Initialize slow=head, fast=head
-# 2. While fast and fast.next exist:
-#    - Move slow one step: slow = slow.next
-#    - Move fast two steps: fast = fast.next.next
-#    - If slow == fast, cycle detected
-# 3. If fast reaches null, no cycle
-#
-# Applications: Cycle detection, find middle, find nth from end, happy number.
-# ================================================================
+"""
+================================================================
+PATTERN 3: FAST/SLOW (DIFFERENT SPEEDS)
+PATTERN EXPLANATION: Two pointers start at same position but move at different speeds. Slow moves 1 step at a time, fast moves 2 steps. If there's a cycle, fast will eventually catch up to slow (they'll meet). If no cycle, fast reaches end first. Also used to find middle element (when fast reaches end, slow is at middle) or maintain fixed gap.
+
+TYPICAL STEPS (Cycle Detection):
+1. Initialize slow=head, fast=head
+2. While fast and fast.next exist:
+   - Move slow one step: slow = slow.next
+   - Move fast two steps: fast = fast.next.next
+   - If slow == fast, cycle detected
+3. If fast reaches null, no cycle
+
+Applications: Cycle detection, find middle, find nth from end, happy number.
+================================================================
+"""
 
 class FastSlowPattern:
     """
-    Problem: Given head of linked list, determine if it has a cycle.
-    A cycle exists if a node can be reached again by following next pointers.
-    
-    TC: O(n) - fast pointer visits at most 2n nodes before meeting slow or reaching end
-    SC: O(1) - only two pointer variables
+    Problem: Given head of linked list, determine if it has a cycle. A cycle exists if a node can be reached again by following next pointers.
     
     How it works (Floyd's Cycle Detection):
     1. Slow pointer moves 1 step, fast moves 2 steps
@@ -567,13 +312,17 @@ class FastSlowPattern:
     - If no cycle, fast reaches end in n/2 steps
     """
     def hasCycle(self, head: Optional[ListNode]) -> bool: # LC 141
-        if not head or not head.next:
+        """
+        - TC: O(n) - fast pointer visits at most 2n nodes before meeting slow or reaching end
+        - SC: O(1) - only two pointer variables
+        """
+        if not head or not head.next: # Empty LL or one node
             return False
         
-        slow = head
+        slow = head 
         fast = head
         
-        while fast and fast.next:
+        while fast and fast.next: 
             slow = slow.next          # Move 1 step
             fast = fast.next.next     # Move 2 steps
             
@@ -626,36 +375,35 @@ print("Has cycle:", sol.hasCycle(cycle_head))  # True
 no_cycle = ListNode(1, ListNode(2, ListNode(3)))
 print("Has cycle:", sol.hasCycle(no_cycle))  # False
 
+"""
+================================================================
+PATTERN 4: K-SUM (FIX + CONVERGE)
+PATTERN EXPLANATION: Reduce k-sum problem to 2-sum by fixing the first k-2 elements with nested loops, then using two pointers on remaining elements. For 3-sum, fix one element and use two pointers. For 4-sum, fix two elements and use two pointers. This
+reduces time complexity from O(n^k) to O(n^(k-1)).
 
-# ================================================================
-# PATTERN 4: K-SUM (FIX + CONVERGE)
-# PATTERN EXPLANATION: Reduce k-sum problem to 2-sum by fixing the first k-2 elements with nested loops, then using two pointers on remaining elements. For 3-sum, fix one element and use two pointers. For 4-sum, fix two elements and use two pointers. This
-# reduces time complexity from O(n^k) to O(n^(k-1)).
-#
-# TYPICAL STEPS (for 3-sum):
-# 1. Sort array (required for two pointer optimization)
-# 2. For each index i (fixing first element):
-#    - Skip duplicates of fixed element
-#    - Set left=i+1, right=len-1
-#    - While left < right:
-#      * Calculate sum with fixed element
-#      * If sum == target, save result, move both pointers
-#      * If sum < target, move left right
-#      * If sum > target, move right left
-#      * Skip duplicates while moving
-# 3. Return all unique triplets/quadruplets
-#
-# Applications: 3sum, 4sum, 3sum closest, triplet problems in sorted arrays.
-# ================================================================
+TYPICAL STEPS (for 3-sum):
+1. Sort array (required for two pointer optimization)
+2. For each index i (fixing first element):
+   - Skip duplicates of fixed element
+   - Set left=i+1, right=len-1
+   - While left < right:
+     * Calculate sum with fixed element
+     * If sum == target, save result, move both pointers
+     * If sum < target, move left right
+     * If sum > target, move right left
+     * Skip duplicates while moving
+3. Return all unique triplets/quadruplets
+
+Applications: 3sum, 4sum, 3sum closest, triplet problems in sorted arrays.
+================================================================
+"""
 
 class KSumPattern:
     """
     Problem: Given integer array nums, return all unique triplets [nums[i], nums[j], nums[k]]
-    such that i != j != k and nums[i] + nums[j] + nums[k] = 0.
-    The solution set must not contain duplicate triplets.
+    such that i != j != k and nums[i] + nums[j] + nums[k] = 0. (i, j, and k must be different indexes)
     
-    TC: O(n²) - sort O(n log n), then O(n) outer loop × O(n) two pointer = O(n²)
-    SC: O(1) or O(n) depending on how you count sorting space
+    The solution set must not contain duplicate triplets. (Cannot have the same triplet using different indicies)
     
     How it works:
     1. Sort array (enables two pointer optimization)
@@ -665,6 +413,10 @@ class KSumPattern:
     5. Reduces 3-sum to 2-sum problem for each fixed element
     """
     def threeSum(self, nums: List[int]) -> List[List[int]]: # LC 15
+        """
+        - TC: O(n²) - sort O(n log n), then O(n) outer loop x O(n) two pointer = O(n²)
+        - SC: O(1) or O(n) depending on how you count sorting space
+        """
         nums.sort()  # Required for two pointer approach
         result = []
         
@@ -679,22 +431,24 @@ class KSumPattern:
             while left < right:
                 current_sum = nums[i] + nums[left] + nums[right]
                 
-                if current_sum == 0:
+                if current_sum == 0: # Case 1: found triplets
                     result.append([nums[i], nums[left], nums[right]])
                     
                     # Skip duplicates for left pointer
                     while left < right and nums[left] == nums[left + 1]:
                         left += 1
+
                     # Skip duplicates for right pointer
                     while left < right and nums[right] == nums[right - 1]:
                         right -= 1
                     
-                    left += 1
+                    left += 1 # If no skips, move l and r pointers
                     right -= 1
                 
+                # Case 2: Sum too small
                 elif current_sum < 0:
                     left += 1  # Need larger sum
-                else:
+                else: # Case 3: Sum too large
                     right -= 1  # Need smaller sum
         
         return result
@@ -728,32 +482,36 @@ sol = KSumPattern()
 print("3Sum:", sol.threeSum([-1,0,1,2,-1,-4]))  # [[-1,-1,2],[-1,0,1]]
 print("3Sum:", sol.threeSum([0,1,1]))  # []
 
+"""
+================================================================
+PATTERN 5: MULTI-ARRAY MERGE (ONE POINTER PER ARRAY)
+PATTERN EXPLANATION: Maintain one pointer for each input array. Compare elements at current pointers, select smallest/largest based on problem, and advance that pointer. Continue until all arrays exhausted. Common in merging sorted structures or finding common/union elements across multiple sorted arrays.
 
-# ================================================================
-# PATTERN 5: MULTI-ARRAY MERGE (ONE POINTER PER ARRAY)
-# PATTERN EXPLANATION: Maintain one pointer for each input array. Compare elements at current pointers, select smallest/largest based on problem, and advance that pointer. Continue until all arrays exhausted. Common in merging sorted structures or finding common/union elements across multiple sorted arrays.
-#
-# TYPICAL STEPS:
-# 1. Initialize pointer for each array (i=0, j=0, etc.)
-# 2. While pointers within bounds:
-#    - Compare elements at current pointers
-#    - Select element based on criteria (min for merge, equal for intersection)
-#    - Add to result if applicable
-#    - Advance pointer of selected element
-# 3. Handle remaining elements from arrays
-# 4. Return merged result
-#
-# Applications: Merge sorted arrays, array intersection, merge intervals.
-# ================================================================
+TYPICAL STEPS:
+1. Initialize pointer for each array (i=0, j=0, etc.)
+2. While pointers within bounds:
+   - Compare elements at current pointers
+   - Select element based on criteria (min for merge, equal for intersection)
+   - Add to result if applicable
+   - Advance pointer of selected element
+3. Handle remaining elements from arrays
+4. Return merged result
+
+Applications: Merge sorted arrays, array intersection, merge intervals.
+================================================================
+"""
 
 class MultiArrayPattern:
     """
     Problem: You are given two integer arrays nums1 and nums2, sorted in non-decreasing order, and two integers m and n, representing number of elements in each.
     
     Merge nums1 and nums2 into single sorted array stored in nums1. nums1 has length m+n where first m elements are actual values and last n are zeros (placeholders).
-    
-    TC: O(m + n) - process all elements from both arrays exactly once
-    SC: O(1) - in-place modification, only three pointer variables
+
+    Example 1:
+    Input: nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3
+    Output: [1,2,2,3,5,6]
+    Explanation: The arrays we are merging are [1,2,3] and [2,5,6].
+    The result of the merge is [1,2,2,3,5,6] with the underlined elements coming from nums1.
     
     How it works:
     1. Use three pointers: p1 for nums1 values, p2 for nums2 values, p3 for merge position
@@ -768,19 +526,23 @@ class MultiArrayPattern:
     - Merging backward fills empty space without overwriting
     """
     def merge(self, nums1: List[int], m: int, nums2: List[int], n: int) -> None: # LC 88
+        """
+        - TC: O(m + n) - process all elements from both arrays exactly once
+        - SC: O(1) - in-place modification, only three pointer variables
+        """
         p1 = m - 1  # Pointer for last element in nums1
         p2 = n - 1  # Pointer for last element in nums2
         p3 = m + n - 1  # Pointer for last position in merged array
         
         # Merge from back to front
         while p1 >= 0 and p2 >= 0:
-            if nums1[p1] > nums2[p2]:
-                nums1[p3] = nums1[p1]
+            if nums1[p1] > nums2[p2]: # Ele in nums1 is bigger
+                nums1[p3] = nums1[p1] # Write that ele to merged array WRITE spot
                 p1 -= 1
-            else:
-                nums1[p3] = nums2[p2]
+            else: # Ele in nums2 is bigger
+                nums1[p3] = nums2[p2] # Write that ele to merged array
                 p2 -= 1
-            p3 -= 1
+            p3 -= 1 # Move write spot
         
         # Copy remaining nums2 elements (if any)
         # Don't need to copy nums1 - already in correct position
@@ -814,6 +576,5 @@ class MultiArrayPattern:
 # Output: [1,2,2,3,5,6]
 
 sol = MultiArrayPattern()
-test_nums1 = [1,2,3,0,0,0]
-sol.merge(test_nums1, 3, [2,5,6], 3)
-print("Merged array:", test_nums1)  # [1,2,2,3,5,6]
+sol.merge([1,2,3,0,0,0], 3, [2,5,6], 3) # [1,2,2,3,5,6]
+sol.merge([4,5,6,0,0,0], 3, [1,2,3], 3) # [1,2,3,4,5,6]

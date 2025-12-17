@@ -39,7 +39,7 @@ from typing import List
 # ========================================================================
 def max_subarray_sum(nums):
     """
-    Find maximum sum of any contiguous subarray (Kadane's Algorithm). A contiguous subarray is a sequence of ele's that appear consecutively in the original array - no skipping or reordering allowed.
+    Find maximum sum of any contiguous subarray (Kadane's Algorithm). A contiguous subarray is sequence of ele's that appear consecutively in the original array - no skipping or reordering allowed.
     
     Example: [-2,1,-3,4,-1,2,1,-5,4] → 6 (subarray [4,-1,2,1])
     
@@ -86,22 +86,22 @@ def min_path_sum(grid):
     if not grid or not grid[0]: # Edge cases - empty matrix/first row
         return 0
     
-    m, n = len(grid), len(grid[0])
+    m, n = len(grid), len(grid[0]) # "m" = rows, "n" = cols
 
-    # Build DP matrix - create single row with "n" zero's and repeat 
+    # Build DP matrix - create single row with "n" ele's and repeat 
     # this "m" times -> results in "m" rows with "n" columns
     dp = [[0] * n for _ in range(m)] 
     
     # Base case: top-left corner
     dp[0][0] = grid[0][0]
-    
-    # Fill first row (can only get to curr grid cell coming from left)
-    for j in range(1, n):
-        dp[0][j] = dp[0][j-1] + grid[0][j]
-    
-    # Fill first col (can only get to curr grid cell coming from above)
-    for i in range(1, m):
+
+    # Fill first col (can only get to curr cell coming from above)
+    for i in range(1, m): # iterate through rows "m" and keep col = 0
         dp[i][0] = dp[i-1][0] + grid[i][0]
+    
+    # Fill first row (can only get to curr cell coming from left)
+    for j in range(1, n): # iterate through cols "n" and keep row = 0
+        dp[0][j] = dp[0][j-1] + grid[0][j]
     
     # Fill rest of table: take minimum of top or left path + curr
     for i in range(1, m):
@@ -119,22 +119,37 @@ print(min_path_sum(grid))  # Output: 7
 
 """
 =========================================================================
-TOP-DOWN DP TEMPLATE (MEMOIZATION)
-    - Use for: When recursion feels natural for the problem (break into smaller subproblems), you don't need to compute all subproblems (memo only computes what it needs), and when the base cases are clear but the iteration order isn't obvious
-    - Pattern: Write recursive solution first, then add memoization to avoid recomputing. Start from the main problem and work down to base cases, caching results along the way.
-    - Common problems: Fibonacci, climbing stairs, coin change, longest increasing subsequence,tree DP problems, any problem where you naturally think "solve for n using n-1, n-2...".
+DP APPROACH COMPARISON: TOP-DOWN VS BOTTOM-UP VS SPACE-OPTIMIZED
+
+Problem: Calculate the nth Fibonacci number
+Fibonacci sequence: 0, 1, 1, 2, 3, 5, 8, 13, 21, 34...
+
+Example: fibonacci(6) → 8 (sequence: 0,1,1,2,3,5,8)
+
+THREE APPROACHES:
+1. Top-Down (Memoization): Recursive with caching
+   - Use when: Recursion feels natural, don't need all subproblems, base cases clear
+   - TC: O(n), SC: O(n) memo + O(n) recursion stack
+
+2. Bottom-Up (Tabulation): Iterative with DP array
+   - Use when: Need most/all subproblems, clear iteration order, avoid stack overflow
+   - TC: O(n), SC: O(n) dp array
+
+3. Space-Optimized: Iterative with only last few values
+   - Use when: Only need previous k states (common in 1D DP)
+   - TC: O(n), SC: O(1) constant space
+
+General rule: Start with approach that feels most intuitive, then optimize if needed.
 =========================================================================
 """
-def dp_topdown_template(n):
+
+# ===== APPROACH 1: TOP-DOWN (MEMOIZATION) =====
+def fibonacci_topdown(n):
     """
-    Calculate the nth Fibonacci number using top-down DP with memoization. Fibonacci sequence: 0, 1, 1, 2, 3, 5, 8, 13, 21, 34...
-    
-    Example: fibonacci(6) → 8 (sequence: 0,1,1,2,3,5,8)
-    
     TC: O(n) - each subproblem solved once
     SC: O(n) - memo cache + recursion stack
     """
-    memo = {} # memo is a dict that maps the nth position to it's fib val
+    memo = {} # memo is a dict that maps the nth position to its fib val
     
     def fib(i):
         # Base case for fib(0) = 0 and fib(1) = 1
@@ -157,23 +172,11 @@ def dp_topdown_template(n):
     
     return fib(n)
 
-# Test
-print(dp_topdown_template(6))   # Output: 8
+print("Top-Down:", fibonacci_topdown(6)) # Output: 8, 
 
-"""
-=========================================================================
-BOTTOM-UP DP TEMPLATE (TABULATION)
-    - Use for: When you need to compute all or most subproblems anyways, when the iteration order is clear, and when you want to avoid recursion stack overflow for large inputs
-    - Pattern: Start from base cases and build up to the final answer using a table/array. Fill dp array in order so each state uses only previously computed states.
-    - Common problems: Fibonacci, climbing stairs, house robber, coin change, knapsack, maximum subarray. Generally more space-efficient than top-down (can optimize to O(1)).
-=========================================================================
-"""
+# ===== APPROACH 2: BOTTOM-UP (TABULATION) =====
 def fibonacci_bottomup(n):
     """
-    Calculate the nth Fibonacci number using bottom-up DP with tabulation. Build from base cases (fib(0)=0, fib(1)=1) up to fib(n) iteratively.
-    
-    Example: fibonacci_bottomup(6) → 8 (sequence: 0,1,1,2,3,5,8)
-    
     TC: O(n) - iterate through all states
     SC: O(n) - dp array
     """
@@ -192,17 +195,11 @@ def fibonacci_bottomup(n):
     
     return dp[n]
 
+print("Bottom-Up:", fibonacci_bottomup(6)) # Output: 8, seq: 0,1,1,2,3,5,8
 
-# Test
-print(fibonacci_bottomup(6))   # Output: 8
-print(fibonacci_bottomup(10))  # Output: 55
-
-# =========================================================================
-# SPACE-OPTIMIZED DP TEMPLATE
-# =========================================================================
-def fib_space_optimized(n):
+# ===== APPROACH 3: SPACE-OPTIMIZED =====
+def fibonacci_space_optimized(n):
     """
-    Space-optimized DP when only need previous few states
     TC: O(n) - same time complexity
     SC: O(1) - constant space (only store last 2 values)
     """
@@ -210,19 +207,17 @@ def fib_space_optimized(n):
         return n
     
     # Only keep last 2 values instead of entire array
-    prev2 = 0
-    prev1 = 1
+    prev2 = 0  # fib(i-2)
+    prev1 = 1  # fib(i-1)
     
     for _ in range(2, n + 1):
-        current = prev1 + prev2
-        prev2 = prev1  # Move pointers forward
+        current = prev1 + prev2  # fib(i)
+        prev2 = prev1  # Shift window forward
         prev1 = current
     
     return prev1
 
-# Test
-print(fib_space_optimized(6))   # Output: 8
-print(fib_space_optimized(10))  # Output: 55
+print("Space-Optimized:", fibonacci_space_optimized(6))  # Output: 8, seq: 0,1,1,2,3,5,8
 
 """
 TIME & SPACE COMPLEXITY REFERENCE
@@ -251,77 +246,78 @@ WHERE:
 - k = number of states in state machine
 - sum = target sum or array sum
 
-COMPLEXITY NOTES:
-----------------
-1. 1D Linear DP: O(n) time, O(n) space
-   - Process each element once: O(n)
-   - Store solution for each position: O(n)
-   
-   Space optimization:
-   - If dp[i] only depends on dp[i-1] and dp[i-2], keep only last 2 vals
-   - Reduces from O(n) to O(1) space
-   - Examples: Fibonacci, House Robber, Climbing Stairs
-   
-   Common pattern: dp[i] = f(dp[i-1], dp[i-2], ..., nums[i])
+----------------------------------
+WHY USE DP INSTEAD OF BRUTE FORCE?
+----------------------------------
+DP transforms exponential time into polynomial time by remembering solutions to subproblems.
 
-2. 2D Grid DP: O(m * n) time, O(m * n) space
-   - Fill entire m x n table: O(m * n)
-   - Store solution for each cell: O(m * n)
-   
-   Space optimization:
-   - If dp[i][j] only depends on current and previous row, keep only 2 rows
-   - Reduces from O(m * n) to O(min(m, n)) space
-   - Examples: Unique Paths, Minimum Path Sum
-   
-   Common pattern: dp[i][j] = f(dp[i-1][j], dp[i][j-1], grid[i][j])
+KEY INSIGHT: Brute force solves the same subproblem thousands of times. 
+DP solves each subproblem once and stores the result.
 
-3. Knapsack Problems: O(n * W) time
-   - n items, W = capacity or target sum
-   - For each item, try all possible capacities: O(n * W)
+1. SIMPLE EXAMPLE: FIBONACCI
    
-   0/1 Knapsack (each item once):
-   - 2D: O(n * W) space - dp[i][w] = include/exclude item i at capacity w
-   - 1D optimized: O(W) space - process backwards to avoid using same item twice
+   Problem: Calculate fib(6) where fib(n) = fib(n-1) + fib(n-2)
    
-   Unbounded Knapsack (items unlimited):
-   - 1D: O(W) space - process forwards, items can be reused
+   BRUTE FORCE - O(2^n):
+   - fib(6) calls fib(5) and fib(4)
+   - fib(5) calls fib(4) and fib(3)
+   - fib(4) calls fib(3) and fib(2)
+   - Notice: fib(4) computed twice, fib(3) computed 3 times, fib(2) computed 5 times!
+   - Total calls for fib(6): 25 function calls
+   - Total calls for fib(20): 21,891 function calls
+   - TC: O(2^n) - grows exponentially
    
-   Common pattern: dp[w] = max(dp[w], dp[w-weight] + value)
+   WITH DP - O(n):
+   - Store fib(2), fib(3), fib(4), etc. in a cache
+   - When fib(4) is needed again, just look it up
+   - Each fib(i) computed exactly once
+   - Total calls for fib(6): 6 function calls
+   - Total calls for fib(20): 20 function calls
+   - TC: O(n) - linear time
+   - For n=20: 21,891 → 20 operations (1,094x faster!)
 
-4. Longest Increasing Subsequence (LIS): Two approaches
+2. ORDERING EXAMPLE: SHORTEST PATH THROUGH CITIES
    
-   DP approach: O(n²) time, O(n) space
-   - For each element, check all previous elements: O(n²)
-   - dp[i] = length of LIS ending at index i
+   Problem: Visit cities A, B, C, D and return to start. What's the shortest total distance?
    
-   Binary Search approach: O(n log n) time, O(n) space
-   - Maintain array of smallest tail elements
-   - Binary search for insertion position: O(log n) per element
-   - More efficient but less intuitive
+   BRUTE FORCE - O(n!):
+   - Try every possible ordering of cities
+   - Starting from A:
+     * A → B → C → D → A (distance = 50)
+     * A → B → D → C → A (distance = 45)
+     * A → C → B → D → A (distance = 60)
+     * A → C → D → B → A (distance = 55)
+     * A → D → B → C → A (distance = 48)
+     * A → D → C → B → A (distance = 52)
+   - That's 3! = 6 orderings to check (for 3 cities after start)
    
-   Common pattern: dp[i] = max(dp[j] + 1) for all j < i where nums[j] < nums[i]
-
-5. Longest Common Subsequence (LCS): O(m * n) time
-   - Compare every character of both strings: O(m * n)
-   - dp[i][j] = LCS length of first i chars of s1 and first j chars of s2
+   The Problem: Recalculates same partial paths repeatedly
+   - Route "A → B → C → ?" recalculates "A → B" cost
+   - Route "A → C → B → ?" also recalculates "A → B" cost (when going B→A at end)
+   - Route "A → D → B → C → ?" recalculates "B → C" cost
+   - Same segments computed over and over through different orderings
    
-   Space optimization:
-   - Only need previous row, reduce to O(min(m, n))
+   TC: O(n!) - factorial growth
+   - 4 cities: 3! = 6 orderings
+   - 10 cities: 9! = 362,880 orderings
+   - 15 cities: 14! = 87 billion orderings
    
-   Common pattern:
-   - If s1[i] == s2[j]: dp[i][j] = dp[i-1][j-1] + 1
-   - Else: dp[i][j] = max(dp[i-1][j], dp[i][j-1])
-
-6. State Machine DP: O(n * k) time, O(n * k) space
-   - n positions/days, k possible states at each position
-   - For each position, process each state: O(n * k)
+   WITH DP - O(n² x 2^n):
+   - Cache: "What's the shortest path from city X, having visited cities S?"
+   - Example states:
+     * From B, visited {A,B}: shortest to finish = 30
+     * From C, visited {A,C}: shortest to finish = 35
+     * From B, visited {A,B,C}: shortest to finish = 20
    
-   Space optimization:
-   - If states only depend on previous position, keep only last position
-   - Reduces from O(n * k) to O(k) space
+   The Win: Each (current_city, visited_set) computed once and reused
+   - "From B, visited {A,B}" computed once, not 6 times
+   - Total unique states: 4 cities x 2^4 visited combinations = 64 states
    
-   Common in: Stock trading (buy/sell/cooldown), game states
-   Pattern: dp[i][state] = best result at position i in given state
+   TC: O(n² x 2^n) where n = number of cities
+   - 4 cities: 4² x 2^4 = 256 operations vs 6 orderings (similar for small n)
+   - 15 cities: 15² x 2^15 = 7.4 million vs 87 billion (11,700x faster!)
+   
+   Real savings appear at n ≥ 10 where factorial growth becomes impossible
 
 =========================================================================
 PATTERN 1: 1D LINEAR DP (SEQUENTIAL DECISIONS)
@@ -346,12 +342,7 @@ class LinearDP:
     """
     Problem: You are a robber planning to rob houses along a street. Each house has a certain amount of money. Adjacent houses have security systems connected - if two adjacent houses are robbed on the same night, the police are automatically called.
     
-    Given an integer array nums representing the amount of money of each house, return the maximum amount of money you can rob without alerting the police.
-    
-    TC: O(n) - process each house once
-    SC: 
-        - O(n) - with DP array, store n values in the 
-        - O(1) - space optimized - only keep track of last 2 values 
+    Given an integer array nums representing the amount of money of each house, return the maximum amount of money you can rob without alerting the police. 
     
     How it works:
     1. At each house, decide: rob it or skip it
@@ -361,6 +352,12 @@ class LinearDP:
     """
     # 1D DP with explicit DP array -> LC 198
     def rob_with_dp_array(self, nums: List[int]) -> int:
+        """
+        TC: O(n) - process each house once
+        SC: 
+        - O(n) - with DP array, store n values in the 
+        - O(1) - space optimized - only keep track of last 2 values
+        """
         n = len(nums)
         dp = [0] * (n + 1)  # Max money we can rob up to each house
         dp[0] = 0  # No houses robbed = $0
@@ -436,36 +433,38 @@ class GridDP:
     Input: m = 3, n = 7
     Output: 28
     
-    TC: O(m * n) - fill entire grid once
-    SC: O(m * n) - 2D dp table (can optimize to O(min(m,n)))
-    
     How it works:
     1. To reach any cell, robot must come from top or left
     2. Number of paths to cell = paths from top + paths from left
-    3. Base case: first row and column have only 1 path each
+    3. Base case: first row and column's cells can only come from one direction (1 unique path each)
     4. Pattern: dp[i][j] = dp[i-1][j] + dp[i][j-1]
     """
     def uniquePaths(self, m: int, n: int) -> int: # LC 62
+        """
+        TC: O(m * n) - fill entire grid once
+        SC: O(m * n) - 2D dp table (can optimize to O(min(m,n)))
+        """
         # Initialize dp table -> m = rows, n = cols
         dp = [[0] * n for _ in range(m)]
         
         # Base case: first col - only one way to reach (go down)
-        for i in range(m):  # Iterate through all m rows
+        for i in range(m): # Iterate through all m rows and col stays 0
             dp[i][0] = 1  # Set first col (col 0) in each row
         
         # Base case: first row - only one way to reach (go right)
-        for j in range(n):  # Iterate through all n cols
+        for j in range(n):  # Iterate through all n cols and row stays 0
             dp[0][j] = 1  # Set first row (row 0) in each col
         
         # Fill the rest of the grid
         for i in range(1, m):
             for j in range(1, n):
-                # Paths to current = paths from above + paths from l
+                # Total unique paths to current = paths from above + paths from l
                 dp[i][j] = dp[i-1][j] + dp[i][j-1]
         
         return dp[m-1][n-1]
     
-    # Space-optimized version: O(n) space
+    # Space-optimized version: O(n) space 
+    # Key Insight: We only ever need the previous row and current row to compute values. We don't need the entire 2D grid!
     def uniquePaths_optimized(self, m: int, n: int) -> int:
         # Only keep current row, previous row is implicit
         dp = [1] * n  # First row all 1s
@@ -495,67 +494,113 @@ print("Unique Paths optimized (3x3):", sol.uniquePaths_optimized(3, 3))  # 6
 
 """
 =========================================================================
-PATTERN 3: 0/1 KNAPSACK (SUBSET SELECTION)
+PATTERN 3: 0/1 KNAPSACK (SUBSET SELECTION) - TOP-DOWN APPROACH
 
 PATTERN EXPLANATION: Choose items to include or exclude to meet a target constraint (sum, weight, capacity). Each item can be used at most once. 
 
-Build solution by considering each item and deciding whether to include it. Often involves checking if a specific target sum or capacity is achievable using a subset of items.
+Use recursion with memoization to explore both choices (include/exclude) for each item, starting from the problem goal and working down to base cases.
 
-TYPICAL STEPS:
-1. Define dp[i][sum] = can we achieve sum using first i items
-2. Base case: dp[0][0] = True (empty set has sum 0)
-3. For each item, for each possible sum:
-   - Option 1: exclude item -> dp[i][sum] = dp[i-1][sum]
-   - Option 2: include item -> dp[i][sum] = dp[i-1][sum-item]
-4. Return dp[n][target]
-5. (Optional) Space optimize to O(target) by using 1D array
+TYPICAL STEPS (TOP-DOWN):
+1. Define recursive function: can_make(i, remaining) = can we achieve 'remaining' using items from index i onwards?
+2. Base cases: 
+   - remaining == 0: True (found exact match)
+   - remaining < 0 or i >= n: False (overshot or ran out of items)
+3. For each item at index i:
+   - Option 1: include item -> can_make(i+1, remaining - item)
+   - Option 2: exclude item -> can_make(i+1, remaining)
+4. Memoize results using (i, remaining) as key
+5. Return result of recursive call starting at index 0
 
-Applications: Partition equal subset, target sum, subset sum, coin change 
-(count ways).
+Applications: Partition equal subset, target sum, subset sum, coin change (count ways).
 =========================================================================
 """
 
 class KnapsackDP:
     """
-    Problem: Given an integer array nums, return true if you can 
-    partition the array into two subsets such that the sum of elements in both subsets is equal.
+    Problem: Given an integer array nums, return true if you can partition 
+    the array into two subsets such that the sum of elements in both subsets 
+    is equal.
+
+    Example 1:
+    Input: nums = [1,5,11,5]
+    Output: true
+    Explanation: The array can be partitioned as [1, 5, 5] and [11].
     
-    TC: O(n * sum) where sum = total sum / 2
-    SC: O(sum) - 1D dp array (space optimized)
-    
-    How it works:
-    1. If total sum is odd, can't partition equally
-    2. Problem becomes: can we find subset with sum = total/2
-    3. This is 0/1 knapsack: for each number, include or exclude
-    4. dp[s] = can we achieve sum s using available numbers
-    5. Pattern: dp[s] = dp[s] OR dp[s-num] (exclude or include current num)
+    How it works (Top-Down):
+    1. If total sum is odd, can't partition equally -> return False
+    2. Problem becomes: can we find subset with sum = total/2?
+    3. For each number in the array, make a choice: include it or exclude it
+    4. Recursively check if remaining sum can be made with remaining numbers
+    5. Memoize (index, remaining_sum) to avoid recomputing same subproblems
     """
-    # 2D version (easier to understand but more space)
     def canPartition(self, nums: List[int]) -> bool: # LC 416
-        total_sum = sum(nums)
-        if total_sum % 2 != 0:
+        """
+        TC: O(n * sum) where sum = total sum / 2
+        SC: O(n * sum) - recursion stack + memoization cache
+        """
+        total = sum(nums)
+        
+        # If total is odd, impossible to split equally
+        if total % 2 != 0:
             return False
         
-        target = total_sum // 2
-        n = len(nums)
+        target = total // 2
+        memo = {} # key=(index, remaining_sum), val=bool
         
-        # dp[i][s] = can we achieve sum s using first i numbers
-        dp = [[False] * (target + 1) for _ in range(n + 1)]
+        def can_make_sum(index, remaining_sum):
+            """
+            Question: Can we make 'remaining_sum' using numbers from "index" onwards?
+            
+            Example: can_make_sum(0, 11) asks:
+            "Can I make sum=11 using all numbers starting from index 0?" -> [1,5,11,5]
+            """
+            
+            # BASE CASE 1 -> SUCCESS: We've made exactly the target sum!
+            if remaining_sum == 0:
+                return True
+            
+            # BASE CASE 2 -> FAILURE: Either went negative or ran out of numbers
+            if remaining_sum < 0 or index >= len(nums):
+                return False
+            
+            # Already solved this subproblem? Return cached answer
+            if (index, remaining_sum) in memo:
+                return memo[(index, remaining_sum)]
+            
+            current_number = nums[index]
+            
+            # CHOICE 1: Include curr number in subset
+            # - Use the number, so subtract it from remaining_sum, move to next number (index + 1)
+            take_it = can_make_sum(index + 1, remaining_sum - current_number)
+            
+            # CHOICE 2: Exclude current num from subset
+            # - Don't use the number, so remaining_sum stays samem, move to next number (index + 1)
+            skip_it = can_make_sum(index + 1, remaining_sum)
+            
+            # Success if EITHER choice works
+            result = take_it or skip_it
+            
+            # Cache the result for this subproblem - Can we make remaining_sum using numbers from index onwards?
+            memo[(index, remaining_sum)] = result
+            
+            return result
         
-        # Base case: sum 0 is always achievable (empty subset)
-        for i in range(n + 1):
-            dp[i][0] = True
-        
-        for i in range(1, n + 1):
-            for s in range(1, target + 1):
-                # Option 1: don't include current number
-                dp[i][s] = dp[i-1][s]
-                
-                # Option 2: include current number (if it fits)
-                if s >= nums[i-1]:
-                    dp[i][s] = dp[i][s] or dp[i-1][s - nums[i-1]]
-        
-        return dp[n][target]
+        # Start at index 0 with full target sum to make
+        return can_make_sum(0, target)
+
+# Example trace:
+# nums = [1, 5, 11, 5], target = 11
+#
+# can_make_sum(0, 11): "Can I make 11 using [1,5,11,5]?"
+#   take_it: can_make_sum(1, 10): "Can I make 10 using [5,11,5]?"
+#     take_it: can_make_sum(2, 5): "Can I make 5 using [11,5]?"
+#       take_it: can_make_sum(3, -6) -> False (went negative)
+#       skip_it: can_make_sum(3, 5): "Can I make 5 using [5]?"
+#         take_it: can_make_sum(4, 0) -> True! ✓ (found exact match)
+#
+# Found subset: [1, 5, 5] = 11
+# Other subset: [11] = 11
+# Output: True
 
 sol = KnapsackDP()
 print("Can Partition:", sol.canPartition([1,5,11,5]))  # True
@@ -586,12 +631,11 @@ class LISDP:
     
     A subsequence is an array derived from another array by deleting some 
     or no elements without changing the order of the remaining elements.
-    
-    TC: O(n²) - for each element, check all previous elements
-    SC: O(n) - dp array
-    
-    Note: There's an O(n log n) solution using binary search, but DP is 
-    more intuitive.
+
+    Example 1:
+    Input: nums = [10,9,2,5,3,7,101,18]
+    Output: 4
+    Explanation: The longest increasing subsequence is [2,3,7,101], therefore the length is 4.
     
     How it works:
     1. dp[i] = length of longest increasing subsequence ending at index i
@@ -600,20 +644,24 @@ class LISDP:
     4. Pattern: dp[i] = max(dp[j] + 1) for all j < i where nums[j] < nums[i]
     """
     def lengthOfLIS(self, nums: List[int]) -> int: # LC 300
+        """
+        TC: O(n²) - for each element, check all previous elements
+        SC: O(n) - dp array
+        """
         if not nums:
             return 0
         
         n = len(nums)
         # dp[i] = length of LIS ending at index i
-        dp = [1] * n  # Each element by itself is a subsequence of length 1
+        dp = [1] * n  # Each ele itself is a subsequence of len 1
         
         # For each position
         for i in range(1, n):
             # Check all previous positions
             for j in range(i):
-                # If previous element is smaller, can extend its subsequence
-                if nums[j] < nums[i]:
-                    dp[i] = max(dp[i], dp[j] + 1)
+                # If curr num is greater, can extend its subsequence
+                if nums[i] > nums[j]:
+                    dp[i] = max(dp[i], dp[j] + 1) # see if extending it gets us a better result
         
         # Return the longest subsequence found at any position
         return max(dp)
@@ -626,13 +674,25 @@ class LISDP:
 # nums:  10   9  2  5  3  7  101  18
 # dp:    [1]  1  1  1  1  1   1    1   (initial)
 # 
-# i=1 (9): 9 < 10? No. dp[1] = 1
-# i=2 (2): 2 < 10? Yes, 2 < 9? Yes. dp[2] = 1 (no extension)
-# i=3 (5): 5 < 2? No, but 5 > 2. dp[3] = dp[2] + 1 = 2 [2,5]
-# i=4 (3): 3 > 2. dp[4] = dp[2] + 1 = 2 [2,3]
-# i=5 (7): 7 > 5. dp[5] = dp[3] + 1 = 3 [2,5,7]
-# i=6 (101): 101 > 7. dp[6] = dp[5] + 1 = 4 [2,5,7,101]
-# i=7 (18): 18 > 7. dp[7] = dp[5] + 1 = 4 [2,5,7,18]
+# i=1 (9): 9 > 10? No. dp[1] = 1
+# i=2 (2): 2 > 10? No, 2 > 9? No. dp[2] = 1 (no extension)
+# i=3 (5): 5 > 10? No, 5 > 9? No, 5 > 2? Yes. dp[3] = dp[2] + 1 = 2 [2,5]
+# i=4 (3): 3 > 10? No, 3 > 9? No, 3 > 2? Yes. dp[4] = dp[2] + 1 = 2 [2,3]
+# i=5 (7): 7 > 10? No, 7 > 9? No, 7 > 2? Yes. dp[5] = max(1, dp[2] + 1) = 2
+#          7 > 5? Yes. dp[5] = max(2, dp[3] + 1) = 3 [2,5,7]
+#          7 > 3? Yes. dp[5] = max(3, dp[4] + 1) = 3
+# i=6 (101): 101 > 10? Yes. dp[6] = max(1, dp[0] + 1) = 2
+#            101 > 9? Yes. dp[6] = max(2, dp[1] + 1) = 2
+#            101 > 2? Yes. dp[6] = max(2, dp[2] + 1) = 2
+#            101 > 5? Yes. dp[6] = max(2, dp[3] + 1) = 3
+#            101 > 3? Yes. dp[6] = max(3, dp[4] + 1) = 3
+#            101 > 7? Yes. dp[6] = max(3, dp[5] + 1) = 4 [2,5,7,101]
+# i=7 (18): 18 > 10? Yes. dp[7] = max(1, dp[0] + 1) = 2
+#           18 > 9? Yes. dp[7] = max(2, dp[1] + 1) = 2
+#           18 > 2? Yes. dp[7] = max(2, dp[2] + 1) = 2
+#           18 > 5? Yes. dp[7] = max(2, dp[3] + 1) = 3
+#           18 > 3? Yes. dp[7] = max(3, dp[4] + 1) = 3
+#           18 > 7? Yes. dp[7] = max(3, dp[5] + 1) = 4 [2,5,7,18]
 #
 # Final dp: [1, 1, 1, 2, 2, 3, 4, 4]
 # LIS: [2, 5, 7, 101] or [2, 5, 7, 18]
@@ -646,11 +706,7 @@ print("LIS length:", sol.lengthOfLIS([0,1,0,3,2,3]))  # 4
 =========================================================================
 PATTERN 5: LONGEST COMMON SUBSEQUENCE (TWO SEQUENCES)
 
-PATTERN EXPLANATION: Find the longest subsequence common to two sequences 
-while maintaining relative order in both. Compare characters from both 
-strings and build solution in a 2D table. When characters match, extend 
-the common subsequence. When they don't match, take the best result from 
-either excluding current character from first string or second string.
+PATTERN EXPLANATION: Find the longest subsequence common to two sequences while maintaining relative order in both. Compare characters from both strings and build solution in a 2D table. When characters match, extend the common subsequence. When they don't match, take the best result from either excluding current character from first string or second string.
 
 TYPICAL STEPS:
 1. Define dp[i][j] = LCS length of text1[0:i] and text2[0:j]
@@ -666,16 +722,14 @@ Applications: LCS, edit distance, shortest common supersequence, diff tools.
 
 class LCSDP:
     """
-    Problem: Given two strings text1 and text2, return the length of 
-    their longest common subsequence. If there is no common subsequence, 
-    return 0.
+    Problem: Given two strings text1 and text2, return the length of their longest common subsequence. If there is no common subsequence, return 0.
     
-    A subsequence is a string generated from the original string by 
-    deleting some (or no) characters without changing the relative order 
-    of the remaining characters.
-    
-    TC: O(m * n) - fill entire 2D table
-    SC: O(m * n) - 2D dp table (can optimize to O(min(m,n)))
+    A subsequence is a string generated from the original string by deleting some (or no) characters without changing the relative order of the remaining characters.
+
+    Example 1:
+    Input: text1 = "abcde", text2 = "ace" 
+    Output: 3  
+    Explanation: The longest common subsequence is "ace" and its length is 3.
     
     How it works:
     1. Build 2D table where dp[i][j] = LCS of first i chars of text1 and 
@@ -686,6 +740,10 @@ class LCSDP:
                else: dp[i][j] = max(dp[i-1][j], dp[i][j-1])
     """
     def longestCommonSubsequence(self, text1: str, text2: str) -> int: # LC 1143
+        """ 
+        TC: O(m * n) - fill entire 2D table
+        SC: O(m * n) - 2D dp table (can optimize to O(min(m,n)))
+        """
         m, n = len(text1), len(text2)
         
         # dp[i][j] = LCS length of text1[0:i] and text2[0:j]
@@ -694,7 +752,7 @@ class LCSDP:
         # Fill the table
         for i in range(1, m + 1):
             for j in range(1, n + 1):
-                if text1[i-1] == text2[j-1]:
+                if text1[i-1] == text2[j-1]: # index off by one
                     # Characters match - extend LCS from previous chars
                     dp[i][j] = dp[i-1][j-1] + 1
                 else:
@@ -704,29 +762,6 @@ class LCSDP:
                     dp[i][j] = max(dp[i-1][j], dp[i][j-1])
         
         return dp[m][n]
-    
-    # Space-optimized version: O(min(m,n))
-    def longestCommonSubsequence_optimized(self, text1: str, text2: str) -> int:
-        # Make text1 the shorter string for space optimization
-        if len(text1) < len(text2):
-            text1, text2 = text2, text1
-        
-        m, n = len(text1), len(text2)
-        
-        # Only keep current and previous row
-        prev = [0] * (n + 1)
-        curr = [0] * (n + 1)
-        
-        for i in range(1, m + 1):
-            for j in range(1, n + 1):
-                if text1[i-1] == text2[j-1]:
-                    curr[j] = prev[j-1] + 1
-                else:
-                    curr[j] = max(prev[j], curr[j-1])
-            
-            prev, curr = curr, prev
-        
-        return prev[n]
 
 # Example:
 # text1 = "abcde"
@@ -753,12 +788,7 @@ print("LCS length:", sol.longestCommonSubsequence("abc", "def"))  # 0
 =========================================================================
 PATTERN 6: STATE MACHINE DP (MULTIPLE STATES)
 
-PATTERN EXPLANATION: Track multiple distinct states at each position with 
-transitions between states. Each state represents a different condition 
-or situation (holding stock, cooldown, sold, etc). At each step, can 
-transition from one state to another with associated costs or profits. 
-Must track optimal value for each state and compute transitions based on
-allowed moves.
+PATTERN EXPLANATION: Track multiple distinct states at each position with transitions between states. Each state represents a different condition or situation (holding stock, cooldown, sold, etc). At each step, can transition from one state to another with associated costs or profits. Must track optimal value for each state and compute transitions based on allowed moves.
 
 TYPICAL STEPS:
 1. Identify all possible states (e.g., hold, sold, cooldown)
@@ -776,17 +806,16 @@ decisions.
 
 class StateMachineDP:
     """
-    Problem: You are given an array prices where prices[i] is the price of 
-    a stock on day i.
+    Problem: You are given an array prices where prices[i] is the price of a stock on day i.
 
-    You can complete as many transactions as you like with the following 
-    restrictions: After you sell your stock, you cannot buy stock on the 
-    next day (cooldown 1 day)
+    You can complete as many transactions as you like with the following restrictions: After you sell your stock, you cannot buy stock on the next day (cooldown 1 day)
     
     Return the maximum profit you can achieve.
-    
-    TC: O(n) - process each day once, update all states
-    SC: O(1) - only keep track of 3 states (space optimized)
+
+    Example 1:
+    Input: prices = [1,2,3,0,2]
+    Output: 3
+    Explanation: transactions = [buy, sell, cooldown, buy, sell]
     
     States:
     - hold: currently holding stock
@@ -807,37 +836,12 @@ class StateMachineDP:
        - sold = hold + price
        - rest = max(rest, sold)
     """
-    def maxProfit(self, prices: List[int]) -> int: # LC 309
-        if not prices:
-            return 0
-        
-        # States: hold = holding stock, sold = just sold, rest = resting/cooldown
-        hold = float('-inf')  # Initially can't be holding (no stock bought yet)
-        sold = float('-inf')  # Initially can't have sold
-        rest = 0  # Initially resting with 0 profit
-        
-        for price in prices:
-            # Save previous values (needed for transitions)
-            prev_hold = hold
-            prev_sold = sold
-            prev_rest = rest
-            
-            # Update states based on transitions
-            # Hold: either already holding, or buy today from rest state
-            hold = max(prev_hold, prev_rest - price)
-            
-            # Sold: must have been holding, sell today
-            sold = prev_hold + price
-            
-            # Rest: either already resting, or cooldown from just sold
-            rest = max(prev_rest, prev_sold)
-        
-        # Return max profit from non-holding states (sold or rest)
-        return max(sold, rest)
-    
-    # Alternative: explicit 2D DP (easier to visualize)
-    def maxProfit_2d(self, prices: List[int]) -> int:
-        if not prices:
+    def maxProfit_2d(self, prices: List[int]) -> int: # LC 309
+        """
+        TC: O(n) -> loop through n days
+        SC: O(n) -> create 2d array of size n * 3
+        """
+        if not prices: # Edge case -> no array of prices -> cannot return profit
             return 0
         
         n = len(prices)
@@ -850,50 +854,20 @@ class StateMachineDP:
         dp[0][2] = 0  # Rest on day 0
         
         for i in range(1, n):
-            # Hold: either already holding, or buy today from rest
-            dp[i][0] = max(dp[i-1][0], dp[i-1][2] - prices[i])
+            # Hold state: find most profitable way to hold stock
+            dp[i][0] = max(dp[i-1][0], # Continue holding -> You already held stock yesterday
+                           dp[i-1][2] - prices[i]) # Buy today -> You were resting yesterday, buy today
             
-            # Sold: must have been holding, sell today
-            dp[i][1] = dp[i-1][0] + prices[i]
+            # Sold state: only one way to be in sold state
+            dp[i][1] = dp[i-1][0] + prices[i] # Must have been holding stock yesterday and sell today
             
-            # Rest: either already resting, or cooldown from sold
-            dp[i][2] = max(dp[i-1][2], dp[i-1][1])
+            # Rest state: find most profitable way to be resting
+            dp[i][2] = max(dp[i-1][2], # Continue resting -> You were already resting yesterday
+                           dp[i-1][1]) # Enter cooldown -> you sold yesterday and now must cooldown
         
         # Return max of sold or rest on last day
         return max(dp[n-1][1], dp[n-1][2])
 
-# Example:
-# prices = [1, 2, 3, 0, 2]
-#
-# Day 0 (price=1):
-#   hold = -1 (buy at 1)
-#   sold = -inf (can't sell nothing)
-#   rest = 0
-#
-# Day 1 (price=2):
-#   hold = max(-1, 0-2) = -1 (keep holding)
-#   sold = -1 + 2 = 1 (sell, profit 1)
-#   rest = max(0, -inf) = 0
-#
-# Day 2 (price=3):
-#   hold = max(-1, 0-3) = -1 (keep holding)
-#   sold = -1 + 3 = 2 (sell, profit 2)
-#   rest = max(0, 1) = 1 (cooldown from previous sell)
-#
-# Day 3 (price=0):
-#   hold = max(-1, 1-0) = 1 (buy at 0 from rest state, overall profit 1)
-#   sold = -1 + 0 = -1
-#   rest = max(1, 2) = 2
-#
-# Day 4 (price=2):
-#   hold = max(1, 2-2) = 1
-#   sold = 1 + 2 = 3 (sell, total profit 3)
-#   rest = max(2, -1) = 2
-#
-# Best strategy: buy at 1, sell at 2, cooldown, buy at 0, sell at 2
-# Profit: (2-1) + (2-0) = 3
-# Output: 3
-
 sol = StateMachineDP()
-print("Max profit with cooldown:", sol.maxProfit([1,2,3,0,2]))  # 3
-print("Max profit with cooldown:", sol.maxProfit([1]))  # 0
+print("Max profit with cooldown:", sol.maxProfit_2d([1,2,3,0,2]))  # 3
+print("Max profit with cooldown:", sol.maxProfit_2d([1]))  # 0

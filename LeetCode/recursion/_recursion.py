@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 """
 =================================================================
 RECURSION COMPLETE GUIDE
@@ -46,293 +48,107 @@ Common Recursion problem types:
 - String manipulation (reverse, palindrome, substrings)
 - Array problems (subsets, partition, max depth)
 
-RECURSION CORE TEMPLATES
-=========================
-"""
+=================================================================
+QUICK REFERENCE: RECURSION COMPLEXITY PATTERNS
+=================================================================
 
-from typing import List, Optional
-
-# ================================================================
-# BASIC LINEAR RECURSION TEMPLATE
-# ================================================================
-def linear_recursion_template(n):
-    """
-    Simple recursion with single recursive call
-    TC: O(n) - n recursive calls
-    SC: O(n) - call stack depth
-    """
-    # Base case - stops recursion
-    if n <= 0:
-        return 0
-    
-    # Recursive case - call with smaller input
-    result = linear_recursion_template(n - 1)
-    
-    # Process current level
-    return result + n
-
-# ================================================================
-# TREE RECURSION TEMPLATE
-# ================================================================
-def tree_recursion_template(n):
-    """
-    Recursion with multiple recursive calls (branches)
-    TC: O(2^n) - exponential branching
-    SC: O(n) - max depth of call stack
-    """
-    # Base case
-    if n <= 1:
-        return n
-    
-    # Multiple recursive calls (branches)
-    left = tree_recursion_template(n - 1)
-    right = tree_recursion_template(n - 2)
-    
-    # Combine results
-    return left + right
-
-# ================================================================
-# DIVIDE AND CONQUER TEMPLATE
-# ================================================================
-def divide_conquer_template(arr, left, right):
-    """
-    Divide problem in half, solve subproblems, combine
-    TC: O(n log n) typical for divide and conquer
-    SC: O(log n) - recursion depth
-    """
-    # Base case - single element or empty
-    if left >= right:
-        return
-    
-    # Divide - split problem in half
-    mid = left + (right - left) // 2
-    
-    # Conquer - solve subproblems
-    divide_conquer_template(arr, left, mid)
-    divide_conquer_template(arr, mid + 1, right)
-    
-    # Combine - merge results
-    merge(arr, left, mid, right)
-
-# ================================================================
-# BACKTRACKING TEMPLATE
-# ================================================================
-def backtracking_template(nums, path, result):
-    """
-    Explore all possibilities, backtrack when invalid
-    TC: O(2^n) or O(n!) depending on problem
-    SC: O(n) - recursion depth + path storage
-    """
-    # Base case - found valid solution
-    if is_valid_solution(path):
-        result.append(path[:])  # Store copy
-        return
-    
-    # Try all choices
-    for choice in get_choices(nums):
-        # Make choice
-        path.append(choice)
-        
-        # Recurse with choice
-        backtracking_template(nums, path, result)
-        
-        # Backtrack - undo choice
-        path.pop()
-
-# ================================================================
-# MEMOIZATION TEMPLATE
-# ================================================================
-def memoization_template(n, memo=None):
-    """
-    Cache results to avoid recomputation
-    TC: O(n) - each subproblem solved once
-    SC: O(n) - memo cache + recursion stack
-    """
-    if memo is None:
-        memo = {}
-    
-    # Base case
-    if n <= 1:
-        return n
-    
-    # Check cache
-    if n in memo:
-        return memo[n]
-    
-    # Compute and cache
-    result = memoization_template(n-1, memo) + memoization_template(n-2, memo)
-    memo[n] = result
-    
-    return result
-
-"""
-TIME & SPACE COMPLEXITY REFERENCE
-==================================
-
-RECURSION COMPLEXITY PATTERNS:
--------------------------------
-+---------------------------+------------------+------------------+
-| Pattern                   | Time Complexity  | Space Complexity |
-+---------------------------+------------------+------------------+
-| Linear Recursion          | O(n)             | O(n)             |
-| Binary Tree Recursion     | O(2^n)           | O(n)             |
-| Divide and Conquer        | O(n log n)       | O(log n)         |
-| Backtracking (subset)     | O(2^n)           | O(n)             |
-| Backtracking (permute)    | O(n!)            | O(n)             |
-| Memoized Recursion        | O(n) to O(n²)    | O(n) to O(n²)    |
-+---------------------------+------------------+------------------+
-
-COMMON RECURSION PATTERNS COMPLEXITY:
---------------------------------------
-+---------------------------+------------------+------------------+
-| Pattern                   | Time Complexity  | Space Complexity |
-+---------------------------+------------------+------------------+
-| Factorial                 | O(n)             | O(n)             |
-| Fibonacci (naive)         | O(2^n)           | O(n)             |
-| Fibonacci (memo)          | O(n)             | O(n)             |
-| Tree Traversal            | O(n)             | O(h)             |
-| Merge Sort                | O(n log n)       | O(n)             |
-| Quick Sort                | O(n log n) avg   | O(log n)         |
-| Binary Search             | O(log n)         | O(log n)         |
-| Power (a^n)               | O(log n)         | O(log n)         |
-| Generate Subsets          | O(2^n)           | O(n)             |
-| Generate Permutations     | O(n!)            | O(n)             |
-| N-Queens                  | O(n!)            | O(n²)            |
-| Combination Sum           | O(2^n)           | O(target/min)    |
-+---------------------------+------------------+------------------+
-
-WHERE:
-- n = input size (array length, tree nodes, etc.)
-- h = height of tree
-- target = target sum in combination problems
-- min = minimum element in array
-
-COMPLEXITY NOTES:
------------------
-1. Linear Recursion: O(n) time, O(n) space
-   - Single recursive call per level: O(n) calls
-   - Each call adds to stack: O(n) space
-   - Examples: Factorial, sum of array, reverse list
-   
-   Recurrence: T(n) = T(n-1) + O(1)
-   Common pattern: Process current, recurse on rest
-
-2. Binary Tree Recursion: O(2^n) time, O(n) space
-   - Two recursive calls per level: 2^n total calls
-   - Max depth of recursion: O(n)
-   - Examples: Fibonacci (naive), count ways, decision trees
-   
-   Recurrence: T(n) = 2T(n-1) + O(1)
-   Exponential without memoization!
-   Common pattern: Split into two subproblems
-
-3. Divide and Conquer: O(n log n) time, O(log n) or O(n) space
-   - Divide: Split into halves (log n levels)
-   - Conquer: Solve recursively
-   - Combine: Merge results (O(n) per level)
-   - Total: O(n) work at each of O(log n) levels = O(n log n)
-   
-   Space: O(log n) for recursion, O(n) if additional array needed
-   Examples: Merge sort, quick sort, binary search tree operations
-   
-   Recurrence: T(n) = 2T(n/2) + O(n)
-   Master theorem: T(n) = O(n log n)
-
-4. Backtracking - Subsets: O(2^n) time, O(n) space
-   - For each element: include or exclude (2 choices)
-   - Total combinations: 2^n
-   - Space: O(n) for recursion depth + current path
-   
-   Examples: Power set, subset sum, combination sum
-   At each step: make choice, recurse, undo choice
-   
-   Generate all: O(2^n) solutions × O(n) per solution = O(n * 2^n) output
-
-5. Backtracking - Permutations: O(n!) time, O(n) space
-   - First position: n choices
-   - Second position: n-1 choices
-   - Total: n! permutations
-   
-   Space: O(n) for recursion + current permutation
-   Examples: All permutations, N-queens, Sudoku
-   
-   Output size: O(n!) permutations × O(n) per permutation
-
-6. Memoization: O(n) to O(n²) time, O(n) to O(n²) space
-   - Each unique subproblem solved once
-   - Cache results in memo dictionary/array
-   - Reduces exponential to polynomial
-   
-   Fibonacci: O(2^n) → O(n) with memoization
-   Common pattern: Check cache, compute if missing, store result
-   
-   Trade-off: Use memory to save time
-
-7. Tree Traversal: O(n) time, O(h) space
-   - Visit each node once: O(n)
-   - Stack depth = tree height: O(h)
-   - Balanced tree: O(log n) space
-   - Skewed tree: O(n) space
-   
-   Examples: Pre/in/post-order, path finding
-   Each node processed once
-
-8. Binary Search: O(log n) time, O(log n) space
-   - Halve search space each step: log n steps
-   - Recursion depth: O(log n)
-   - Can be optimized to O(1) space with iteration
-   
-   Recurrence: T(n) = T(n/2) + O(1)
-   Solution: T(n) = O(log n)
-
-GENERAL RECURSION OPTIMIZATION:
---------------------------------
-Time optimization:
-- Use memoization to cache results
-- Convert to iteration if tail recursion
-- Use divide and conquer to reduce branching
-
-Space optimization:
-- Convert tail recursion to iteration
-- Use iterative deepening for DFS
-- Pass by reference instead of copying
-
-Choosing approach:
-- Recursive: Natural for tree/graph, backtracking
-- Iterative: Better for simple loops, space-critical
-- Memoized: When subproblems overlap
-
-WHEN TO USE EACH PATTERN:
+1. BASIC LINEAR RECURSION
 --------------------------
-Linear Recursion:
-  - Process sequence one element at a time
-  - Sum, reverse, validate structure
-  - Can often convert to iteration
+Pattern: Single recursive call, process one at a time
+Example: factorial(n) = n × factorial(n-1)
 
-Tree Recursion:
-  - Multiple branches from each call
-  - Decision trees, Fibonacci
-  - Use memoization if subproblems overlap
+TC: O(n) - n recursive calls
+SC: O(n) - call stack depth of n
 
-Divide and Conquer:
-  - Problem divisible into independent halves
-  - Sorting, searching in sorted data
-  - Merge/combine step needed
+Examples: Factorial, Sum Array, Reverse Linked List
 
-Backtracking:
-  - Generate all possibilities
-  - Constraint satisfaction problems
-  - Undo choices to try alternatives
 
-Memoization:
-  - Overlapping subproblems
-  - Optimize exponential to polynomial
-  - Convert to DP for bottom-up
-"""
+2. TREE RECURSION (BINARY TREE)
+--------------------------------
+Pattern: Two recursive calls (left & right children)
+Example: maxDepth = 1 + max(left_depth, right_depth)
 
-"""
-RECURSION PATTERNS
-==================
+TC: O(n) - visit each node once
+SC: O(h) - call stack depth = tree height
+    - Balanced tree: O(log n)
+    - Skewed tree: O(n)
+
+Examples: Max Depth, Path Sum, Invert Tree, Same Tree
+
+SPECIAL CASE - Naive Fibonacci:
+TC: O(2^n) - exponential branching without memoization
+SC: O(n) - max call stack depth
+
+
+3. DIVIDE AND CONQUER
+----------------------
+Pattern: Split in half, solve recursively, combine
+
+TC: O(n log n)
+    - log n levels (halving each time)
+    - O(n) work per level
+    
+SC: O(log n) for recursion stack
+    - Add O(n) if using extra arrays (merge sort)
+
+Examples:
+- Merge Sort: O(n log n) time, O(n) space
+- Quick Sort: O(n log n) time, O(log n) space
+- Binary Search: O(log n) time, O(log n) space
+
+
+4. BACKTRACKING
+---------------
+Pattern: Try all possibilities, backtrack when invalid
+
+TC: O(2^n) or O(n!)
+    - Subsets: O(2^n) - include/exclude each element
+    - Permutations: O(n!) - n choices, then n-1, etc.
+    
+SC: O(n)
+    - Call stack depth = max path length
+    - Path storage = O(n)
+
+Examples:
+- Subsets: O(2^n) time, O(n) space
+- Permutations: O(n!) time, O(n) space
+- Combination Sum: O(2^n) time, O(n) space
+
+
+5. MEMOIZATION (TOP-DOWN DP)
+-----------------------------
+Pattern: Cache results to avoid recomputation
+
+TC: O(n) to O(n²)
+    - Each unique subproblem solved once
+    - 1D problems: O(n) subproblems
+    - 2D problems: O(n²) subproblems
+    
+SC: O(n) to O(n²)
+    - Memo dictionary size
+    - Plus recursion stack
+
+Examples:
+- Fibonacci: O(n) time, O(n) space (vs O(2^n) naive)
+- Climbing Stairs: O(n) time, O(n) space
+- Coin Change: O(n × amount) time, O(n × amount) space
+
+
+6. HELPER FUNCTION RECURSION
+-----------------------------
+Pattern: Pass accumulated state through recursion
+
+TC: Same as underlying pattern
+    - Usually O(n) for trees or lists
+    
+SC: Same as underlying + state storage
+    - Usually O(h) for trees, O(n) for lists
+    - State variables don't usually add much
+
+Examples:
+- Reverse Linked List: O(n) time, O(n) space
+- Sum Root to Leaf: O(n) time, O(h) space
+- Range Sum BST: O(n) time, O(h) space
 """
 
 # ================================================================
@@ -354,17 +170,17 @@ RECURSION PATTERNS
 
 class BasicRecursion:
     """
-    Problem 1: Calculate n! (n factorial) = n × (n-1) × ... × 2 × 1
+    Problem 1: Calculate n! (n factorial) = n x (n-1) x ... x 2 x 1
     
     Example:
-        factorial(5) = 5 × 4 × 3 × 2 × 1 = 120
+        factorial(5) = 5 x 4 x 3 x 2 x 1 = 120
     
     TC: O(n) - n recursive calls
     SC: O(n) - call stack depth
     
     How it works:
     1. Base case: 0! = 1 or 1! = 1
-    2. Recursive case: n! = n × (n-1)!
+    2. Recursive case: n! = n x (n-1)!
     3. Each call multiplies current n with result of (n-1)!
     4. Stack unwinds multiplying results together
     """
@@ -388,96 +204,8 @@ class BasicRecursion:
 #   = 5 * 24
 #   = 120
 
-    def power(self, x: float, n: int) -> float:  # LC 50 - Pow(x, n)
-        """
-        Problem 2: Calculate x^n efficiently using recursion.
-        
-        Optimized with divide and conquer:
-        - x^n = (x^(n/2))^2 if n is even
-        - x^n = x × (x^(n/2))^2 if n is odd
-        
-        TC: O(log n) - halve n each time
-        SC: O(log n) - recursion depth
-        
-        How it works:
-        1. Base case: x^0 = 1
-        2. Handle negative exponents: x^(-n) = 1/(x^n)
-        3. Divide: Calculate half = x^(n/2)
-        4. Conquer: Square half, multiply by x if odd
-        """
-        # Base case
-        if n == 0:
-            return 1.0
-        
-        # Handle negative exponent
-        if n < 0:
-            x = 1 / x
-            n = -n
-        
-        # Divide and conquer
-        half = self.power(x, n // 2)
-        
-        # Even exponent: x^n = (x^(n/2))^2
-        if n % 2 == 0:
-            return half * half
-        # Odd exponent: x^n = x × (x^(n/2))^2
-        else:
-            return x * half * half
-
-# Example trace:
-# power(2, 10)
-#   n=10 (even): half = power(2, 5)
-#     n=5 (odd): half = power(2, 2)
-#       n=2 (even): half = power(2, 1)
-#         n=1 (odd): half = power(2, 0)
-#           n=0: return 1         # Base case
-#         return 2 * 1 * 1 = 2    # 2^1
-#       return 2 * 2 = 4          # 2^2
-#     return 2 * 4 * 4 = 32       # 2^5
-#   return 32 * 32 = 1024         # 2^10
-
-    def isPalindrome(self, s: str) -> bool:
-        """
-        Problem 3: Check if string is palindrome using recursion.
-        
-        TC: O(n) - process each character once
-        SC: O(n) - recursion depth
-        
-        How it works:
-        1. Base case: Empty or single character is palindrome
-        2. Check if first and last characters match
-        3. Recursively check middle substring
-        """
-        # Remove non-alphanumeric and convert to lowercase
-        s = ''.join(c.lower() for c in s if c.isalnum())
-        
-        def helper(left: int, right: int) -> bool:
-            # Base case: Pointers met or crossed
-            if left >= right:
-                return True
-            
-            # Check ends match and recurse on middle
-            if s[left] != s[right]:
-                return False
-            
-            return helper(left + 1, right - 1)
-        
-        return helper(0, len(s) - 1)
-
-# Example trace:
-# isPalindrome("A man, a plan, a canal: Panama")
-# Clean: "amanaplanacanalpanama"
-# helper(0, 20):  'a' == 'a'? Yes → helper(1, 19)
-# helper(1, 19):  'm' == 'm'? Yes → helper(2, 18)
-# helper(2, 18):  'a' == 'a'? Yes → helper(3, 17)
-# ... continues until left >= right
-# All characters matched → True
-
 sol = BasicRecursion()
-print("Factorial(5):", sol.factorial(5))  # 120
-print("Power(2, 10):", sol.power(2, 10))  # 1024
-print("Is Palindrome:", sol.isPalindrome("A man, a plan, a canal: Panama"))  # True
-
+print(sol.factorial(5)) # 120
 
 # ================================================================
 # PATTERN 2: TREE RECURSION (MULTIPLE BRANCHES)
@@ -504,72 +232,25 @@ class TreeNode:
 
 class TreeRecursion:
     """
-    Problem 1: Calculate nth Fibonacci number.
-    F(n) = F(n-1) + F(n-2), where F(0)=0, F(1)=1
+    Find maximum depth of binary tree. 
     
-    Example:
-        F(5) = 0, 1, 1, 2, 3, 5
-        Output: 5
-    
-    TC: O(2^n) naive, O(n) with memoization
-    SC: O(n) - recursion depth
-    
+        3
+       / \
+      9  20
+        /  \
+       15   7
+
+    Input: root = [3,9,20,null,null,15,7]
+    Output: 3
+
     How it works:
-    1. Base cases: F(0)=0, F(1)=1
-    2. Two recursive branches: F(n-1) and F(n-2)
-    3. Add results from both branches
-    4. Many repeated calculations without memoization
-    """
-    def fib(self, n: int) -> int:  # LC 509 - Fibonacci Number
-        # Base cases
-        if n <= 1:
-            return n
-        
-        # Two recursive calls (tree branching)
-        return self.fib(n - 1) + self.fib(n - 2)
-    
-    def fib_memo(self, n: int, memo=None) -> int:
-        """Optimized with memoization"""
-        if memo is None:
-            memo = {}
-        
-        # Base cases
-        if n <= 1:
-            return n
-        
-        # Check cache
-        if n in memo:
-            return memo[n]
-        
-        # Calculate and cache
-        memo[n] = self.fib_memo(n-1, memo) + self.fib_memo(n-2, memo)
-        return memo[n]
-
-# Example trace (naive):
-# fib(5)
-#   = fib(4) + fib(3)
-#   = (fib(3) + fib(2)) + (fib(2) + fib(1))
-#   = ((fib(2) + fib(1)) + (fib(1) + fib(0))) + ((fib(1) + fib(0)) + 1)
-#   = (((fib(1) + fib(0)) + 1) + (1 + 0)) + ((1 + 0) + 1)
-#   = (((1 + 0) + 1) + 1) + (1 + 1)
-#   = ((1 + 1) + 1) + 2
-#   = (2 + 1) + 2
-#   = 3 + 2
-#   = 5
-#
-# Note: Many repeated calculations! fib(3) called twice, fib(2) called 3 times
-
-    def maxDepth(self, root: Optional[TreeNode]) -> int:  # LC 104
-        """
-        Problem 2: Find maximum depth of binary tree.
-        
-        TC: O(n) - visit each node once
-        SC: O(h) - recursion depth = tree height
-        
-        How it works:
         1. Base case: null node has depth 0
         2. Recursively get depth of left and right subtrees
-        3. Current depth = 1 + max(left_depth, right_depth)
+        3. Current depth = 1 + max(left_depth, right_depth)"""
+    def maxDepth(self, root: Optional[TreeNode]) -> int:  # LC 104
+        """
+        - TC: O(n) - visit each node once
+        - SC: O(h) - recursion depth = tree height
         """
         # Base case: empty tree
         if not root:
@@ -602,68 +283,8 @@ class TreeRecursion:
 #     return 1 + max(1, 1) = 2
 #   return 1 + max(1, 2) = 3
 
-    def hasPathSum(self, root: Optional[TreeNode], targetSum: int) -> bool:  # LC 112
-        """
-        Problem 3: Check if tree has root-to-leaf path with given sum.
-        
-        TC: O(n) - visit each node once
-        SC: O(h) - recursion depth
-        
-        How it works:
-        1. Base case: null node → False
-        2. Leaf node: check if value equals remaining sum
-        3. Internal node: check if either subtree has path
-        4. Pass down remaining sum (targetSum - current value)
-        """
-        # Base case: empty tree
-        if not root:
-            return False
-        
-        # Leaf node: check if this completes the path
-        if not root.left and not root.right:
-            return root.val == targetSum
-        
-        # Check both subtrees with updated sum
-        remaining = targetSum - root.val
-        return (self.hasPathSum(root.left, remaining) or 
-                self.hasPathSum(root.right, remaining))
-
-# Example trace:
-# Tree:      5
-#           / \
-#          4   8
-#         /   / \
-#        11  13  4
-#       /  \      \
-#      7    2      1
-# targetSum = 22
-#
-# hasPathSum(5, 22):
-#   Not leaf, remaining = 22 - 5 = 17
-#   Check left: hasPathSum(4, 17)
-#     Not leaf, remaining = 17 - 4 = 13
-#     Check left: hasPathSum(11, 13)
-#       Not leaf, remaining = 13 - 11 = 2
-#       Check left: hasPathSum(7, 2)
-#         Leaf, 7 == 2? No, return False
-#       Check right: hasPathSum(2, 2)
-#         Leaf, 2 == 2? Yes, return True  # Found path!
-#       return False or True = True
-#     return True
-#   return True
-# Path found: 5 → 4 → 11 → 2 = 22
-
-sol = TreeRecursion()
-print("Fibonacci(10):", sol.fib(10))  # 55
-print("Fibonacci with Memo(10):", sol.fib_memo(10))  # 55
-
 tree = TreeNode(3, TreeNode(9), TreeNode(20, TreeNode(15), TreeNode(7)))
 print("Max Depth:", sol.maxDepth(tree))  # 3
-
-tree2 = TreeNode(5, TreeNode(4, TreeNode(11, TreeNode(7), TreeNode(2))), 
-                 TreeNode(8, TreeNode(13), TreeNode(4, None, TreeNode(1))))
-print("Has Path Sum:", sol.hasPathSum(tree2, 22))  # True
-
 
 # ================================================================
 # PATTERN 3: DIVIDE AND CONQUER
@@ -1462,75 +1083,3 @@ while reversed_head:
 # Test sum numbers
 tree = TreeNode(1, TreeNode(2), TreeNode(3))
 print("Sum Root to Leaf:", sol.sumNumbers(tree))  # 25
-
-
-# ================================================================
-# SUMMARY OF RECURSION PATTERNS
-# ================================================================
-"""
-Pattern 1 - Basic Recursion (Linear):
-  - Single recursive call, process linearly
-  - Simple problems with sequential processing
-  - Use for: Factorial, sum, reverse, power
-  - Example: LC 50 (Pow(x, n))
-
-Pattern 2 - Tree Recursion (Multiple Branches):
-  - Multiple recursive calls from each invocation
-  - Exponential without memoization
-  - Use for: Fibonacci, tree traversal, decision problems
-  - Example: LC 104 (Maximum Depth), LC 112 (Path Sum)
-
-Pattern 3 - Divide and Conquer:
-  - Divide problem in half, solve, combine
-  - O(n log n) typical complexity
-  - Use for: Sorting, binary search, optimization
-  - Example: LC 912 (Sort Array - Merge Sort), LC 704 (Binary Search)
-
-Pattern 4 - Backtracking:
-  - Explore all possibilities, undo choices
-  - Generate combinations, permutations
-  - Use for: Constraint satisfaction, generate all solutions
-  - Example: LC 78 (Subsets), LC 46 (Permutations), LC 39 (Combination Sum)
-
-Pattern 5 - Recursion with Memoization:
-  - Cache results to avoid recomputation
-  - Convert exponential to polynomial
-  - Use for: DP problems, overlapping subproblems
-  - Example: LC 70 (Climbing Stairs), LC 198 (House Robber)
-
-Pattern 6 - Helper Function Recursion:
-  - Use helper with accumulated state
-  - Track progress through parameters
-  - Use for: Reverse, range problems, path accumulation
-  - Example: LC 206 (Reverse List), LC 129 (Sum Root to Leaf)
-
-Master these 6 patterns and you'll handle 80-90% of recursion problems on LeetCode!
-
-KEY TAKEAWAYS:
---------------
-1. Always define clear base case(s) to stop recursion
-2. Ensure progress toward base case (smaller input, updated state)
-3. Each recursive call should solve simpler subproblem
-4. Use memoization for overlapping subproblems
-5. Stack space = O(recursion depth)
-6. Backtracking = make choice, recurse, undo choice
-7. Helper functions for carrying accumulated state
-8. Divide and conquer for problems divisible into halves
-9. Tree recursion can be exponential - consider memoization
-10. Some recursive solutions more elegant than iterative
-
-WHEN TO CONVERT TO ITERATION:
-------------------------------
-- Tail recursion (last operation is recursive call)
-- Simple linear recursion (factorial, sum)
-- Space-critical applications
-- Stack overflow concerns with deep recursion
-
-WHEN TO KEEP RECURSIVE:
------------------------
-- Tree/graph traversal
-- Backtracking problems
-- Divide and conquer
-- Natural recursive structure
-- Code clarity more important than performance
-"""
