@@ -494,22 +494,26 @@ print("Unique Paths optimized (3x3):", sol.uniquePaths_optimized(3, 3))  # 6
 
 """
 =========================================================================
-PATTERN 3: 0/1 KNAPSACK (SUBSET SELECTION) - TOP-DOWN APPROACH
+PATTERN 3: 0/1 KNAPSACK (SUBSET SELECTION) - BOTTOM-UP APPROACH
 
 PATTERN EXPLANATION: Choose items to include or exclude to meet a target constraint (sum, weight, capacity). Each item can be used at most once. 
 
-Use recursion with memoization to explore both choices (include/exclude) for each item, starting from the problem goal and working down to base cases.
+Use dynamic programming with a 1D array to track which target values are achievable. Build up possible sums iteratively by processing each item once.
 
-TYPICAL STEPS (TOP-DOWN):
-1. Define recursive function: can_make(i, remaining) = can we achieve 'remaining' using items from index i onwards?
-2. Base cases: 
-   - remaining == 0: True (found exact match)
-   - remaining < 0 or i >= n: False (overshot or ran out of items)
-3. For each item at index i:
-   - Option 1: include item -> can_make(i+1, remaining - item)
-   - Option 2: exclude item -> can_make(i+1, remaining)
-4. Memoize results using (i, remaining) as key
-5. Return result of recursive call starting at index 0
+TYPICAL STEPS (BOTTOM-UP):
+1. Check if problem is solvable (e.g., if sum is odd, can't partition equally)
+2. Define target value (e.g., total_sum / 2 for equal partition)
+3. Create dp array: dp[j] = "Can we make sum j?"
+4. Initialize base case: dp[0] = True (can always make sum 0)
+5. For each item:
+   - Iterate BACKWARDS from target to item value
+   - If dp[j - item] is True, then dp[j] = True
+6. Return dp[target]
+
+WHY BACKWARDS? 
+Example: num = 5, dp = [T, F, F, F, F, F, ...]
+Forward:  i=5 sets dp[5]=T, then i=10 uses that NEW dp[5] -> dp[10]=T (used 5 twice!) ✗
+Backward: i=10 uses OLD dp[5]=F, then i=5 sets dp[5]=T (used 5 once) ✓
 
 Applications: Partition equal subset, target sum, subset sum, coin change (count ways).
 =========================================================================
@@ -526,17 +530,17 @@ class KnapsackDP:
     Output: true
     Explanation: The array can be partitioned as [1, 5, 5] and [11].
     
-    How it works (Top-Down):
+    How it works (Bottom-Up):
     1. If total sum is odd, can't partition equally -> return False
     2. Problem becomes: can we find subset with sum = total/2?
-    3. For each number in the array, make a choice: include it or exclude it
-    4. Recursively check if remaining sum can be made with remaining numbers
-    5. Memoize (index, remaining_sum) to avoid recomputing same subproblems
+    3. Create dp array where dp[j] = "Can we make sum j?"
+    4. For each number, iterate backwards updating which sums are achievable
+    5. Return dp[target] - can we make the target sum?
     """
     def canPartition(self, nums: List[int]) -> bool: # LC 416
         """
-        TC: O(n * sum) where sum = total sum / 2
-        SC: O(n * sum) - recursion stack + memoization cache
+        TC: O(n * target) where n = len(nums), target = sum(nums) / 2
+        SC: O(target) for the dp array
         """
         total = sum(nums)
         
@@ -545,61 +549,38 @@ class KnapsackDP:
             return False
         
         target = total // 2
-        memo = {} # key=(index, remaining_sum), val=bool
         
-        def can_make_sum(index, remaining_sum):
-            """
-            Question: Can we make 'remaining_sum' using numbers from "index" onwards?
-            
-            Example: can_make_sum(0, 11) asks:
-            "Can I make sum=11 using all numbers starting from index 0?" -> [1,5,11,5]
-            """
-            
-            # BASE CASE 1 -> SUCCESS: We've made exactly the target sum!
-            if remaining_sum == 0:
-                return True
-            
-            # BASE CASE 2 -> FAILURE: Either went negative or ran out of numbers
-            if remaining_sum < 0 or index >= len(nums):
-                return False
-            
-            # Already solved this subproblem? Return cached answer
-            if (index, remaining_sum) in memo:
-                return memo[(index, remaining_sum)]
-            
-            current_number = nums[index]
-            
-            # CHOICE 1: Include curr number in subset
-            # - Use the number, so subtract it from remaining_sum, move to next number (index + 1)
-            take_it = can_make_sum(index + 1, remaining_sum - current_number)
-            
-            # CHOICE 2: Exclude current num from subset
-            # - Don't use the number, so remaining_sum stays samem, move to next number (index + 1)
-            skip_it = can_make_sum(index + 1, remaining_sum)
-            
-            # Success if EITHER choice works
-            result = take_it or skip_it
-            
-            # Cache the result for this subproblem - Can we make remaining_sum using numbers from index onwards?
-            memo[(index, remaining_sum)] = result
-            
-            return result
+        # dp[i] = Can we make sum i using numbers we've processed so far?
+        dp = [False] * (target + 1)
+        dp[0] = True  # Base case: can always make sum 0 by picking nothing
         
-        # Start at index 0 with full target sum to make
-        return can_make_sum(0, target)
+        # For each num, see what sums we can make
+        for num in nums:
+            # Iterate backwards to avoid using num twice in one iteration.
+            # Going forward would let dp[i] use the updated dp[i-num] from this same
+            # iteration, effectively using num multiple times (violates 0/1 property).
+            for i in range(target, num - 1, -1):
+                if dp[i - num]:  # If we could make (i - num) before
+                    dp[i] = True  # Then we can make i now (by adding num)
+        
+        return dp[target]
 
 # Example trace:
 # nums = [1, 5, 11, 5], target = 11
 #
-# can_make_sum(0, 11): "Can I make 11 using [1,5,11,5]?"
-#   take_it: can_make_sum(1, 10): "Can I make 10 using [5,11,5]?"
-#     take_it: can_make_sum(2, 5): "Can I make 5 using [11,5]?"
-#       take_it: can_make_sum(3, -6) -> False (went negative)
-#       skip_it: can_make_sum(3, 5): "Can I make 5 using [5]?"
-#         take_it: can_make_sum(4, 0) -> True! ✓ (found exact match)
+# Initial: dp = [T, F, F, F, F, F, F, F, F, F, F, F]
+#               0  1  2  3  4  5  6  7  8  9  10 11
 #
-# Found subset: [1, 5, 5] = 11
-# Other subset: [11] = 11
+# After num=1: dp = [T, T, F, F, F, F, F, F, F, F, F, F]
+#                    0  1
+#
+# After num=5: dp = [T, T, F, F, F, T, T, F, F, F, F, F]
+#                    0  1           5  6
+#
+# After num=11: dp = [T, T, F, F, F, T, T, F, F, F, F, T]
+#                     0  1           5  6                 11 ✓
+#
+# dp[11] = True -> Found subset [1, 5, 5] = 11, other subset [11] = 11
 # Output: True
 
 sol = KnapsackDP()

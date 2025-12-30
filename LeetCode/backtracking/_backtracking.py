@@ -363,7 +363,7 @@ class PartitioningPattern:
 
 class GridBacktrackingPattern:
     """
-    Problem: Given m×n board and word, return true if word exists in grid. 
+    Problem: Given mxn board and word, return true if word exists in grid. 
     Word constructed from sequentially adjacent cells. Same cell can't be used twice.
     
     LC 79: Word Search
