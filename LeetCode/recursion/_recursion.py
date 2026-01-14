@@ -7,10 +7,7 @@ RECURSION COMPLETE GUIDE
 
 WHAT IS RECURSION?
 ------------------
-Recursion is a programming technique where a function calls itself to solve smaller
-instances of the same problem. It breaks down complex problems into simpler subproblems
-until reaching a base case that can be solved directly. The solution is built by combining
-results from recursive calls as the call stack unwinds.
+Recursion is a programming technique where a function calls itself to solve smaller instances of the same problem. It breaks down complex problems into simpler subproblems until reaching a base case that can be solved directly. The solution is built by combining results from recursive calls as the call stack unwinds.
 
 Key characteristics:
 - Base case: Termination condition that stops recursion
@@ -152,10 +149,7 @@ Examples:
 
 ================================================================
 PATTERN 1: BASIC RECURSION (LINEAR/SINGLE BRANCH)
-PATTERN EXPLANATION: Single recursive call that progresses linearly toward base case.
-Each call processes current element and delegates rest to recursive call. Build solution
-as stack unwinds. Simplest form of recursion, often can be converted to iteration. Used
-for sequential processing, validation, and simple transformations.
+PATTERN EXPLANATION: Single recursive call that progresses linearly toward base case. Each call processes current element and delegates rest to recursive call. Build solution as stack unwinds. Simplest form of recursion, often can be converted to iteration. Used for sequential processing, validation, and simple transformations.
 
 TYPICAL STEPS:
 1. Define base case (empty, single element, or zero)
@@ -175,9 +169,6 @@ class BasicRecursion:
     Example:
         factorial(5) = 5 x 4 x 3 x 2 x 1 = 120
     
-    TC: O(n) - n recursive calls
-    SC: O(n) - call stack depth
-    
     How it works:
     1. Base case: 0! = 1 or 1! = 1
     2. Recursive case: n! = n x (n-1)!
@@ -185,6 +176,10 @@ class BasicRecursion:
     4. Stack unwinds multiplying results together
     """
     def factorial(self, n: int) -> int:
+        """
+        - TC: O(n) - n recursive calls
+        - SC: O(n) - call stack depth
+        """
         # Base case
         if n <= 1:
             return 1
@@ -210,10 +205,7 @@ print(sol.factorial(5)) # 120
 """
 ================================================================
 PATTERN 2: TREE RECURSION (MULTIPLE BRANCHES)
-PATTERN EXPLANATION: Multiple recursive calls from each invocation, creating branching
-structure like a tree. Each branch explores different possibility or subproblem. Without
-memoization, can have exponential time complexity. Common in decision problems, tree
-traversal, and exploring all paths. Solutions combine results from all branches.
+PATTERN EXPLANATION: Multiple recursive calls from each invocation, creating branching structure like a tree. Each branch explores different possibility or subproblem. Without memoization, can have exponential time complexity. Common in decision problems, tree traversal, and exploring all paths. Solutions combine results from all branches.
 
 TYPICAL STEPS:
 1. Define base case(s)
@@ -621,24 +613,26 @@ class RecursionWithMemo:
 sol = RecursionWithMemo()
 print("Climbing Stairs(5):", sol.climbStairs(5))  # 8
 
-# ================================================================
-# PATTERN 6: HELPER FUNCTION RECURSION (ACCUMULATED STATE)
-# PATTERN EXPLANATION: Use helper function with extra parameters to accumulate state or track progress through recursion. Main function initializes state, helper carries it through recursive calls. Common for problems needing indices, accumulators, or context that main function doesn't have. Cleaner than modifying input or using global variables.
-#
-# TYPICAL STEPS:
-# 1. Main function: Set up initial state, call helper
-# 2. Helper function: Takes original params + accumulated state
-# 3. Base case: Check termination condition
-# 4. Recursive case: Update state, pass to next call
-# 5. Return or modify accumulated result
-# 6. Main function returns final accumulated state
-#
-# Applications: Reverse list, flatten nested list, path collection, range recursion.
-# ================================================================
+"""
+================================================================
+PATTERN 6: HELPER FUNCTION RECURSION (ACCUMULATED STATE)
+PATTERN EXPLANATION: Use helper function with extra parameters to accumulate state or track progress through recursion. Main function initializes state, helper carries it through recursive calls. Common for problems needing indices, accumulators, or context that main function doesn't have. Cleaner than modifying input or using global variables.
+
+TYPICAL STEPS:
+1. Main function: Set up initial state, call helper
+2. Helper function: Takes original params + accumulated state
+3. Base case: Check termination condition
+4. Recursive case: Update state, pass to next call
+5. Return or modify accumulated result
+6. Main function returns final accumulated state
+
+Applications: Reverse list, flatten nested list, path collection, range recursion.
+================================================================
+"""
 
 class HelperRecursion:
     """
-    Problem 4: Sum all root-to-leaf numbers.
+    Sum all root-to-leaf numbers.
     
     Example:
         Tree:    1

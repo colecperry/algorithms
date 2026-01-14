@@ -17,11 +17,21 @@
 import heapq
 
 def findKthLargest(nums, k):
-    heapq.heapify(nums)
+    """
+    TC: 
+        - Heapify is O(n)
+        - Heappop() is log(n), worst case num of operations = n - k, when k = 1 that == n
+        - Total TC is (O(n) log(n))
+    SC:
+        - O(1) -> we use original nums array as the heap
+    """
+    heapq.heapify(nums) # turn nums into a min heap
+
+    # pop smallest ele off until length of min heap == k
     while len(nums) > k:
         heapq.heappop(nums)
     
-    return nums[0]
+    return nums[0] # root guarenteed to be kth largest
 
 
 

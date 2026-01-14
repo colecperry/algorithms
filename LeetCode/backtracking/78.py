@@ -14,122 +14,85 @@
 
 from typing import List
 
-# ============================================
-# SOLUTION 1: Iterative Building (RECOMMENDED)
-# ============================================
-
-class Solution:
+class Solution: # LC 78: Subsets
+    """
+    TC: O(2^n * n)
+        - 2^n subsets - Each element has 2 choices: in or out, each subset can be up to n elements long
+        - O(n) copy - It takes O(n) to copy each subset in worst case
+    
+    SC: O(n)
+        - Recursion depth: O(n) - maximum n ele deep (including every element: []→[1]→[1,2]→[1,2,3])
+        - Path storage: O(n) - current subset being built -> path never exceeds n elements
+        - O(n) + O(n) = O(n)
+    
+    Key insight:
+    - CRITICAL difference from combinations: save at EVERY level!
+    - Combinations: save only when len(path) == k
+    - Subsets: save immediately on entering function
+    - Empty subset [] is valid, as are all partial builds [1], [1,2], etc.
+    """
     def subsets(self, nums: List[int]) -> List[List[int]]:
-        result = []
+        result = []  # Store all subsets
         
         def backtrack(start, path):
-            # Add current subset to result (every path is valid!)
-            result.append(path[:])  # [:] creates a copy
+            """
+            Build subsets incrementally, saving at every step.
             
-            # Try adding each remaining element
+            Args:
+                start: Index to start considering elements from
+                path: Current subset being built (e.g., [1,2])
+            """
+            # KEY INSIGHT: Save current subset at EVERY level!
+            # This is the main difference from combinations pattern
+            # [] is a valid subset, [1] is valid, [1,2] is valid, etc.
+            result.append(path[:])  # Save copy of current state
+            
+            # RECURSIVE CASE: Try adding each remaining element
+            # Note: No explicit base case needed!
+            # When start >= len(nums), loop doesn't run, function returns naturally
             for i in range(start, len(nums)):
-                path.append(nums[i])   # Choose: add nums[i]
-                backtrack(i + 1, path) # Explore: build subsets with nums[i]
-                path.pop()             # Undo: remove nums[i] to try next
+                # STEP 1: MAKE CHOICE - include nums[i] in subset
+                path.append(nums[i])
+                
+                # STEP 2: EXPLORE - build subsets with nums[i] included
+                # Pass i+1 to avoid reusing same element
+                backtrack(i + 1, path)
+                
+                # STEP 3: UNDO CHOICE (BACKTRACK) - exclude nums[i]
+                # Remove to try subsets without this element once loop ends
+                path.pop()
         
+        # Start at index 0, empty path
         backtrack(0, [])
         return result
-    
+
+# ============================================
+# VISUALIZATION FOR SUBSETS: nums=[1,2,3]
+# ============================================
+#
+#                              backtrack(start=0, path=[])
+#                                💾 SAVE [] → result=[[]]
+#                            /              |              \
+#                        TRY 1            TRY 2           TRY 3
+#                          /                |                \
+#                   path=[1]             path=[2]            path=[3]
+#                 start=1                start=2             start=3
+#             💾 SAVE [1]                💾 SAVE [2]          💾 SAVE [3]
+#              /       \                    |             (no more elements)
+#         TRY 2       TRY 3               TRY 3
+#           /            \                  |
+#       path=[1,2]     path=[1,3]       path=[2,3]
+#       start=2        start=3          start=3
+#    💾 SAVE [1,2]   💾 SAVE [1,3]    💾 SAVE [2,3]
+#         |            (no more)        (no more)
+#       TRY 3
+#         |
+#    path=[1,2,3]
+#    start=3
+# 💾 SAVE [1,2,3]
+# (no more elements)
+#
+
 sol = Solution()
 print(sol.subsets([1,2,3])) # [[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]
 print(sol.subsets([0])) # [[],[0]]
-print(sol.subsets([1,2])) # [[], [1], [1,2], [2]]
-    
-# ═══════════════════════════════════════════════════════════════
-# VISUAL CALL STACK TRACE: nums = [1,2]
-# ═══════════════════════════════════════════════════════════════
-# 
-# Step 1: Call backtrack(0, [])
-#   path = []
-#   ├─ Append [] to result → result = [[]]
-#   ├─ Loop: i goes from 0 to 1
-#   │
-#   │  ITERATION 1 (i=0):
-#   │  ├─ path.append(nums[0]) → path = [1]
-#   │  │
-#   │  │  Step 2: Call backtrack(1, [1])  ← NEW CALL
-#   │  │    path = [1]
-#   │  │    ├─ Append [1] to result → result = [[], [1]]
-#   │  │    ├─ Loop: i goes from 1 to 1
-#   │  │    │
-#   │  │    │  ITERATION 1 (i=1):
-#   │  │    │  ├─ path.append(nums[1]) → path = [1, 2]
-#   │  │    │  │
-#   │  │    │  │  Step 3: Call backtrack(2, [1,2])  ← NEW CALL
-#   │  │    │  │    path = [1, 2]
-#   │  │    │  │    ├─ Append [1,2] to result → result = [[], [1], [1,2]]
-#   │  │    │  │    ├─ Loop: range(2, 2) → EMPTY RANGE, no iterations
-#   │  │    │  │    └─ RETURN ← Back to Step 2
-#   │  │    │  │
-#   │  │    │  ├─ path.pop() → path = [1]  ← BACKTRACK!
-#   │  │    │  └─ Loop done (no more i values)
-#   │  │    │
-#   │  │    └─ RETURN ← Back to Step 1
-#   │  │
-#   │  ├─ path.pop() → path = []  ← BACKTRACK!
-#   │  │
-#   │  ITERATION 2 (i=1):
-#   │  ├─ path.append(nums[1]) → path = [2]
-#   │  │
-#   │  │  Step 4: Call backtrack(2, [2])  ← NEW CALL
-#   │  │    path = [2]
-#   │  │    ├─ Append [2] to result → result = [[], [1], [1,2], [2]]
-#   │  │    ├─ Loop: i goes from 2 to 1 (NO ITERATIONS - empty range!)
-#   │  │    └─ RETURN ← Back to Step 1
-#   │  │
-#   │  ├─ path.pop() → path = []  ← BACKTRACK!
-#   │  └─ Loop done
-#   │
-#   └─ RETURN
-
-# FINAL: result = [[], [1], [1,2], [2]]
-    
-# ============================================
-# SOLUTION 2: Binary Decision Tree (LEARNING)
-# ============================================
-class Solution2:
-    def subsets2(self, nums: List[int]) -> List[List[int]]:
-        result = [] # final output
-        subset = [] # curr subset
-        
-        def dfs(i):
-            # Base case: considered all elements, save this subset
-            if i >= len(nums):
-                result.append(subset[:])  # [:] creates a copy
-                return
-            
-            # LEFT BRANCH: INCLUDE nums[i] in subset
-            subset.append(nums[i])
-            dfs(i + 1)
-            
-            # RIGHT BRANCH: DON'T INCLUDE nums[i] (backtrack first)
-            subset.pop()  # Undo the append above
-            dfs(i + 1)
-        
-        dfs(0)  # Start decision tree at index 0
-        return result
-
-
-# ============================================
-# VISUALIZATION FOR SOLUTION 2: nums=[1,2]
-# ============================================
-#
-#                       dfs(0)
-#                     /        \
-#            include 1          exclude 1
-#              [1]                  []
-#             /    \              /     \
-#      include 2  exclude 2   include 2  exclude 2
-#        [1,2]      [1]         [2]         []
-#
-# Result: [[], [1], [1,2], [2]]  (builds right to left)
-
-sol2 = Solution2()
-print(sol2.subsets2([1,2,3])) # [[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]
-print(sol2.subsets2([0])) # [[],[0]]
-print(sol.subsets([1,2])) # [[], [1], [1,2], [2]]

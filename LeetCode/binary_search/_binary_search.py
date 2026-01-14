@@ -1,8 +1,5 @@
 """
-=================================================================
-BINARY SEARCH COMPLETE GUIDE
-=================================================================
-
+----------------------
 WHAT IS BINARY SEARCH?
 ----------------------
 Binary search is an efficient algorithm for finding a target value in a sorted array or
@@ -137,7 +134,7 @@ BINARY SEARCH CORE TEMPLATES
 from typing import List, Optional
 
 # ================================================================
-# STANDARD BINARY SEARCH TEMPLATE
+#              STANDARD BINARY SEARCH TEMPLATE
 # ================================================================
 def binary_search_template(nums, target):
     """
@@ -165,7 +162,9 @@ def binary_search_template(nums, target):
     
     return -1  # Not found
 
-# Recursive version
+# ================================================================
+#            RECURSIVE BINARY SEARCH TEMPLATE
+# ================================================================
 def binary_search_recursive(nums, target, left, right):
     """
     Recursive binary search
@@ -186,92 +185,7 @@ def binary_search_recursive(nums, target, left, right):
         return binary_search_recursive(nums, target, left, mid - 1) # Search left recursively (r = mid - 1)
 
 # ================================================================
-# FIND INSERTION POSITION TEMPLATE
-# ================================================================
-def insertion_position_template(nums, target):
-    """
-    Template for finding where to insert target
-    
-    TC: O(log n)
-    SC: O(1)
-    
-    WHEN TO USE:
-    - Find insertion position in sorted array
-    - Find lower/upper bound
-    - Locate where value belongs
-    
-    KEY INSIGHT: !!!
-    - When binary search ends without finding target
-    - Left pointer points to insertion position
-    - This maintains sorted order
-    """
-    left, right = 0, len(nums) - 1
-    
-    while left <= right:
-        mid = left + (right - left) // 2
-        
-        if nums[mid] == target:
-            return mid
-        elif nums[mid] < target:
-            left = mid + 1
-        else:
-            right = mid - 1
-    
-    return left  # Insertion position
-
-# ================================================================
-# ANSWER SPACE CORE TEMPLATE
-# ================================================================
-def answer_space_template(arr, target):
-    """
-    Find the smallest number in arr that is >= target.
-    
-    Example:
-        arr = [1, 3, 5, 7, 9]
-        target = 6
-        Output: 7 (smallest number >= 6)
-    
-    TC: O(log n)
-    SC: O(1)
-    
-    WHEN TO USE:
-    - "Find minimum value that satisfies condition"
-    - "Find maximum value that satisfies condition"
-    - Can test if value works with helper function
-    
-    KEY PATTERN:
-    - Define answer range [min_possible, max_possible]
-    - Write is_valid(mid) helper function
-    - Binary search to find optimal answer
-    """
-    # Answer range: [first element, last element]
-    left, right = 0, len(arr) - 1
-    result = -1
-    
-    def is_valid(index):
-        """Check if arr[index] >= target"""
-        return arr[index] >= target
-    
-    # Binary search for smallest valid value
-    while left <= right:
-        mid = left + (right - left) // 2
-        
-        if is_valid(mid):
-            result = arr[mid]
-            right = mid - 1  # Try smaller index
-        else:
-            left = mid + 1  # Need larger index
-    
-    return result
-
-
-# Test
-print(answer_space_template([1, 3, 5, 7, 9], 6))  # 7
-print(answer_space_template([1, 3, 5, 7, 9], 3))  # 3
-print(answer_space_template([1, 3, 5, 7, 9], 10)) # -1
-
-# ================================================================
-# 2D MATRIX TEMPLATE
+#                   2D MATRIX TEMPLATE
 # ================================================================
 def matrix_search_template(matrix, target):
     """
@@ -340,68 +254,29 @@ print(matrix_search_template(matrix, 3))   # True
 print(matrix_search_template(matrix, 13))  # False
 print(matrix_search_template(matrix, 60))  # True
 
-"""
-COMPLEXITY QUICK REFERENCE
-==========================
-
-Binary Search Time Complexity:
-- Standard search: O(log n)
-- Search on answer space: O(f(n) * log(range))
-  where f(n) = validation function cost
-- 2D matrix: O(log(m*n))
-- Rotated array: O(log n)
-
-Why O(log n):
-- Each comparison eliminates half remaining elements
-- Search space: n → n/2 → n/4 → n/8 → ... → 1
-- Number of steps to reach 1: log₂(n)
-
-Comparison with other approaches:
-- Linear search: O(n)
-- Binary search: O(log n)
-- Improvement: n / log(n) times faster
-
-Space Complexity:
-- Iterative: O(1) - only pointer variables
-- Recursive: O(log n) - call stack depth
-- Generally prefer iterative for space efficiency
-
-When to Use Each Template:
-1. Standard: Find exact value in sorted array
-2. Insertion: Find where to insert or find boundary
-3. Answer Space: Search range of possible answers
-4. 2D Matrix: Search flattened sorted matrix
-5. Modified Binary: Rotated arrays, peak finding
-"""
 
 """
-BINARY SEARCH PATTERNS
-======================
-"""
+================================================================
+PATTERN 1: STANDARD SEARCH IN SORTED ARRAY
+PATTERN EXPLANATION: Find target value in sorted array by repeatedly comparing with middle element and eliminating half of search space. Classic divide and conquer approach where we divide array at midpoint and conquer by searching only the relevant half.
 
-# ================================================================
-# PATTERN 1: STANDARD SEARCH IN SORTED ARRAY
-# PATTERN EXPLANATION: Find target value in sorted array by repeatedly comparing with middle element and eliminating half of search space. Classic divide and conquer approach where we divide array at midpoint and conquer by searching only the relevant half.
-#
-# TYPICAL STEPS:
-# 1. Initialize left=0, right=len(nums)-1
-# 2. While left <= right:
-#    - Calculate mid = left + (right - left) // 2
-#    - If nums[mid] == target: found, return mid
-#    - If nums[mid] < target: search right half (left = mid + 1)
-#    - If nums[mid] > target: search left half (right = mid - 1)
-# 3. Return -1 if not found
-#
-# Applications: Search in sorted array, check if element exists, find exact match.
-# ================================================================
+TYPICAL STEPS:
+1. Initialize left=0, right=len(nums)-1
+2. While left <= right:
+    - Calculate mid = left + (right - left) // 2
+    - If nums[mid] == target: found, return mid
+    - If nums[mid] < target: search right half (left = mid + 1)
+    - If nums[mid] > target: search left half (right = mid - 1)
+3. Return -1 if not found
+
+Applications: Search in sorted array, check if element exists, find exact match.
+================================================================
+"""
 
 class StandardSearchPattern:
     """
     Problem: Given sorted array of integers nums and target value, return index of target.
     If target not found, return -1.
-    
-    TC: O(log n) - halve search space each iteration
-    SC: O(1) - only pointer variables
     
     How it works:
     1. Compare target with middle element
@@ -416,6 +291,10 @@ class StandardSearchPattern:
     - Number of halvings: log₂(n)
     """
     def search(self, nums: List[int], target: int) -> int: # LC 704
+        """
+        - TC: O(log n) - halve search space each iteration
+        - SC: O(1) - only pointer variables
+        """
         left, right = 0, len(nums) - 1
         
         while left <= right:
@@ -448,27 +327,25 @@ sol = StandardSearchPattern()
 print("Binary search:", sol.search([-1,0,3,5,9,12], 9))  # 4
 print("Binary search:", sol.search([-1,0,3,5,9,12], 2))  # -1
 
+"""
+================================================================
+PATTERN 2: FIND INSERTION POSITION
+PATTERN EXPLANATION: Find index where target should be inserted to maintain sorted order. When binary search completes without finding target, left pointer naturally points to correct insertion position. This works because left tracks the smallest index where nums[index] >= target.
 
-# ================================================================
-# PATTERN 2: FIND INSERTION POSITION
-# PATTERN EXPLANATION: Find index where target should be inserted to maintain sorted order. When binary search completes without finding target, left pointer naturally points to correct insertion position. This works because left tracks the smallest index where nums[index] >= target.
-#
-# TYPICAL STEPS:
-# 1. Initialize left=0, right=len(nums)-1
-# 2. Binary search as normal
-# 3. If target found, return its index
-# 4. If not found, return left (insertion position)
-#
-# Applications: Insert into sorted array, find lower/upper bound, first/last occurrence.
-# ================================================================
+TYPICAL STEPS:
+1. Initialize left=0, right=len(nums)-1
+2. Binary search as normal
+3. If target found, return its index
+4. If not found, return left (insertion position)
+
+Applications: Insert into sorted array, find lower/upper bound, first/last occurrence.
+================================================================
+"""
 
 class InsertionPositionPattern:
     """
     Problem: Given sorted array and target, return index where target would be inserted
     to maintain sorted order. If target exists, return its current index.
-    
-    TC: O(log n)
-    SC: O(1)
     
     How it works:
     1. Perform standard binary search
@@ -483,6 +360,10 @@ class InsertionPositionPattern:
     - So target belongs at index left
     """
     def searchInsert(self, nums: List[int], target: int) -> int: # LC 35
+        """
+        - TC: O(log n)
+        - SC: O(1)
+        """
         left, right = 0, len(nums) - 1
         
         while left <= right:
@@ -523,31 +404,29 @@ print("Insert position:", sol.searchInsert([1,3,5,6], 5))  # 2
 print("Insert position:", sol.searchInsert([1,3,5,6], 2))  # 1
 print("Insert position:", sol.searchInsert([1,3,5,6], 7))  # 4
 
+"""
+================================================================
+PATTERN 3: SEARCH IN ROTATED SORTED ARRAY
+PATTERN EXPLANATION: Search in array that was sorted then rotated at unknown pivot.
+Key insight: after rotation, one half is always still properly sorted. Identify which half is sorted by comparing endpoints with middle. Then check if target is in sorted half's range to decide which half to search.
 
-# ================================================================
-# PATTERN 3: SEARCH IN ROTATED SORTED ARRAY
-# PATTERN EXPLANATION: Search in array that was sorted then rotated at unknown pivot.
-# Key insight: after rotation, one half is always still properly sorted. Identify which half is sorted by comparing endpoints with middle. Then check if target is in sorted half's range to decide which half to search.
-#
-# TYPICAL STEPS:
-# 1. Compare nums[left] with nums[mid] to identify sorted half
-# 2. If left half sorted (nums[left] <= nums[mid]):
-#    - Check if target in range [nums[left], nums[mid]]
-#    - If yes: search left, if no: search right
-# 3. If right half sorted (nums[mid] <= nums[right]):
-#    - Check if target in range [nums[mid], nums[right]]
-#    - If yes: search right, if no: search left
-# 4. Repeat until found or exhausted
-#
-# Applications: Search rotated sorted array, find minimum in rotated array.
-# ================================================================
+TYPICAL STEPS:
+1. Compare nums[left] with nums[mid] to identify sorted half
+2. If left half sorted (nums[left] <= nums[mid]):
+   - Check if target in range [nums[left], nums[mid]]
+   - If yes: search left, if no: search right
+3. If right half sorted (nums[mid] <= nums[right]):
+   - Check if target in range [nums[mid], nums[right]]
+   - If yes: search right, if no: search left
+4. Repeat until found or exhausted
+
+Applications: Search rotated sorted array, find minimum in rotated array.
+================================================================
+"""
 
 class RotatedArrayPattern:
     """
     Problem: Search for target in sorted array rotated at unknown pivot. Original: [0,1,2,4,5,6,7] rotated to [4,5,6,7,0,1,2]
-    
-    TC: O(log n) - still halve search space each time
-    SC: O(1)
     
     How it works:
     1. One half is always properly sorted
@@ -561,6 +440,10 @@ class RotatedArrayPattern:
     - Sorted half has nums[left] <= nums[mid] or nums[mid] <= nums[right]
     """
     def search(self, nums: List[int], target: int) -> int: # LC 33
+        """
+        TC: O(log n) - still halve search space each time
+        SC: O(1)
+        """
         left, right = 0, len(nums) - 1
         
         while left <= right:
@@ -608,22 +491,24 @@ sol = RotatedArrayPattern()
 print("Rotated search:", sol.search([4,5,6,7,0,1,2], 0))  # 4
 print("Rotated search:", sol.search([4,5,6,7,0,1,2], 3))  # -1
 
+"""
+================================================================
+PATTERN 4: BINARY SEARCH ON ANSWER SPACE
+PATTERN EXPLANATION: Instead of searching in given array, search a range of possible answers. Define minimum and maximum possible answers, then binary search to find optimal.
+Use helper function to test if candidate answer satisfies constraints. Common in "minimize maximum" or "maximize minimum" problems.
 
-# ================================================================
-# PATTERN 4: BINARY SEARCH ON ANSWER SPACE
-# PATTERN EXPLANATION: Instead of searching in given array, search a range of possible answers. Define minimum and maximum possible answers, then binary search to find optimal.
-# Use helper function to test if candidate answer satisfies constraints. Common in "minimize maximum" or "maximize minimum" problems.
-#
-# TYPICAL STEPS:
-# 1. Define answer range: [min_answer, max_answer]
-# 2. Write is_valid(candidate) helper that checks if candidate works
-# 3. Binary search on range:
-#    - If candidate valid: save it, try to optimize (smaller or larger)
-#    - If invalid: adjust search direction
-# 4. Return best valid answer found
-#
-# Applications: Capacity to ship packages, koko eating bananas, split array, minimize max.
-# ================================================================
+TYPICAL STEPS:
+1. Define answer range: [min_answer, max_answer]
+2. Write is_valid(candidate) helper that checks if candidate works
+3. Binary search on range:
+   - If candidate valid: save it, try to optimize (smaller or larger)
+   - If invalid: adjust search direction
+4. Return best valid answer found
+
+Applications: Capacity to ship packages, koko eating bananas, split array, minimize max.
+================================================================
+"""
+import math
 
 class AnswerSpacePattern:
     """
@@ -639,9 +524,6 @@ class AnswerSpacePattern:
     Input: piles = [3,6,7,11], h = 8
     Output: 4
     
-    TC: O(n log(max_pile)) - n to check if speed works, log(max) for binary search
-    SC: O(1)
-    
     How it works:
     1. Answer range: [1, max(piles)]
         - Minimum speed: 1 banana/hour
@@ -655,7 +537,10 @@ class AnswerSpacePattern:
     - When K doesn't work, try larger
     """
     def minEatingSpeed(self, piles: List[int], h: int) -> int: # LC 875
-        import math
+        """
+        - TC: O(n log(max_pile)) - n to check if speed works, log(max) for binary search
+        - SC: O(1)
+        """
         
         def can_finish(speed):
             """Check if Koko can finish all piles with this speed"""
@@ -705,31 +590,29 @@ sol = AnswerSpacePattern()
 print("Min eating speed:", sol.minEatingSpeed([3,6,7,11], 8))  # 4
 print("Min eating speed:", sol.minEatingSpeed([30,11,23,4,20], 5))  # 30
 
+"""
+================================================================
+PATTERN 5: SEARCH IN 2D MATRIX (FLATTENED SEARCH)
+PATTERN EXPLANATION: Treat 2D sorted matrix as flattened 1D array. Convert between 1D index and 2D coordinates to apply standard binary search. Works when matrix is sorted row by row and each row's first element is greater than previous row's last element.
 
-# ================================================================
-# PATTERN 5: SEARCH IN 2D MATRIX (FLATTENED SEARCH)
-# PATTERN EXPLANATION: Treat 2D sorted matrix as flattened 1D array. Convert between 1D index and 2D coordinates to apply standard binary search. Works when matrix is sorted row by row and each row's first element is greater than previous row's last element.
-#
-# TYPICAL STEPS:
-# 1. Treat matrix as 1D array with rows*cols elements
-# 2. Binary search on range [0, rows*cols - 1]
-# 3. For each mid:
-#    - Convert to 2D: row = mid // cols, col = mid % cols
-#    - Access value: matrix[row][col]
-#    - Compare and update search bounds
-# 4. Return true if found, false otherwise
-#
-# Applications: 2D matrix search, grid search with sorted property.
-# ================================================================
+TYPICAL STEPS:
+1. Treat matrix as 1D array with rows*cols elements
+2. Binary search on range [0, rows*cols - 1]
+3. For each mid:
+   - Convert to 2D: row = mid // cols, col = mid % cols
+   - Access value: matrix[row][col]
+   - Compare and update search bounds
+4. Return true if found, false otherwise
+
+Applications: 2D matrix search, grid search with sorted property.
+================================================================
+"""
 
 class MatrixSearchPattern:
     """
-    Problem: Search target in m×n matrix where:
+    Problem: Search target in mxn matrix where:
     - Each row sorted in ascending order
     - First integer of each row > last integer of previous row
-    
-    TC: O(log(m*n)) - binary search on total elements
-    SC: O(1)
     
     How it works:
     1. Conceptually flatten matrix into 1D sorted array
@@ -739,9 +622,13 @@ class MatrixSearchPattern:
     Key conversions:
     - Total elements: rows * cols
     - 1D index to 2D: row = index // cols, col = index % cols
-    - Example: index 7 in 3×4 matrix → row=7//4=1, col=7%4=3 → matrix[1][3]
+    - Example: index 7 in 3x4 matrix → row=7//4=1, col=7%4=3 → matrix[1][3]
     """
     def searchMatrix(self, matrix: List[List[int]], target: int) -> bool: # LC 74
+        """
+        - TC: O(log(m*n)) - binary search on total elements
+        - SC: O(1)
+        """
         if not matrix or not matrix[0]:
             return False
         
@@ -796,30 +683,28 @@ sol = MatrixSearchPattern()
 print("Matrix search:", sol.searchMatrix([[1,3,5,7],[10,11,16,20],[23,30,34,60]], 3))  # True
 print("Matrix search:", sol.searchMatrix([[1,3,5,7],[10,11,16,20],[23,30,34,60]], 13))  # False
 
+"""
+================================================================
+PATTERN 6: FIND PEAK ELEMENT (ELIMINATION LOGIC)
+PATTERN EXPLANATION: Find peak in unsorted array using comparison with neighbor to eliminate half the search space. Even without global sorting, local comparisons reveal which direction guarantees a peak. If slope increases (mid < mid+1), peak must be to right. If slope decreases (mid > mid+1), peak is at mid or to left.
 
-# ================================================================
-# PATTERN 6: FIND PEAK ELEMENT (ELIMINATION LOGIC)
-# PATTERN EXPLANATION: Find peak in unsorted array using comparison with neighbor to eliminate half the search space. Even without global sorting, local comparisons reveal which direction guarantees a peak. If slope increases (mid < mid+1), peak must be to right. If slope decreases (mid > mid+1), peak is at mid or to left.
-#
-# TYPICAL STEPS:
-# 1. Initialize left=0, right=len(nums)-1
-# 2. While left < right: (not <=, converging to answer)
-#    - Compare nums[mid] with nums[mid+1]
-#    - If nums[mid] < nums[mid+1]: peak on right (left = mid + 1)
-#    - Else: peak at mid or left (right = mid)
-# 3. Return left (or right, they're equal)
-#
-# Applications: Find peak, find local maximum, bitonic array search.
-# ================================================================
+TYPICAL STEPS:
+1. Initialize left=0, right=len(nums)-1
+2. While left < right: (not <=, converging to answer)
+   - Compare nums[mid] with nums[mid+1]
+   - If nums[mid] < nums[mid+1]: peak on right (left = mid + 1)
+   - Else: peak at mid or left (right = mid)
+3. Return left (or right, they're equal)
+
+Applications: Find peak, find local maximum, bitonic array search.
+================================================================
+"""
 
 class PeakElementPattern:
     """
     Problem: Find peak element where nums[i] > nums[i-1] and nums[i] > nums[i+1] and return it's index.
 
     Neighbors of out-of-bound indices are -infinity.
-    
-    TC: O(log n) - eliminate half each iteration
-    SC: O(1)
     
     How it works:
     1. Compare mid with mid+1 to determine slope
@@ -836,6 +721,10 @@ class PeakElementPattern:
     - Guarantee: eliminated half cannot contain peak
     """
     def findPeakElement(self, nums: List[int]) -> int: # LC 162
+        """
+        - TC: O(log n) - eliminate half each iteration
+        - SC: O(1)
+        """
         left, right = 0, len(nums) - 1
         
         while left < right:  # Note: < not <=

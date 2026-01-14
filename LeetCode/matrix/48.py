@@ -15,24 +15,41 @@
 #   [7, 8, 9],      [9, 6, 3],
 # ]                ]
 
-
-import copy
 from typing import List
+
 class Solution:
+    """
+    TC: O(n²) — typically we say this is O(n^2) where n is the dimension (rows or columns/side length), if we have n rows and n columns, total operations = n * n. BUT we only touch each element a constant number of times.
+    SC: swap in-place, just a few temp variables for swapping.
+    """
     def rotate(self, matrix: List[List[int]]) -> None:
         n = len(matrix)
         
         # transpose matrix
         for i in range(n):
-            for j in range(i + 1, n):
+            for j in range(i + 1, n): # start at i + 1 so we don't swap twice
                 matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
         # reverse rows
         for i in range(n):
-            for j in range(n // 2):
+            for j in range(n // 2): # only need to go halfway to reverse a row
                 matrix[i][j], matrix[i][n - j - 1] = matrix[i][n - j - 1], matrix[i][j]
+
+    def rotate(self, matrix: List[List[int]]) -> None: # Simpler
+        rows, cols = len(matrix), len(matrix[0])
+
+        # Step 1: Transpose matrix: [i][j] -> [j][i]
+        for i in range(rows):
+            for j in range(i + 1, cols):
+                matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
+
+        # Step 2: Reverse each row
+        for i in range(rows):
+            matrix[i].reverse()
 
 
 sol = Solution()
-print(sol.rotate([[1,2,3],[4,5,6],[7,8,9]]))
+matrix = [[1,2,3],[4,5,6],[7,8,9]]
+sol.rotate()
+print(matrix)
 
 

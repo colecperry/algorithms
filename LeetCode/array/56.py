@@ -12,81 +12,41 @@
 # Output: [[1,5]]
 # Explanation: Intervals [1,4] and [4,5] are considered overlapping.
 
-# How to Solve (while loop):
-# - First, sort the intervals by their starting point so overlapping intervals are adjacent.
-# - Use a while loop to iterate through the intervals.
-# - Track the start and end of the current merged interval.
-# - As long as the next interval starts before or at the current interval's end,
-#   extend the current interval's end to include it.
-# - Once no more overlapping intervals are found, append the merged interval to the output.
-# - Repeat until all intervals are processed.
-
-# Time Complexity (TC):
-# - Sorting the intervals takes O(n log n)
-# - The while loop goes through each interval once → O(n)
-# - So overall time complexity is O(n log n)
-
-# Space Complexity (SC):
-# - O(n) in the worst case, if no intervals overlap and each interval is added to the output
-# - No extra space beyond the output list (ignoring sorting overhead, which is O(1) if done in-place)
+# How it works:
+    # 1. Sort intervals by start time
+    # 2. Compare each interval with last merged interval
+    # 3. If current.start ≤ last.end, they overlap → merge
+    # 4. If no overlap, add current as new interval
+    # 5. Merging: extend last interval's end to max(last.end, current.end)
 
 
 from typing import List
 
 class Solution:
-    def merge(self, intervals: List[List[int]]) -> List[List[int]]: # while
-        # sort intervals by start of interval
-        intervals.sort(key=lambda x: x[0])
-        i = 0 # Manual i pointer for while loop
-        output = []
-        while i < len(intervals): # Loop until end of interval array
-            start = intervals[i][0] # Start of current interval range 
-            end = intervals[i][1] # End of current interval range
-            while i + 1 < len(intervals) and intervals[i + 1][0] <= end: # if overlap exists (next start less than current end), keep iterating
-                end = max(end, intervals[i + 1][1]) # update the end
-                i += 1
-            output.append([start, end]) # append interval once overlap ends
-            i += 1
-        return output
-                
-    # High-level approach (For loop):
-    # - Sort the intervals by their starting point so overlapping intervals are adjacent.
-    # - Initialize the first interval as the starting range.
-    # - Iterate through each interval using a for loop:
-    #   - If the current interval overlaps with the previous one (i.e., current start <= previous end), update the end of the current merged range to the maximum of both ends.
-    #   - If there is no overlap, append the previous merged interval to the result,
-    #     and start a new range with the current interval.
-    # - After the loop, append the final merged interval to the result list.
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]: # for loop
+        """
+        - TC: O(n log n) - dominated by sorting
+        - SC: O(n) - output array (or O(log n) for sorting if we don't count 
+        output)
+        """
 
-    # Time Complexity (TC):
-    # - Sorting takes O(n log n)
-    # - The for loop processes each interval once → O(n)
-    # - Total time complexity is O(n log n)
-
-    # Space Complexity (SC):
-    # - O(n) in the worst case, if no intervals overlap and each interval is added to the result
-    # - Additional space is minimal beyond the output list
-
-    def merge2(self, intervals: List[List[int]]) -> List[List[int]]: # for loop
-        intervals.sort(key=lambda x:x[0]) # sort intervals by start of interval
+        intervals.sort(key=lambda x: x[0]) # sort by start
         result = []
+        prev_start, prev_end = intervals[0] # get initial start & end by destructuring
 
-        start, end = intervals[0] # get initial start and end interval numbers
-        for interval in intervals:
-            currStart, currEnd = interval # get the current start and end
-
-            if(currStart <= end): # see if there is an overlap
-                end = max(end, currEnd) # update end of merged interval
-            else: # if no overlap
-                result.append([start, end]) # append the prev interval
-                start, end = currStart, currEnd # update new start and end
+        for curr_start, curr_end in intervals[1:]: # iterate & unpack from i=1 
+            if prev_end >= curr_start: # check for overlap with prev interval
+                prev_end = max(prev_end, curr_end) # update end pointer
+            else: # no overlap
+                result.append([prev_start, prev_end]) # add merged interval to res
+                prev_start, prev_end = curr_start, curr_end # move pointers
         
-        result.append([start, end]) # Append the last interval
+        result.append([prev_start, prev_end]) # Append after no more overlaps
         return result
 
 sol = Solution()
-print(sol.merge2([[1,3],[2,6],[8,10],[15,18]])) # [[1,6],[8,10],[15,18]]
-print(sol.merge2([[1,4],[4,5]])) # [[1,5]]
+print(sol.merge([[1,3],[2,6],[8,10],[15,18]])) # [[1,6],[8,10],[15,18]]
+print(sol.merge([[1,4],[4,5]])) # [[1,5]]
 
 #   0   1   2  3  4  5
 #   a

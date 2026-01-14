@@ -34,24 +34,19 @@
 
 
 def mySqrt(x):
-    if x == 0: # Edge case if x == 0, return right away
-        return 0
-    if x == 1: # Edge case if x == 1
-        return 1
-    
-    l = 0 # Initialize l and r pointers
-    r = x // 2
+    l, r = 0, x  # answer is in [0, x]
 
-    while l <= r : # Binary Search Loop
-        mid = l + (r - l) //2 # Calculate mid point (floor)
-        num = mid * mid # Calculate mid squared -> The num we are squaring
-        if num == x: # If we found the number
-            return mid # Return the sqrt
-        elif num > x: # If num we calculate is greater than integer X (Too big)
-            r = mid - 1 # Search the left side
-        else: # Else number is too small
-            l = mid + 1 # Search the right side
-    return r # Once while loop condition terminates, R ends up pointing at the largest int where r^2 <= x 
+    while l <= r:
+        mid = (l + r) // 2
+        square = mid * mid
+        
+        if square == x: # Found exact answer
+            return mid
+        elif square > x: # Answer too big -> Search left
+            r = mid - 1 
+        else: # Answer too small -> Search right
+            l = mid + 1
+    return r # Once while loop terminates, R ends up pointing at the largest int where r^2 <= x 
 
 
 print(mySqrt(4)) # Expected output: 2

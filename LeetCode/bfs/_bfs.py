@@ -60,7 +60,7 @@ def bfs_tree_template(root):
 def bfs_matrix_template(matrix, start_row, start_col):
     """
     Basic matrix BFS template with visited tracking
-    - TC: O(rows * cols) -> each cell in the matrix is visited at most once due to visited set tracking
+    - TC: O(rows * cols) -> each cell in the matrix is visited at most once (no revisits due to visited set tracking)
     - SC: O(rows * cols) -> visited set can store up to (rows * cols) tuples, queue can store up to O(min(rows, cols)) worst case per BFS level
     """
     if not matrix or not matrix[0]: # Empty matrix or empty data in first row
@@ -83,12 +83,12 @@ def bfs_matrix_template(matrix, start_row, start_col):
         for dr, dc in directions:
             new_row, new_col = row + dr, col + dc
             
-            if (0 <= new_row < rows and 
-                0 <= new_col < cols and 
-                (new_row, new_col) not in visited):
+            if (0 <= new_row < rows and  # Row not OOB
+                0 <= new_col < cols and  # Col not OOB
+                (new_row, new_col) not in visited): # Not already visited
                 
-                visited.add((new_row, new_col))
-                queue.append((new_row, new_col))
+                visited.add((new_row, new_col)) # Mark new cell as visited
+                queue.append((new_row, new_col)) # & add it to the queue to explore
     
     return result
 
@@ -150,6 +150,44 @@ print("BFS from 'A':", bfs_graph_template(test_graph, 'A'))
 # Output: ['A', 'B', 'C', 'D', 'F', 'E', 'G']
 
 """
+BFS TIME COMPLEXITY GUIDE
+=========================
+
+TREE: O(n)
+----------
+- n = total nodes
+- Visit each node exactly once
+- No visited set needed (no cycles)
+
+MATRIX: O(rows * cols)
+----------------------
+- Each cell visited at most once
+- Visited set prevents re-processing
+- Think of it as O(n) where n = total cells
+
+GRAPH: O(V + E)
+---------------
+- V = vertices (nodes)
+- E = edges (connections)
+- Visit each vertex once (V), traverse each edge once (E)
+- For dense graphs, almost every node connects to every other node (E ≈ V²): simplifies to O(V²)
+- For sparse graphs where each node has 1 to 2 edges (E ≈ V): simplifies to O(V)
+
+WHY BFS IS EFFICIENT
+--------------------
+The visited set is the key. Without it:
+
+Brute force (no visited tracking):
+- Same cell/node can be reached via multiple paths
+- Each path explored separately → exponential blowup
+- Matrix example: O(4^(rows*cols)) — 4 directions, unlimited revisits
+- Graph example: O(V!) — every permutation of nodes
+
+With visited tracking:
+- Each cell/node processed exactly once
+- "Already seen? Skip." — eliminates redundant work
+- Converts exponential → linear
+
 WHEN TO USE BFS VS DFS
 ======================
 
@@ -172,23 +210,33 @@ COMMON BFS PATTERNS
 from collections import deque
 from typing import List, Optional
 
-# ================================================================
-# PATTERN 1: SINGLE-SOURCE BFS (SHORTEST PATH/LEVEL ORDER)
-# PATTERN EXPLANATION: Starting from a single source node or cell, explore outward level by level.
-# BFS visits nodes in order of increasing distance from the source, guaranteeing that the first time a node is reached, it's via the shortest path. Process can be organized by levels or simply track distance.
-#
-# TYPICAL STEPS:
-# 1. Initialize queue with starting node/cell
-# 2. Mark start as visited
-# 3. While queue not empty:
-#    - Dequeue current node
-#    - Process/check current node
-#    - Add unvisited neighbors to queue
-#    - Mark neighbors as visited
-# 4. Track distance/level if needed
-#
-# Applications: Shortest path, minimum depth, level order traversal, nearest exit, minimum steps.
-# ================================================================
+"""
+================================================================
+PATTERN 1: TREE LEVEL-ORDER BFS
+================================================================
+PATTERN EXPLANATION: Traverse a tree level by level, processing all nodes at 
+depth d before moving to depth d+1. No visited set needed since trees have no 
+cycles. Use level_size = len(queue) to process one complete level per iteration.
+
+TYPICAL STEPS:
+1. Initialize queue with root
+2. While queue not empty:
+   - Capture level_size = len(queue)
+   - Process exactly level_size nodes (one full level)
+   - Add children to queue (they form the next level)
+3. Collect results per level if needed
+
+KEY CHARACTERISTICS:
+- No visited set (trees are acyclic)
+- level_size loop to batch process each level
+- Result is often List[List] (values grouped by level)
+
+Applications: Level order traversal, zigzag traversal, right side view, 
+minimum/maximum depth, level averages.
+
+Examples: LC 102, 103, 107, 111, 199, 515, 637
+================================================================
+"""
 
 class TreeNode:
     def __init__(self, val=0, left=None, right=None):
@@ -196,12 +244,20 @@ class TreeNode:
         self.left = left
         self.right = right
 
-class SingleSourceBFS: # PART A: TREE BFS
+class TreeLevelOrderBFS: # PART A: TREE BFS
     """
     Problem: Given the root of a binary tree, return the level order traversal of its nodes' values (i.e., from left to right, level by level).
-    
-    TC: O(n) - visit each node exactly once
-    SC: O(w) - queue stores nodes at widest level w (worst case n/2 for complete tree)
+
+    # Ex. 1
+    #            3
+    #           / \
+    #          /   \
+    #         9    20
+    #             /  \
+    #           15    7
+    #
+    # Input: root = [3,9,20,null,null,15,7]
+    # Output: [[3],[9,20],[15,7]]
     
     How it works:
     1. Use queue for BFS, process nodes level by level
@@ -210,6 +266,10 @@ class SingleSourceBFS: # PART A: TREE BFS
     4. Children of current level become the next level
     """
     def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]: # LC 102
+        """
+        TC: O(n) - visit each node exactly once
+        SC: O(w) - queue stores nodes at widest level w (worst case n/2 for complete tree)
+        """
         if not root:  # Edge case - empty tree
             return []
         
@@ -223,7 +283,7 @@ class SingleSourceBFS: # PART A: TREE BFS
             # Process all nodes at current level
             for _ in range(level_size):
                 node = queue.popleft()
-                level.append(node.val) # Append "level_size" nodes to curr lvl
+                level.append(node.val) # Append all nodes to curr lvl
                 
                 # Add children (they form the next level)
                 if node.left:
@@ -247,19 +307,48 @@ class SingleSourceBFS: # PART A: TREE BFS
 # Output: [[3], [9,20], [15,7]]
 
 # Test tree BFS
-sol = SingleSourceBFS()
+sol = TreeLevelOrderBFS()
 tree_root = TreeNode(3, TreeNode(9), TreeNode(20, TreeNode(15), TreeNode(7)))
 print("Level order:", sol.levelOrder(tree_root))  # [[3], [9,20], [15,7]]
 
-class SingleSourceBFS2: # PART B: GRID BFS (SHORTEST PATH)
+
+"""
+================================================================
+PATTERN 2: SHORTEST PATH BFS
+================================================================
+PATTERN EXPLANATION: Find the minimum distance/steps from a starting point to 
+a target in a grid or graph. BFS guarantees the first time we reach the target 
+is via the shortest path. Requires visited tracking to avoid cycles.
+
+TYPICAL STEPS:
+1. Initialize queue with starting position (and distance 0 or 1)
+2. Mark start as visited
+3. While queue not empty:
+   - Dequeue current position and distance
+   - If current is target, return distance (early termination)
+   - Add unvisited neighbors to queue with distance + 1
+   - Mark neighbors as visited immediately when adding to queue
+4. Return -1 if queue exhausts without finding target
+
+KEY CHARACTERISTICS:
+- Visited set required (grids/graphs can have cycles)
+- Early termination when target found
+- Returns single value (distance), not grouped levels
+- Mark visited WHEN ADDING to queue, not when processing
+
+Applications: Shortest path in grid, nearest exit, minimum moves, 
+maze solving, minimum steps to reach target.
+
+Examples: LC 1091, 542, 1926, 934, 317, 909
+================================================================
+"""
+
+class ShortestPathBFS: # PART B: GRID BFS (SHORTEST PATH)
     """
     Problem: Given an n x n binary matrix grid, return the length of the shortest clear path from top-left (0,0) to bottom-right (n-1,n-1). A clear path has all cells = 0.
     
     You can move in 8 directions (horizontal, vertical, diagonal).
     If no path exists, return -1.
-    
-    TC: O(n²) - visit each cell at most once
-    SC: O(n²) - queue and visited tracking
     
     How it works:
     1. Start BFS from (0,0) with distance 1
@@ -268,6 +357,12 @@ class SingleSourceBFS2: # PART B: GRID BFS (SHORTEST PATH)
     4. Mark visited by modifying grid (or use visited set)
     """
     def shortestPathBinaryMatrix(self, grid: List[List[int]]) -> int: # LC 1091
+        """
+        TC: O(n²) - visit each cell at most once -> row (n) * col (n)
+        SC: O(n)
+            - O(1) - visited tracking done by marking grid in place
+            - O(n) - queue stores at most O(n) cells (the minimum side of the matrix is the BFS frontier/diagonal)
+        """
         n = len(grid)
         
         # Edge cases
@@ -298,16 +393,16 @@ class SingleSourceBFS2: # PART B: GRID BFS (SHORTEST PATH)
                 new_row, new_col = row + dr, col + dc
                 
                 # Check bounds, clear cell (0), and unvisited
-                if (0 <= new_row < n and 
-                    0 <= new_col < n and 
+                if (0 <= new_row < n and          # Row in bounds
+                    0 <= new_col < n and          # Col in bounds
                     grid[new_row][new_col] == 0): # 0 -> unvisited
                     
-                    grid[new_row][new_col] = 1  # Mark visited
-                    queue.append((new_row, new_col, dist + 1))
+                    grid[new_row][new_col] = 1    # Mark new cell as visited
+                    queue.append((new_row, new_col, dist + 1)) # Add cell to explore
         
         return -1  # No path found
 
-sol = SingleSourceBFS2()
+sol = ShortestPathBFS()
 print(sol.shortestPathBinaryMatrix([
         [0,1,0],
         [0,0,0],
@@ -319,22 +414,25 @@ print(sol.shortestPathBinaryMatrix([
     [1,1,0]
 ]))  # -1
 
+"""
+================================================================
+PATTERN 3: MULTI-SOURCE BFS
+PATTERN EXPLANATION: Begin BFS exploration from multiple starting points simultaneously rather than a single source. All sources start at the same initial distance/time and spread outward together in sync.
 
-# ================================================================
-# PATTERN 2: MULTI-SOURCE BFS
-# PATTERN EXPLANATION: Begin BFS exploration from multiple starting points simultaneously rather than a single source. All sources start at the same initial distance/time and spread outward together in sync.
+Used when you need to find the minimum distance to ANY of several sources, or when multiple origins spread/affect their surroundings at the same rate.
 
-# Used when you need to find the minimum distance to ANY of several sources, or when multiple origins spread/affect their surroundings at the same rate.
+TYPICAL STEPS:
+1. Initialize queue with ALL starting source nodes/cells
+2. Mark all sources as visited
+3. Process BFS level by level (each level = one unit of distance/time)
+4. Spread from all current positions simultaneously
+5. Track what changes or count what's affected
 
-# TYPICAL STEPS:
-# 1. Initialize queue with ALL source nodes/cells
-# 2. Mark all sources as visited
-# 3. Process BFS level by level (each level = one unit of distance/time)
-# 4. Spread from all current positions simultaneously
-# 5. Track what changes or count what's affected
-#
-# Applications: Rotting oranges, walls and gates, fire spreading, infection spread, 01 matrix.
-# ================================================================
+Applications: Rotting oranges, walls and gates, fire spreading, infection spread, 01 matrix.
+
+Examples: LC 994, 286, 542, 1162, 934
+================================================================
+"""
 
 class MultiSourceBFS: 
     """
@@ -346,9 +444,6 @@ class MultiSourceBFS:
     Every minute, fresh oranges adjacent (4-directionally) to rotten oranges become rotten.
     Return minimum minutes until no fresh oranges remain. Return -1 if impossible.
     
-    TC: O(rows * cols) - visit each cell once
-    SC: O(rows * cols) - queue can contain all cells
-    
     How it works:
     1. Add ALL initially rotten oranges to queue (multi-source start)
     2. Count fresh oranges initially
@@ -357,46 +452,47 @@ class MultiSourceBFS:
     5. Check if any fresh oranges remain unreachable
     """
     def orangesRotting(self, grid: List[List[int]]) -> int: # LC 994
+        """
+        TC: O(rows * cols) - visit each cell once in the initialization loop -> (O(rows * cols)), and each cell enters the BFS queue at most once (we mark it as '2') -> (O(rows * cols))
+        SC: O(min(rows, cols)) - queue holds BFS frontier
+        """
         rows, cols = len(grid), len(grid[0])
-        queue = deque()
-        fresh_count = 0
+        queue = deque()  # BFS queue
+        fresh_count = 0  # Number of fresh oranges left
         
         # Initialize: find all rotten oranges and count fresh
         for r in range(rows):
             for c in range(cols):
-                if grid[r][c] == 2:
-                    queue.append((r, c))  # Multi-source initialization
+                if grid[r][c] == 2:  # Found a rotten orange
+                    queue.append((r, c, 0))  # Multi-source initialization (row, col, time)
                 elif grid[r][c] == 1:
-                    fresh_count += 1 # Initial num of fresh oranges
+                    fresh_count += 1  # Initial num of fresh oranges
         
         # Edge case: no fresh oranges
         if fresh_count == 0:
             return 0
         
-        minutes = 0 # Track minutes elapsed
-        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # BFS explores 4 directions
+        max_time = 0  # Track minutes elapsed
         
-        # BFS: process level by level (each level = 1 minute)
-        while queue and fresh_count > 0:
-            minutes += 1
-            level_size = len(queue)  # Process entire level at once
+        # BFS: spread rot from all rotten oranges simultaneously
+        while queue:
+            row, col, time = queue.popleft()
             
-            for _ in range(level_size):
-                row, col = queue.popleft()
+            # Spread rot to 4 adjacent cells
+            for dr, dc in directions:
+                new_row, new_col = row + dr, col + dc
                 
-                # Spread rot to 4 adjacent cells
-                for dr, dc in directions:
-                    new_row, new_col = row + dr, col + dc
+                if (0 <= new_row < rows and  # OOB checks
+                    0 <= new_col < cols and 
+                    grid[new_row][new_col] == 1):  # If we find a fresh orange
                     
-                    if (0 <= new_row < rows and 
-                        0 <= new_col < cols and 
-                        grid[new_row][new_col] == 1):  # Fresh orange
-                        
-                        grid[new_row][new_col] = 2  # Make rotten
-                        fresh_count -= 1 # Decrease fresh oranges
-                        queue.append((new_row, new_col))
+                    grid[new_row][new_col] = 2  # Make it rotten (so we don't revisit)
+                    fresh_count -= 1  # Decrease fresh oranges
+                    max_time = time + 1  # Update max time
+                    queue.append((new_row, new_col, max_time))  # Append with incremented time
         
-        return minutes if fresh_count == 0 else -1 
+        return max_time if fresh_count == 0 else -1
 
 #  Minute 0      Minute 1      Minute 2      Minute 3      Minute 4
 # [2, 1, 1]     [2, 2, 1]     [2, 2, 2]     [2, 2, 2]     [2, 2, 2]
@@ -410,113 +506,128 @@ print("Minutes to rot:", sol.orangesRotting([[2,1,1],[1,1,0],[0,1,1]]))  # 4
 print("Impossible:", sol.orangesRotting([[2,1,1],[0,1,1],[1,0,1]]))  # -1
 print("Already done:", sol.orangesRotting([[0,2]]))  # 0
 
+"""
+================================================================
+PATTERN 4: BFS WITH EXTENDED STATE
+PATTERN EXPLANATION: Track more than just position - include additional information as part of the state.
+State becomes a tuple like (position, extra_data) where extra_data might be keys collected, obstacles broken, moves remaining, etc. The visited set must track the COMPLETE state, not just position, because arriving at the same position with different additional information represents different scenarios.
 
-# ================================================================
-# PATTERN 3: BFS WITH EXTENDED STATE
-# PATTERN EXPLANATION: Track more than just position - include additional information as part of the state.
-# State becomes a tuple like (position, extra_data) where extra_data might be keys collected, obstacles broken, moves remaining, etc. The visited set must track the COMPLETE state, not just position, because arriving at the same position with different additional information represents different scenarios.
-#
-# TYPICAL STEPS:
-# 1. Define state as tuple: (position, additional_info)
-# 2. Initialize queue with starting state
-# 3. Use visited set that tracks FULL state tuple
-# 4. When generating neighbors:
-#    - Update position AND additional info
-#    - Check if new state already visited
-# 5. Process until goal state reached or queue exhausted
-#
-# Applications: Lock combinations, collecting keys, obstacle elimination, turn limits, resource tracking.
-# ================================================================
+KEY DISTINCTION: The extra data must affect REVISITING. If you can visit (row, col) multiple times with different states, it's extended state. If time/distance is just metadata you're carrying (each cell still visited once), it's NOT extended state.
 
-class ExtendedState:
+TYPICAL STEPS:
+1. Define state as tuple: (position, additional_info)
+2. Initialize queue with starting state
+3. Use visited set that tracks FULL state tuple
+4. When generating neighbors:
+   - Update position AND additional info
+   - Check if new state already visited
+5. Process until goal state reached or queue exhausted
+
+Applications: Lock combinations, collecting keys, obstacle elimination, turn limits, resource tracking.
+================================================================
+"""
+
+class ExtendedStateBFS:
     """
-    Problem: You have a lock with 4 circular wheels (each 0-9).
-    Lock starts at "0000". Each move turns one wheel up or down by 1. You are given a list of combinations that are "deadends" (forbidden - can't pass through).
-    
-    Return minimum turns to reach target, or -1 if impossible.
-    
-    TC: O(10^4 * 8) - at most 10,000 states, each generates 8 neighbors
-    SC: O(10^4) - visited set stores all possible combinations
-    
-    How it works:
-    1. Treat each 4-digit combination as a node
-    2. State = (combination, turns) - track both position and distance
-    3. Generate 8 neighbors per state (turn each of 4 wheels up/down)
-    4. BFS finds shortest path from "0000" to target
-    5. Skip deadends and already-visited combinations
+    Problem: Given m x n grid (0 = empty, 1 = obstacle), find shortest path from 
+    top-left to bottom-right. You can eliminate AT MOST k obstacles.
+
+    Ex. 
+    Input: grid = 
+    [[0,0,0],
+     [1,1,0],
+     [0,0,0],
+     [0,1,1],
+     [0,0,0]], k = 1
+    Output: 6
+    Explanation: 
+    The shortest path without eliminating any obstacle is 10.
+    The shortest path with one obstacle elimination at position (3,2) is 6. Such path is (0,0) -> (0,1) -> (0,2) -> (1,2) -> (2,2) -> (3,2) -> (4,2).
     """
-    def openLock(self, deadends: List[str], target: str) -> int: # LC 752
-        # Edge Cases
-        if "0000" in deadends: # Starting combo in deadends
-            return -1
-        if target == "0000": # Starting combo is target
+    def shortestPath(self, grid: List[List[int]], k: int) -> int:  # LC 1293
+        """
+        TC: O(m * n * k) - each cell can be visited with k+1 different states - one for each possible remaining value: 
+        Cell (2, 3) could be visited as:
+        - (2, 3, 0)
+        - (2, 3, 1)
+        - (2, 3, 2)
+        - ...
+        - (2, 3, k)
+        SC: O(m * n * k) - visited set can store all possible states ->  (row, col, remaining) tuples
+        """
+        rows, cols = len(grid), len(grid[0])
+        
+        # Edge case: already at destination
+        if rows == 1 and cols == 1:
             return 0
         
-        dead = set(deadends) # Turn deadends to set for 0(1) lookup
-        visited = {"0000"} # Mark starting position in visited set
-        queue = deque([("0000", 0)])  # (combination, turns)
+        # (row, col, remaining, dist) — remaining affects revisiting (state), dist is just a counter
+        queue = deque([(0, 0, k, 0)])
         
-        def get_neighbors(combo):
-            """Generate all 8 possible next combinations"""
-            neighbors = []
-            for i in range(4):  # Iterate over 4 wheels
-                digit = int(combo[i])
-                
-                # Turn wheel up (9 wraps to 0)
-                up = str((digit + 1) % 10)
-                neighbors.append(combo[:i] + up + combo[i+1:])
-                
-                # Turn wheel down (0 wraps to 9)
-                down = str((digit - 1) % 10)
-                neighbors.append(combo[:i] + down + combo[i+1:])
-            
-            return neighbors
+        # Initialize visited set -> Only track (row, col, remaining) — same cell with more eliminations left is worth revisiting
+        visited = {(0, 0, k)}
+        
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
         
         while queue:
-            combo, turns = queue.popleft()
+            row, col, remaining, dist = queue.popleft()
             
-            # Iterate over 8 next combos -> call fn, return list
-            for next_combo in get_neighbors(combo): # of 8 combos
-                # Skip if deadend or already visited
-                if next_combo in dead or next_combo in visited:
-                    continue # Do not add neighbor -> BFS blocked
+            for dr, dc in directions: # try 4 directions
+                new_row, new_col = row + dr, col + dc
                 
-                # Check if reached target
-                if next_combo == target:
-                    return turns + 1
+                # OOB check
+                if not (0 <= new_row < rows and 0 <= new_col < cols):
+                    continue
                 
-                # Add to queue for exploration with extended state
-                visited.add(next_combo)
-                queue.append((next_combo, turns + 1))
+                # Calculate new remaining eliminations from current cell being explored
+                new_remaining = remaining - grid[new_row][new_col]  # Subtract 1 if obstacle, 0 if empty
+                
+                # Skip if out of eliminations
+                if new_remaining < 0:
+                    continue
+                
+                # Check if reached destination
+                if new_row == rows - 1 and new_col == cols - 1:
+                    return dist + 1
+                
+                # EXTENDED STATE CHECK: have I been to this cell with this many eliminations left?
+                if (new_row, new_col, new_remaining) not in visited:
+                    visited.add((new_row, new_col, new_remaining))
+                    queue.append((new_row, new_col, new_remaining, dist + 1))
         
-        return -1  # Target unreachable
+        return -1  # No path found
 
-# Lock wheels: [0][0][0][0]
-# Target: "0202"
-# Deadends: ["0201", "0101", "0102", "1212", "2002"]
+
+# Example walkthrough:
+# Grid:        k = 1 (can break 1 wall)
+# [0, 0, 0]
+# [1, 1, 0]
+# [0, 0, 0]
 #
-# Path: 0000 → 1000 → 1100 → 1200 → 1201 → 1202 → 0202
-# Turns: 6
-
-sol = ExtendedState()
-print(sol.openLock(["0201","0101","0102","1212","2002"], "0202"))  # 6
-print(sol.openLock(["8888"], "0009"))  # 1
-print(sol.openLock(["8887","8889","8878","8898","8788","8988","7888","9888"], "8888"))  # -1
-
-
-# ================================================================
-# PATTERN 4: IMPLICIT GRAPH BFS
-# PATTERN EXPLANATION: The graph structure is not explicitly provided. Instead, generate neighbors/next states on-the-fly based on problem rules. Each state is treated as a node, and transitions between states form edges. This transforms problems into graph traversal where you define what "neighbors" means for your problem domain.
+# Path A: (0,0) → (0,1) → (0,2) → (1,2) → (2,2)  = 4 steps, 0 walls broken
+# Path B: (0,0) → (1,0) → (2,0) → (2,1) → (2,2)  = 4 steps, 1 wall broken
 #
-# TYPICAL STEPS:
-# 1. Define what constitutes a "state" in your problem
-# 2. Define rules for generating valid next states (neighbors)
-# 3. Implement get_neighbors() function based on problem rules
-# 4. Run standard BFS treating states as nodes
-# 5. Track visited states to avoid cycles
-#
-# Applications: Word transformation, sliding puzzles, DNA mutation, string transformations, state machines.
-# ================================================================
+# Both valid! BFS finds shortest.
+
+sol = ExtendedStateBFS()
+print(sol.shortestPath([[0,0,0],[1,1,0],[0,0,0], [0,1,1], [0,0,0]], 1))  # 6
+print(sol.shortestPath([[0,0,0],[1,1,0],[0,0,0]], 1))  # 4
+
+"""
+================================================================
+PATTERN 5: IMPLICIT GRAPH BFS
+PATTERN EXPLANATION: The graph structure is not explicitly provided. Instead, generate neighbors/next states on-the-fly based on problem rules. Each state is treated as a node, and transitions between states form edges. This transforms problems into graph traversal where you define what "neighbors" means for your problem domain.
+
+TYPICAL STEPS:
+1. Define what constitutes a "state" in your problem
+2. Define rules for generating valid next states (neighbors)
+3. Implement get_neighbors() function based on problem rules
+4. Run standard BFS treating states as nodes
+5. Track visited states to avoid cycles
+
+Applications: Word transformation, sliding puzzles, DNA mutation, string transformations, state machines.
+================================================================
+"""
 
 class GraphBFS:
     """
@@ -527,10 +638,6 @@ class GraphBFS:
     Input: startGene = "AACCGGTT", endGene = "AAACGGTA", bank = ["AACCGGTA","AACCGCTA","AAACGGTA"]
     Output: 2
     
-    TC: O(N * M * 4) where N = bank size, M = gene length (8)
-        For each gene, try 4 possible characters at each position
-    SC: O(N) - visited set and queue store genes from bank
-    
     How it works:
     1. Treat each gene as a node in implicit graph
     2. Generate neighbors by changing one character to A/C/G/T
@@ -539,6 +646,11 @@ class GraphBFS:
     5. Return number of mutations (path length - 1)
     """
     def minMutation(self, startGene: str, endGene: str, bank: List[str]) -> int: # LC 433
+        """
+        TC: O(N * M * 4) where N = bank size, M = gene length (8)
+        For each gene, try 4 possible characters at each position
+        SC: O(N) - visited set and queue store genes from bank
+        """
         if endGene not in bank:  # Target must be reachable (in bank)
             return -1
         
@@ -551,10 +663,10 @@ class GraphBFS:
             """
             Generate next states (neighbors) by trying all single-character mutations. This is the "implicit" part - we create edges on-the-fly based on rules.
             """
-            neighbors = []
+            neighbors = [] # list of neighbors -> one char different than input
             for i in range(len(gene)):  # Try mutating each position
                 for char in genes:  # Try each possible character
-                    if char != gene[i]:  # Skip if no actual change
+                    if char != gene[i]:  # Skip if same char
                         neighbor = gene[:i] + char + gene[i+1:]  # Build new gene string
                         if neighbor in bank_set:  # Only valid if exists in bank
                             neighbors.append(neighbor)
@@ -568,7 +680,7 @@ class GraphBFS:
             if gene == endGene:
                 return mutations
             
-            # Explore all valid next states (one mutation away)
+            # Explore all valid next states (one mutation away & exist in bank)
             for next_gene in get_neighbors(gene):
                 if next_gene not in visited:  # Haven't explored this gene yet
                     visited.add(next_gene)  # Mark as explored

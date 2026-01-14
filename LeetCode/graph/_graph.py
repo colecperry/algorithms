@@ -3,6 +3,16 @@
 GRAPH ALGORITHMS COMPLETE GUIDE
 =================================================================
 
+MAKESURE TO HAVE THESE 
+
+Graph guide topics:
+
+Topological sort (Kahn's BFS / DFS)
+Cycle detection
+Union Find
+Dijkstra's (weighted shortest path)
+Connected components
+
 WHAT ARE GRAPH ALGORITHMS?
 --------------------------
 Graph algorithms solve problems on data structures consisting of nodes (vertices) and edges (connections).

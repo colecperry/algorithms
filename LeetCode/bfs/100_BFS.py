@@ -115,7 +115,6 @@ class Solution(object):
             queue.append((node1.right, node2.right))
 
         return True  # If we never return False, the trees are identical
-    
 
 
 p = TreeNode(1, TreeNode(2), TreeNode(3))

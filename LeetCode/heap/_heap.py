@@ -27,9 +27,9 @@ Array: [1, 3, 2, 7, 5, 4, 6]
 
 Heap Properties:
 - Insert: O(log n) - add to end, bubble up
-- Remove min/max: O(log n) - swap root with last, sink down
+- Remove min/max: O(log n) - move last element to the root, sink down
 - Peek min/max: O(1) - just check root
-- Heapify: O(n) - convert unsorted array to heap
+- Heapify: O(n) - convert unsorted array to heap -> start at first non leaf node and sink it down until heap property satisfied (node smaller than both children)
 
 When to use Heap:
 - Need repeated access to min/max element
