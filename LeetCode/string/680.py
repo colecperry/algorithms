@@ -17,26 +17,16 @@
 # Input: s = "abc"
 # Output: false
 
-# How to Solve: 
-    # Start by initializing two pointers at the beginning and end of the string
-    # Use a loop to compare characters at both ends, moving inward
-    # If all characters match, the string is already a palindrome, return True
-    # If a mismatch is found:
-        # Try skipping the character at the left pointer and check if the rest is a palindrome
-        # If not, try skipping the character at the right pointer and check again
-        # If either case results in a valid palindrome, return True
-        # If no mismatches are found through the loop, return True by default
-
     # Time Complexity: O(n)
     # - In the worst case, we traverse the string once and possibly make one additional traversal of a substring
 
-    # Space Complexity: O(1)
-    # - No extra space is used beyond a few pointers; checks are done in-place
-
-
 class Solution:
     def validPalindrome(self, s: str) -> bool:
-        def is_palindrome(left, right): # Checking palindrome after skipping
+        """
+        - TC: O(n) for outer two pointer loop, then O(n) + O(n) check if mismatch found from inner loop
+        - SC: No extra space is used beyond a few pointers; checks are done in-place
+        """
+        def is_palindrome(left, right): # Bool -> check if passed in str is palindrome 
             while left < right: 
                 if s[left] != s[right]: # Return False if chars !=
                     return False
@@ -47,14 +37,12 @@ class Solution:
         left, right = 0, len(s) - 1 # Init "l" and "r" pointers 
 
         while left < right: 
-            if s[left] != s[right]: # If char's are not ==
-                # Try skipping either the left or the right character
-                return is_palindrome(left + 1, right) or is_palindrome(left, right - 1) # Return true if either are a palindrome after skipping from each side
+            if s[left] != s[right]: # If char's are not == try deleting both chars
+                return is_palindrome(left + 1, right) or is_palindrome(left, right - 1)
             left += 1
             right -= 1
 
         return True # Return true if all chars are equal
-
 
 sol = Solution()
 print(sol.validPalindrome("aba"))

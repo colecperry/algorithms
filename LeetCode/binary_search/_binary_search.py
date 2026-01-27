@@ -41,91 +41,38 @@ Worst case: n comparisons (if target at end or not present)
 ────────────────────────────────────────────────────
 BINARY SEARCH - O(log n)
 ────────────────────────────────────────────────────
-Eliminate half the search space each iteration:
+Eliminate half the search space each iteration.
 
-Step 1: Check middle (index 4): 9 < 13
-        Eliminate left half [1,3,5,7,9]
-        Search right half [11,13,15,17,19]
+Why log₂(n)? The base matches the divisor.
+- Divide the search space by 2 each step → log base 2
+- Divide the seatch space by 3 each step → log base 3
 
-Step 2: Check middle (index 6): 13 = 13 ✓
+Example: n = 1,000,000
+1M → 500K → 250K → 125K → ... → 1
+Only 20 halvings to reach 1 element. That's log₂(1M) ≈ 20.
 
-Comparisons needed: 2
-Worst case: log₂(n) comparisons
-
-════════════════════════════════════════════════════
+────────────────────────────────────────────────────
 COMPLEXITY COMPARISON
-════════════════════════════════════════════════════
+────────────────────────────────────────────────────
+Array Size | Linear | Binary | Improvement
+-----------|--------|--------|------------
+    1,000  |  1,000 |     10 |    100x
+  100,000  |100,000 |     17 |  5,882x
+1,000,000  |  1M    |     20 | 50,000x
 
-Array Size | Linear Search | Binary Search | Improvement
------------|---------------|---------------|-------------
-    10     |      10       |       4       |   2.5x faster
-   100     |     100       |       7       |  14x faster
-  1,000    |   1,000       |      10       | 100x faster
- 10,000    |  10,000       |      14       | 714x faster
-100,000    | 100,000       |      17       | 5,882x faster
-1,000,000  |1,000,000      |      20       | 50,000x faster
+Key insight:
+- Linear: Double array → double comparisons
+- Binary: Double array → add 1 comparison
 
-Real-world impact:
-- Searching 1 million elements:
-  * Linear: 1,000,000 comparisons
-  * Binary: 20 comparisons
-  * Binary search is 50,000x faster!
+────────────────────────────────────────────────────
+WHEN TO USE
+────────────────────────────────────────────────────
+✓ Array is sorted (or has monotonic property)
+✓ Can eliminate half based on comparison
+✓ Searching for min/max value that satisfies condition
 
-Growth comparison:
-- Linear: Double array size → Double comparisons
-- Binary: Double array size → Add just 1 comparison
-- At n=1,000,000: Linear needs 1M checks, Binary needs 20
-
-Why such a difference?
-- Linear: Checks every element → n operations
-- Binary: Halves space each time → log₂(n) operations
-- log₂(1,000,000) = 20 (halving: 1M → 500k → 250k → ... → 1)
-
-How binary search works:
-1. Start with left and right pointers at array boundaries
-2. Calculate middle index
-3. Compare middle element with target
-4. If equal: found target
-5. If middle < target: target must be in right half
-6. If middle > target: target must be in left half
-7. Repeat until found or search space exhausted
-
-Visual example:
-    Array: [1, 3, 5, 7, 9, 11, 13, 15], target = 7
-    
-    Step 1: [1, 3, 5, 7, 9, 11, 13, 15]
-             L        M              R
-             7 > 5, search right half
-    
-    Step 2:           [7, 9, 11, 13, 15]
-                       L  M          R
-             7 < 9, search left half
-    
-    Step 3:           [7]
-                       LMR
-             Found!
-
-When to use Binary Search:
-- Array is sorted or has monotonic property
-- Need O(log n) search time
-- Can eliminate half of search space based on comparison
-- Searching answer space (min/max value that satisfies condition)
-- Finding boundaries or insertion points
-
-When NOT to use Binary Search:
-- Array is unsorted and can't be sorted
-- No way to eliminate half the search space
-- Need all occurrences of element (might need multiple searches)
-- Linear scan is simpler and sufficient
-
-Common binary search problem types:
-- Standard search in sorted array
-- Find insertion position
-- Search rotated or modified sorted arrays
-- Binary search on answer space
-- 2D matrix search
-- Find peak/valley elements
-- Find boundaries (first/last occurrence)
+✗ Array unsorted and can't be sorted
+✗ No way to eliminate half the search space
 
 BINARY SEARCH CORE TEMPLATES
 =============================
@@ -139,14 +86,8 @@ from typing import List, Optional
 def binary_search_template(nums, target):
     """
     Standard binary search for finding target in sorted array
-    
-    TC: O(log n) - halve search space each iteration
-    SC: O(1) for iterative, O(log n) for recursive
-    
-    WHEN TO USE:
-    - Search for exact value in sorted array
-    - Find if element exists
-    - Return index of target
+    - TC: O(log n) - halve the search space each iteration
+    - SC: O(1) for iterative, O(log n) for recursive
     """
     left, right = 0, len(nums) - 1 # Left and Right pointers start on the edges
     
@@ -170,7 +111,7 @@ def binary_search_recursive(nums, target, left, right):
     Recursive binary search
     
     TC: O(log n)
-    SC: O(log n) - recursion call stack
+    SC: O(log n) - each recursive call halves the search space -> stack depth
     """
     if left > right:
         return -1
@@ -184,152 +125,10 @@ def binary_search_recursive(nums, target, left, right):
     else: # Ele at midpoint greater than target
         return binary_search_recursive(nums, target, left, mid - 1) # Search left recursively (r = mid - 1)
 
-# ================================================================
-#                   2D MATRIX TEMPLATE
-# ================================================================
-def matrix_search_template(matrix, target):
-    """
-    Problem: Search in m x n matrix where:
-    - Integers in each row are sorted left to right
-    - First integer of each row > last integer of previous row
-    
-    Example:
-        matrix = [
-            [1,  3,  5,  7],
-            [10, 11, 16, 20],
-            [23, 30, 34, 60]
-        ]
-        target = 3
-        Output: True
-    
-    TC: O(log(m*n)) - treating as 1D sorted array of m*n elements
-    SC: O(1)
-    
-    WHEN TO USE:
-    - Matrix rows sorted left to right
-    - Each row's first element > previous row's last element
-    - Essentially a flattened sorted array
-    
-    KEY TRICK:
-    # Treat 2D matrix as flattened 1D array, then binary search
-    # Example: [[1,3,5,7], [10,11,16,20]] becomes [1,3,5,7,10,11,16,20]
-    # Use math to convert between 1D index and 2D coordinates
-    """
-    # Edge case: empty matrix
-    if not matrix or not matrix[0]:
-        return False
-    
-    rows, cols = len(matrix), len(matrix[0])
-    
-    # Binary search on "virtual" 1D array of length rows*cols
-    left, right = 0, rows * cols - 1
-    
-    while left <= right:
-        mid = left + (right - left) // 2
-        
-        # Convert 1D index to 2D coordinates
-        # Example: mid=5, cols=4 -> row=5//4=1, col=5%4=1 -> matrix[1][1]
-        row = mid // cols  # Which row?
-        col = mid % cols   # Which column in that row?
-        value = matrix[row][col]
-        
-        # Standard binary search comparisons
-        if value == target:
-            return True
-        elif value < target:
-            left = mid + 1   # Target is in right half
-        else:
-            right = mid - 1  # Target is in left half
-    
-    return False  # Target not found
-
-
-# Test cases
-matrix = [
-    [1,  3,  5,  7],
-    [10, 11, 16, 20],
-    [23, 30, 34, 60]
-]
-print(matrix_search_template(matrix, 3))   # True
-print(matrix_search_template(matrix, 13))  # False
-print(matrix_search_template(matrix, 60))  # True
-
-
 """
 ================================================================
-PATTERN 1: STANDARD SEARCH IN SORTED ARRAY
-PATTERN EXPLANATION: Find target value in sorted array by repeatedly comparing with middle element and eliminating half of search space. Classic divide and conquer approach where we divide array at midpoint and conquer by searching only the relevant half.
+PATTERN 1: FIND INSERTION POSITION
 
-TYPICAL STEPS:
-1. Initialize left=0, right=len(nums)-1
-2. While left <= right:
-    - Calculate mid = left + (right - left) // 2
-    - If nums[mid] == target: found, return mid
-    - If nums[mid] < target: search right half (left = mid + 1)
-    - If nums[mid] > target: search left half (right = mid - 1)
-3. Return -1 if not found
-
-Applications: Search in sorted array, check if element exists, find exact match.
-================================================================
-"""
-
-class StandardSearchPattern:
-    """
-    Problem: Given sorted array of integers nums and target value, return index of target.
-    If target not found, return -1.
-    
-    How it works:
-    1. Compare target with middle element
-    2. If equal: found target
-    3. If target larger: must be in right half (all left half elements smaller)
-    4. If target smaller: must be in left half (all right half elements larger)
-    5. Repeat until found or search space exhausted
-    
-    Why O(log n):
-    - Each iteration eliminates half the elements
-    - n → n/2 → n/4 → ... → 1
-    - Number of halvings: log₂(n)
-    """
-    def search(self, nums: List[int], target: int) -> int: # LC 704
-        """
-        - TC: O(log n) - halve search space each iteration
-        - SC: O(1) - only pointer variables
-        """
-        left, right = 0, len(nums) - 1
-        
-        while left <= right:
-            mid = left + (right - left) // 2
-            
-            if nums[mid] == target:
-                return mid
-            elif nums[mid] < target:
-                left = mid + 1
-            else:
-                right = mid - 1
-        
-        return -1
-
-# Example:
-# nums = [-1,0,3,5,9,12], target = 9
-#
-# Step 1: left=0, right=5, mid=2
-#   nums[2]=3 < 9
-#   Eliminate left: [9,12]
-#
-# Step 2: left=3, right=5, mid=4
-#   nums[4]=9 == 9 ✓
-#   Found at index 4
-#
-# Comparisons: 2 (vs 5 for linear search)
-# Output: 4
-
-sol = StandardSearchPattern()
-print("Binary search:", sol.search([-1,0,3,5,9,12], 9))  # 4
-print("Binary search:", sol.search([-1,0,3,5,9,12], 2))  # -1
-
-"""
-================================================================
-PATTERN 2: FIND INSERTION POSITION
 PATTERN EXPLANATION: Find index where target should be inserted to maintain sorted order. When binary search completes without finding target, left pointer naturally points to correct insertion position. This works because left tracks the smallest index where nums[index] >= target.
 
 TYPICAL STEPS:
@@ -337,6 +136,17 @@ TYPICAL STEPS:
 2. Binary search as normal
 3. If target found, return its index
 4. If not found, return left (insertion position)
+
+Why left is insertion position:
+- Think of left as: "first position I haven't ruled out yet"
+- [1, 3, 5, 7], target = 4
+- Is 3 valid? No, too small. Rule it out: left = 2
+- Is 5 valid? Yes, could insert before it. Keep left = 2
+
+- Answer: 2
+
+- left only moves forward when we find something too small.
+- It never moves backward. So it stops at the first valid spot.
 
 Applications: Insert into sorted array, find lower/upper bound, first/last occurrence.
 ================================================================
@@ -346,22 +156,14 @@ class InsertionPositionPattern:
     """
     Problem: Given sorted array and target, return index where target would be inserted
     to maintain sorted order. If target exists, return its current index.
-    
-    How it works:
-    1. Perform standard binary search
-    2. If target found, return its index
-    3. If not found, left pointer points to insertion position
-    
-    Why left is insertion position:
-    - Left always points to smallest element >= target
-    - When search ends, left > right
-    - All elements at indices < left are < target
-    - All elements at indices >= left are >= target
-    - So target belongs at index left
+
+    Example 1:
+        Input: nums = [1,3,5,6], target = 5
+        Output: 2
     """
     def searchInsert(self, nums: List[int], target: int) -> int: # LC 35
         """
-        - TC: O(log n)
+        - TC: O(log n) - we half the search space each iteration
         - SC: O(1)
         """
         left, right = 0, len(nums) - 1
@@ -378,37 +180,27 @@ class InsertionPositionPattern:
         
         return left  # Insertion position
 
-# Example:
-# nums = [1,3,5,6], target = 2
-#
-# Step 1: mid=2, nums[2]=5 > 2
-#   Search left: [1,3]
-#
-# Step 2: mid=0, nums[0]=1 < 2
-#   Search right: [3]
-#   left=1, right=0 (left > right, done)
-#
-# left=1 points to where 2 should go: [1,2,3,5,6]
-# Output: 1
-#
-# Example 2:
-# nums = [1,3,5,6], target = 7
-#
-# Search eliminates all elements
-# left=4 (after last element)
-# Insert at end: [1,3,5,6,7]
-# Output: 4
-
 sol = InsertionPositionPattern()
-print("Insert position:", sol.searchInsert([1,3,5,6], 5))  # 2
 print("Insert position:", sol.searchInsert([1,3,5,6], 2))  # 1
 print("Insert position:", sol.searchInsert([1,3,5,6], 7))  # 4
 
 """
 ================================================================
-PATTERN 3: SEARCH IN ROTATED SORTED ARRAY
+PATTERN 2: SEARCH IN ROTATED SORTED ARRAY
+
 PATTERN EXPLANATION: Search in array that was sorted then rotated at unknown pivot.
+
 Key insight: after rotation, one half is always still properly sorted. Identify which half is sorted by comparing endpoints with middle. Then check if target is in sorted half's range to decide which half to search.
+
+The rotation creates ONE break point. Mid splits the array into two halves.
+The break point can only be in one half — the other half is guarenteed to be sorted.
+
+    [4, 5, 6, 7, 0, 1, 2]
+              ↑
+           break point (7 → 0), mid = 7
+    
+    Left half:  [4, 5, 6, 7]  ← no break, sorted ✓
+    Right half: [7, 0, 1, 2]  ← break is here, not sorted ✗
 
 TYPICAL STEPS:
 1. Compare nums[left] with nums[mid] to identify sorted half
@@ -427,17 +219,10 @@ Applications: Search rotated sorted array, find minimum in rotated array.
 class RotatedArrayPattern:
     """
     Problem: Search for target in sorted array rotated at unknown pivot. Original: [0,1,2,4,5,6,7] rotated to [4,5,6,7,0,1,2]
-    
-    How it works:
-    1. One half is always properly sorted
-    2. Check if left half sorted: nums[left] <= nums[mid]
-    3. If sorted, check if target in that half's range
-    4. Search the half that could contain target
-    
-    Why one half is always sorted:
-    - Rotation creates one breakpoint
-    - Breakpoint is in one half, other half unaffected
-    - Sorted half has nums[left] <= nums[mid] or nums[mid] <= nums[right]
+
+    Example 1:
+    - Input: nums = [4,5,6,7,0,1,2], target = 0
+    - Output: 4
     """
     def search(self, nums: List[int], target: int) -> int: # LC 33
         """
@@ -457,14 +242,14 @@ class RotatedArrayPattern:
                 # Is target in sorted left half?
                 if nums[left] <= target < nums[mid]:
                     right = mid - 1
-                else:
+                else: # target in right hallf
                     left = mid + 1
-            # Right half is sorted
-            else:
+            
+            else: # Right half is sorted
                 # Is target in sorted right half?
                 if nums[mid] < target <= nums[right]:
                     left = mid + 1
-                else:
+                else: # target in left half
                     right = mid - 1
         
         return -1
@@ -488,14 +273,16 @@ class RotatedArrayPattern:
 # Output: 4
 
 sol = RotatedArrayPattern()
-print("Rotated search:", sol.search([4,5,6,7,0,1,2], 0))  # 4
-print("Rotated search:", sol.search([4,5,6,7,0,1,2], 3))  # -1
+print("Rotated search:", sol.search([4,5,6,7,0,1,2], 0))  # left half sorted -> 4
+print("Rotated search:", sol.search([4,5,6,0,1,2,3], 5))  # right half sorted -> 1
 
 """
 ================================================================
-PATTERN 4: BINARY SEARCH ON ANSWER SPACE
-PATTERN EXPLANATION: Instead of searching in given array, search a range of possible answers. Define minimum and maximum possible answers, then binary search to find optimal.
-Use helper function to test if candidate answer satisfies constraints. Common in "minimize maximum" or "maximize minimum" problems.
+PATTERN 3: BINARY SEARCH ON ANSWER SPACE
+
+PATTERN EXPLANATION: Instead of searching in a given array, search a range of 
+possible answers. Define min and max possible answers, then binary search to 
+find the smallest or largest value that satisfies a condition. Use helper function to test if candidate answer satisfies constraints. Common in "minimize maximum" or "maximize minimum" problems.
 
 TYPICAL STEPS:
 1. Define answer range: [min_answer, max_answer]
@@ -528,7 +315,7 @@ class AnswerSpacePattern:
     1. Answer range: [1, max(piles)]
         - Minimum speed: 1 banana/hour
         - Maximum speed: max(piles) (eat largest pile in 1 hour)
-    2. For each candidate speed, calculate total hours needed
+    2. For each candidate speed, calculate total hours needed to finish all bananas
     3. Binary search to find minimum speed that works
     
     Why binary search on speed:
@@ -538,15 +325,15 @@ class AnswerSpacePattern:
     """
     def minEatingSpeed(self, piles: List[int], h: int) -> int: # LC 875
         """
-        - TC: O(n log(max_pile)) - n to check if speed works, log(max) for binary search
+        - TC: O(n log(max_pile)) - n to check if speed works, log(max_pile) for binary search space
         - SC: O(1)
         """
         
         def can_finish(speed):
             """Check if Koko can finish all piles with this speed"""
             total_hours = 0
-            for pile in piles:
-                total_hours += math.ceil(pile / speed)
+            for pile in piles: # eat each pile
+                total_hours += math.ceil(pile / speed) # hours to eat curr pile at curr speed
             return total_hours <= h
         
         # Define answer space
@@ -557,10 +344,10 @@ class AnswerSpacePattern:
             mid = left + (right - left) // 2
             
             if can_finish(mid):
-                result = mid       # This speed works
+                result = mid       # This speed (mid) works
                 right = mid - 1    # Try slower (minimize)
             else:
-                left = mid + 1     # Too slow, need faster
+                left = mid + 1     # Speed too slow, need faster
         
         return result
 
@@ -592,7 +379,7 @@ print("Min eating speed:", sol.minEatingSpeed([30,11,23,4,20], 5))  # 30
 
 """
 ================================================================
-PATTERN 5: SEARCH IN 2D MATRIX (FLATTENED SEARCH)
+PATTERN 4: SEARCH IN 2D MATRIX (FLATTENED SEARCH)
 PATTERN EXPLANATION: Treat 2D sorted matrix as flattened 1D array. Convert between 1D index and 2D coordinates to apply standard binary search. Works when matrix is sorted row by row and each row's first element is greater than previous row's last element.
 
 TYPICAL STEPS:
@@ -610,7 +397,7 @@ Applications: 2D matrix search, grid search with sorted property.
 
 class MatrixSearchPattern:
     """
-    Problem: Search target in mxn matrix where:
+    Problem: Search target in m*n matrix where:
     - Each row sorted in ascending order
     - First integer of each row > last integer of previous row
     
@@ -626,14 +413,14 @@ class MatrixSearchPattern:
     """
     def searchMatrix(self, matrix: List[List[int]], target: int) -> bool: # LC 74
         """
-        - TC: O(log(m*n)) - binary search on total elements
+        - TC: O(log(m*n)) - binary search halves the total elements
         - SC: O(1)
         """
-        if not matrix or not matrix[0]:
+        if not matrix or not matrix[0]: # edge case -> empty matrix or first row
             return False
         
         rows, cols = len(matrix), len(matrix[0])
-        left, right = 0, rows * cols - 1
+        left, right = 0, rows * cols - 1 # matrix search space = m*n
         
         while left <= right:
             mid = left + (right - left) // 2
@@ -685,16 +472,18 @@ print("Matrix search:", sol.searchMatrix([[1,3,5,7],[10,11,16,20],[23,30,34,60]]
 
 """
 ================================================================
-PATTERN 6: FIND PEAK ELEMENT (ELIMINATION LOGIC)
+PATTERN 5: FIND PEAK ELEMENT (ELIMINATION LOGIC)
 PATTERN EXPLANATION: Find peak in unsorted array using comparison with neighbor to eliminate half the search space. Even without global sorting, local comparisons reveal which direction guarantees a peak. If slope increases (mid < mid+1), peak must be to right. If slope decreases (mid > mid+1), peak is at mid or to left.
 
-TYPICAL STEPS:
-1. Initialize left=0, right=len(nums)-1
-2. While left < right: (not <=, converging to answer)
-   - Compare nums[mid] with nums[mid+1]
-   - If nums[mid] < nums[mid+1]: peak on right (left = mid + 1)
-   - Else: peak at mid or left (right = mid)
-3. Return left (or right, they're equal)
+    How it works:
+    1. Compare mid with mid+1 to determine slope
+    2. If mid < mid+1 (going up): search right — peak must be ahead
+    3. If mid > mid+1 (going down): search left — peak is at mid or behind
+    
+    Why this works:
+    - A peak exists somewhere (boundaries are -∞)
+    - Follow the upward slope — it must eventually turn down or hit a boundary
+    - We always move toward higher ground and keep potential peaks in the search space
 
 Applications: Find peak, find local maximum, bitonic array search.
 ================================================================
@@ -705,20 +494,11 @@ class PeakElementPattern:
     Problem: Find peak element where nums[i] > nums[i-1] and nums[i] > nums[i+1] and return it's index.
 
     Neighbors of out-of-bound indices are -infinity.
-    
-    How it works:
-    1. Compare mid with mid+1 to determine slope
-    2. If increasing slope (mid < mid+1): peak guaranteed to right
-       - Why: Either slope continues up and hits boundary (peak)
-       - Or slope goes down (peak found)
-    3. If decreasing slope (mid > mid+1): peak at mid or to left
-       - Why: Either slope continues down from left and mid is peak
-       - Or slope goes up to left (peak found)
-    
-    Why this works without sorting:
-    - Not searching for specific value
-    - Using local property (slope) to eliminate half
-    - Guarantee: eliminated half cannot contain peak
+
+    Example 1:
+    - Input: nums = [1,2,3,1]
+    - Output: 2
+    - Explanation: 3 is a peak element and your function should return the index number 2.
     """
     def findPeakElement(self, nums: List[int]) -> int: # LC 162
         """
@@ -734,7 +514,7 @@ class PeakElementPattern:
                 # Upward slope, peak must be to the right
                 left = mid + 1
             else:
-                # Downward slope, peak at mid or to the left
+                # Downward slope, peak could be at mid or to the left
                 right = mid
         
         return left  # left == right at peak
@@ -743,11 +523,12 @@ class PeakElementPattern:
 # nums = [1,2,3,1]
 #
 # Step 1: left=0, right=3, mid=1
-#   nums[1]=2 < nums[2]=3 (upward slope)
+#   2 < 3 (upward slope)
 #   Peak to right: [3,1]
+#   left = 2
 #
 # Step 2: left=2, right=3, mid=2
-#   nums[2]=3 > nums[3]=1 (downward slope)
+#   3 > 1 (downward slope)
 #   Peak at mid or left: [3]
 #   right=2
 #

@@ -52,7 +52,7 @@ QUICK REFERENCE: RECURSION COMPLEXITY PATTERNS
 1. BASIC LINEAR RECURSION
 --------------------------
 Pattern: Single recursive call, process one at a time
-Example: factorial(n) = n × factorial(n-1)
+Example: factorial(n) = n x factorial(n-1)
 
 TC: O(n) - n recursive calls
 SC: O(n) - call stack depth of n

@@ -1,19 +1,19 @@
+from typing import List
+
 class Solution:
-    def mySqrt(self, x: int) -> int:
-        left, right = 0, x
+    def findPeakElement(self, nums: List[int]) -> int:
+        l, r = 0, len(nums) - 1
+        while l < r:
+            mid = l + (r - l) // 2 # calc mid index
+            if nums[mid + 1] > nums[mid]: # Peak to the right of mid
+                l = mid + 1
+            else: # peak to the left
+                r = mid # at peak now or peak to the left
+        
+        return l
 
-        while left <= right:
-            mid = left + (right - left) // 2
 
-            if mid * mid > x: # mid too big
-                right = mid - 1 # search left
-            elif mid * mid < x: # mid too small
-                left = mid + 1 # search right
-            else: # exact match
-                return mid
-
-        return right
     
 sol = Solution()
-print(sol.mySqrt(4)) # 2
-print(sol.mySqrt(8)) # 2.82
+print(sol.findPeakElement([1,2,3,1])) # 2
+print(sol.findPeakElement([1,2,1,3,5,6,4])) # 5

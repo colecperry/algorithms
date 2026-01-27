@@ -23,18 +23,21 @@
 # Output: 9
 
 class Solution(object):
+    """
+    TC: O(n) -> loop over each non duplicate number once, and touch each number one more time while counting in another sequence. Each number does not have it's own while loop because their predecessor exists
+    SC: O(n) -> hold non duplicate nums from original array
+    """
     def longestConsecutive(self, nums):       
-        nums_set = set(nums) # Convert list into a set
-        maxCount = 0
+        nums_set = set(nums)  # Convert list into a set for O(1) lookup/ eliminate
+        maxCount = 0          # dups (we only need to start counting from non-dups)
         
-        for n in nums_set:
-            if n - 1 not in nums_set: # Only start counting if 'n' is the start of a seq
+        for num in nums_set: # Look at each num in set (non dups)
+            if (num - 1) not in nums_set: # Start counting if the curr num is start of a seq
                 count = 0 # Reset count to 0
-                current = n # Set current variable to ele at start of seq
 
-                while current in nums_set: # Start a while loop using "in" operator for set
+                while num in nums_set: # Start a while loop using "in" operator for set
                     count += 1 # Increase the count
-                    current += 1 # Increase current (next num in seq after n)
+                    num += 1 # Increment to next num in potential seq
                 
                 maxCount = max(maxCount, count) # Update maxCount after while loop ends
         

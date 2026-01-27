@@ -32,34 +32,31 @@
 # Input: height = [1,1]
 # Output: 1
 
-# Brute Force: Gets time limit exceeded
-class Solution(object):
-    def maxArea(self, height):
-        max_area = 0
-        for l in range(len(height)): # Create nested loop to check every combination
-            for r in range(l + 1, len(height)):
-                area = min(height[l], height[r]) * (r - l) # Calculate area
-                max_area = max(max_area, area) # update max area
-        return max_area
+from typing import List
     
-# Optimal Solution Uses two pointer
-    def maxArea2(self, height):
-        max_area = 0 # Create variable to track area
-        l, r = 0, len(height) - 1 # Create two pointer at each end of array
-
-        while l < r: # Loop until they meet
-            area = min(height[l], height[r]) * (r-l) # Calculate the area
-            max_area = max(area, max_area) # Update the max area
-            if height[l] < height[r]: # Move on from pointer that has a smaller value
-                l += 1                # This maximizes the potential area
+def maxArea(height: List[int]) -> int:
+        """
+        TC: O(n) - single pass with two pointers
+        SC: O(1) - only tracking pointers and max
+        """
+        left, right = 0, len(height) - 1
+        max_area = 0
+        
+        while left < right:
+            # Calculate area: width × height (limited by shorter line)
+            width = right - left
+            min_height = min(height[left], height[right])
+            area = width * min_height
+            max_area = max(area, max_area)
+            
+            # Move the shorter line (value) inward 
+            if height[left] < height[right]:
+                left += 1
             else:
-                r -= 1
-
+                right -= 1
+        
         return max_area
 
 
-
-
-my_solution = Solution()
-print(my_solution.maxArea([1,8,6,2,5,4,8,3,7]))
-print(my_solution.maxArea([1,1]))
+print(maxArea([1,8,6,2,5,4,8,3,7]))
+print(maxArea([1,1]))

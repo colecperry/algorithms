@@ -22,24 +22,25 @@
     # We want to keep increasing the window size with the R pointer until the sum is greater than the target, and then shrink from the left as much as possible while the sum is greater than or equal to the target to find the smallest window possible
     # In this case, we want to use a while loop inside a for loop because if we use a if/elif/else inside a for loop we can only shrink the window from l once per iteration
 
-# TC -> O(n) -> we iterate through the nums array once
-# SC -> O(1) -> no extra data structures needed
-
 from typing import List
 
 class Solution:
+    """
+    - TC: O(n): Each element is added to the sliding window once when r reaches it, and removed at most once when l passes it, O(2n) -> O(n)
+    - SC: O(1) - No extra data structures needed
+    """
     def minSubArrayLen(self, target: int, nums: List[int]) -> int:
         l = 0 # Left sliding window pointer
-        min_sub_arr = float('inf') # Keep track of the minimum sub array length
+        min_len = float('inf') # Keep track of the minimum subarr len
         curr_sum = 0 # Track the current sum of nums between R and L ptrs
         for r in range(len(nums)):
             curr_sum += nums[r] # Keep adding until window sum >= target
             while curr_sum >= target: # Keep shrinking window
-                min_sub_arr = min(r - l + 1, min_sub_arr) # Update min len
+                min_len = min(r - l + 1, min_len) # (r - l + 1) is count b/t 2 ele's
                 curr_sum -= nums[l] # Decrease the sum by left element
                 l += 1 
 
-        return 0 if min_sub_arr == float('inf') else min_sub_arr # If the window never gets bigger than the sum, min_sub_arr will end up as inf, so return 0
+        return 0 if min_len == float('inf') else min_len # If the window never gets bigger than the sum, min_sub_arr will end up as inf, so return 0
         
 sol = Solution()
 print(sol.minSubArrayLen(7, [2,3,1,2,4,3])) # 2

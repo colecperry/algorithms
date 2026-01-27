@@ -7,6 +7,8 @@ WHAT IS SLIDING WINDOW?
 -----------------------
 Sliding window is a technique where we maintain a contiguous subarray or substring that slides across the data structure. The window can expand (add elements on right), contract (remove elements from left), or slide (move both boundaries).
 
+CONTIGUOUS: elements used in the sliding window must be next to eachother in the array
+
 Key characteristics:
 - Works on arrays and strings (contiguous elements)
 - Window boundaries defined by two pointers (left and right)
@@ -79,8 +81,6 @@ from collections import Counter, defaultdict
 # ================================================================
 def fixed_window_template(arr, k):
     """
-    Template for fixed size sliding window
-    
     PROBLEM CONTEXT:
     Find the maximum sum of any contiguous subarray of size k.
     Example: arr = [2,1,5,1,3,2], k = 3
@@ -176,6 +176,7 @@ def variable_window_template(arr, target):
         max_length = max(max_length, right - left + 1)
     
     return max_length
+
 
 # Example usage
 arr = [1, 2, 3, 4, 5]

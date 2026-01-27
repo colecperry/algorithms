@@ -16,13 +16,6 @@
 # Input: head = [1,2], n = 1
 # Output: [1]
 
-# How to solve: (Optimal)
-    # Use a left pointer (first node) and a right pointer ("n" spaces right of the left pointer)
-    # Iterate moving both pointers forward one until right pointer gets to the end of the list
-        # Once the right pointer hits null, we know that the left pointer will be on the node we want to delete (n nodes from the end)
-
-
-
 class ListNode(object):
     def __init__(self, val=0, next=None):
         self.val = val
@@ -30,21 +23,27 @@ class ListNode(object):
 
 class Solution(object):
     def removeNthFromEnd(self, head, n):
-        dummy = ListNode(0, head) # Create dummy node with it's next set to head
-        left = dummy # Create left pointer starting at the dummy node
-        right = head  # Set right pointer to the head
-
-        for _ in range(n): # Move right pointer to starting spot
-            right = right.next
-
-        while right: # Move left and right pointers to correct spot
-            left = left.next
-            right = right.next
-        left.next = left.next.next # Delete the node
-
+        dummy = ListNode(0, head)  # Handles edge case of removing head
+        slow, fast = dummy, dummy
+        
+        # Move fast n+1 ahead (so slow lands one BEFORE node to remove)
+        for _ in range(n + 1):
+            fast = fast.next
+        
+        # Move both until fast hits end
+        # This code gets skipped if n==len(linked list)
+        while fast:
+            slow = slow.next
+            fast = fast.next
+        
+        # Skip the nth node
+        slow.next = slow.next.next
+        
         return dummy.next
         
-        
+# Edge case where n == len(linked list)
+# Fast gets to None, then second loop is skipped completely
+# Then we point the slow (pointed at the dummy node) to the second node in the list
 
 # Helper function to print linked list (for verification)
 def print_linked_list(head):
@@ -53,7 +52,7 @@ def print_linked_list(head):
         print(current.val, end=" -> " if current.next else "\n")
         current = current.next
 
-# Manually creating Example 1: [1,2,3,4]
+# Manually creating Example 1: [1,2,3,4,5]
 head1 = ListNode(1, ListNode(2, ListNode(3, ListNode(4, ListNode(5, None)))))
 solution = Solution()
 solution.removeNthFromEnd(head1, 2)

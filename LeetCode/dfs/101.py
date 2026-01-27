@@ -73,9 +73,13 @@ class TreeNode:
         self.left = left
         self.right = right
 class Solution:
-    def isSymmetricRecursive(self, root: Optional[TreeNode]) -> bool: # Recursive
+    def isSymmetricRecursive(self, root: Optional[TreeNode]) -> bool:
+        """
+        TC: 
+        SC: 
+        """
         def dfs(left, right):
-            # Base cases:
+            # Base cases -> both base cases that work with None need to come before val comparisons to avoid comparing "None.val" -> error
             if not left and not right: # If both nodes are none -> return True
                 return True
             elif not left or not right: # If only one node is none -> return False
@@ -112,7 +116,7 @@ class Solution:
 
             # Push mirrored child pairs to stack for future comparison
             stack.append((left.left, right.right))   # outer pair
-            stack.append((left.right, right.left))   # inner pair -> eventually you will append none and hit the base case
+            stack.append((left.right, right.left))   # inner pair 
 
         return True  # All checks passed; tree is symmetric
 
