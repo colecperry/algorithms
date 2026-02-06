@@ -5,52 +5,55 @@ class TreeNode:
         self.val = val
         self.left = left
         self.right = right
+
 class Solution:
-    def isSymmetric(self, root: Optional[TreeNode]) -> bool:
-        stack = [(())]
-        def dfs(left, right):
-            node_1, node_2 = stack.pop()
-            if not node_1 and not node_2:
-                return True
+    def minDepth(self, root: Optional[TreeNode]) -> int:
+        if not root:
+            return 0
+        # Base Case -> Leaf node
+        if not root.left and not root.right:
+            return 1 
+        
+        # Recursive Case -> 1 child: Explore one direction
+        if not root.left:
+            right = self.minDepth(root.right)
+            return 1 + right
+        
+        elif not root.right:
+            left = self.minDepth(root.left)
+            return 1 + left
+        
+        # Recursive Case -> 2 children: Explore left and right
+        else:
+            left = self.minDepth(root.left)
+            right = self.minDepth(root.right)
 
-            if not node_1 or not node_2:
-                return False
-            
-            if node_1.val != node_2.val:
-                return False
-            
-            stack.append((node_1.left.val, node_2.right.val))
-            stack.append((node_1.right.val, node_2.left.val))
+            return 1 + min(left, right)
 
-        return dfs(root.left, root.right)
-    
-# Ex. 2
-#               1
-#              / \
-#             /   \
-#            2     2
-#             \     \
-#              3     3
+my_solution = Solution()
 
-sol = Solution()
+root1 = TreeNode(3)
+root1.left = TreeNode(9)
+root1.right = TreeNode(20)
+root1.right.left = TreeNode(15)
+root1.right.right = TreeNode(17)
 
-t1 = TreeNode(1)
-t1.left = TreeNode(2)
-t1.right = TreeNode(2)
-t1.left.left = TreeNode(3)
-t1.left.right = TreeNode(4)
-t1.right.left = TreeNode(4)
-t1.right.right = TreeNode(3)
+print(my_solution.minDepth(root1)) # 2
 
-t2 = TreeNode(1)
-t2.left = TreeNode(2)
-t2.right = TreeNode(2)
-t2.left.right = TreeNode(3)
-t2.right.right = TreeNode(3)
+#               2
+#                \
+#                 3
+#                  \
+#                   4 
+#                    \
+#                     5
+#                      \ 
+#                       6
 
+root2 = TreeNode(2)
+root2.right = TreeNode(3)
+root2.right.right = TreeNode(4)
+root2.right.right.right = TreeNode(5)
+root2.right.right.right.right = TreeNode(6)
 
-print(sol.isSymmetric(t1))
-print(sol.isSymmetric(t2))
-
-# print(sol.isSymmetricIterative(t1))
-# print(sol.isSymmetricIterative(t2))
+print(my_solution.minDepth(root2)) # 5

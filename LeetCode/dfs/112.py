@@ -40,64 +40,6 @@
 # Output: false
 # Explanation: Since the tree is empty, there are no root-to-leaf paths.
 
-# How to Solve (Recursive):
-    # Step 1: Handle the base case
-    # If the current node is None, there is no path — return False
-
-    # Step 2: Check if the current node is a leaf (no left or right children)
-    # If it is, check if targetSum == root.val
-    # If so, return True (this path matches the required sum)
-
-    # Step 3: Otherwise, continue the DFS
-    # Subtract the current node's value from targetSum
-    # Recursively check both left and right subtrees
-    # Return True if either left or right recursive call returns True
-
-    # Step 4: If neither subtree leads to a valid path, return False
-
-    # Time Complexity: O(n)
-    # - We visit every node once in the worst case
-    # - n = number of nodes in the tree
-
-    # Space Complexity: O(h)
-    # - Due to recursion stack
-    # - h = height of the tree
-    # - Best case (balanced): O(log n)
-    # - Worst case (skewed tree): O(n)
-
-# How to solve (Iterative)
-    # Step 1: Handle the base case
-    # If the root is None (empty tree), there are no paths — return False
-
-    # Step 2: Initialize an explicit stack to simulate DFS
-    # Each stack element is a tuple: (node, remaining_sum)
-    # We start with the root node and the original targetSum
-
-    # Step 3: Loop while the stack is not empty
-    # Pop the top element: get the current node and remaining sum to reach target
-    # Subtract the current node's value from the remaining sum
-
-    # Step 4: Check if the current node is a leaf
-    # If it is a leaf and the remaining sum after subtracting equals 0, return True
-
-    # Step 5: If not a leaf, push the children onto the stack
-    # For each child, pass the updated remaining sum (i.e., remaining_sum)
-
-    # NOTE: In recursive DFS, the call stack naturally goes all the way down the left side first
-    # In iterative DFS, we must push right first, then left, if we want to replicate that same behavior
-    # However, for this specific problem, traversal order doesn’t matter — we just need to find *any* valid path
-
-    # Step 6: If we exit the loop without finding a valid path, return False
-
-    # Time Complexity: O(n)
-    # - Every node is visited once in the worst case
-
-    # Space Complexity: O(h)
-    # - Due to the stack
-    # - Worst case: O(n) for a skew
-
-
-
 from typing import Optional
 
 # Definition for a binary tree node.
@@ -107,17 +49,28 @@ class TreeNode:
         self.left = left
         self.right = right
 class Solution: 
-    # Recursive remaining sum solution
+    # Recursive remaining sum solution - no helper fn
     def hasPathSumRecursive(self, root: Optional[TreeNode], targetSum: int) -> bool:
-        if not root: # Base case -> empty tree
+        """
+        - TC: O(n) -> Worst case, we visit each node once
+        - SC: O(h) -> The deepest recursion stack depth is equal to the tree height
+        - NOTE: If we have only a left child or right child, we recurse and hit Base Case 1
+        """
+        # Base Case 1
+        if not root: # Empty Tree
             return False
-        if not root.left and not root.right: # If we are at a leaf node
-            return targetSum == root.val # Check if equal to root.val because we haven't subtracted current node's val yet
-        left_has_path = self.hasPathSumRecursive(root.left, targetSum - root.val) # Recurse L and R
-        right_has_path = self.hasPathSumRecursive(root.right, targetSum - root.val) # Update rem sum
-        return left_has_path or right_has_path # Returns True if either path leads to 0
+        
+        # Base Case 2
+        elif not root.left and not root.right: # Leaf Node
+            return targetSum - root.val == 0
+
+        # Recursive Case -> Check both left and right
+        found_sum_left = self.hasPathSumRecursive(root.left, targetSum - root.val)
+        found_sum_right = self.hasPathSumRecursive(root.right, targetSum - root.val)
+
+        return found_sum_left or found_sum_right
     
-    # Recursive running total dfs solution
+    # Recursive helper version with running sum
     def hasPathSumRecursive2(self, root: Optional[TreeNode], targetSum: int) -> bool:
         if not root: # Check for empty tree
             return False
@@ -128,13 +81,13 @@ class Solution:
                 return currSum == targetSum
 
             # Recursive case: explore left child if it exists
-            if node.left:
+            if node.left: # Must check for null first because if node.left is null we can't access it's val -> error
                 left = dfs(node.left, currSum + node.left.val) # Returns true if any path == target or false if no such path exists, add the val each call to track the current sum
             else:
                 left = False 
 
             # Explore right child if it exists
-            if node.right:
+            if node.right: # Must check for null first because if node.right is null we can't access it's val
                 right = dfs(node.right, currSum + node.right.val)
             else:
                 right = False
@@ -152,7 +105,7 @@ class Solution:
 
         while stack:
             node, current_sum = stack.pop() # Pop a node off the stack and destructure tuple
-            remaining_sum = current_sum - node.val # Get the total remaining sum including current node
+            remaining_sum = current_sum - node.val # Update the remaining sum
             if not node.left and not node.right and remaining_sum == 0: # Check if we are at a leaf node and found path
                 return True
             if node.right: # Push right first so left is processed next when we pop (mimics DFS order)

@@ -70,28 +70,41 @@ class Solution: # LC 78: Subsets
 # VISUALIZATION FOR SUBSETS: nums=[1,2,3]
 # ============================================
 #
-#                              backtrack(start=0, path=[])
-#                                💾 SAVE [] → result=[[]]
-#                            /              |              \
-#                        TRY 1            TRY 2           TRY 3
-#                          /                |                \
-#                   path=[1]             path=[2]            path=[3]
-#                 start=1                start=2             start=3
-#             💾 SAVE [1]                💾 SAVE [2]          💾 SAVE [3]
-#              /       \                    |             (no more elements)
-#         TRY 2       TRY 3               TRY 3
-#           /            \                  |
-#       path=[1,2]     path=[1,3]       path=[2,3]
-#       start=2        start=3          start=3
-#    💾 SAVE [1,2]   💾 SAVE [1,3]    💾 SAVE [2,3]
-#         |            (no more)        (no more)
-#       TRY 3
-#         |
-#    path=[1,2,3]
+#                                     backtrack(start=0, path=[])
+#                                       💾 SAVE [] → result=[[]]
+#                                 for i in range(0, 3):  ← [0,1,2]
+#                            /                     |                    \
+#                        i=0                      i=1                  i=2
+#                          /                       |                      \
+#                   path=[1]                    path=[2]                path=[3]
+#                   start=1                     start=2                 start=3
+#               💾 SAVE [1]                   💾 SAVE [2]             💾 SAVE [3]
+#         for i in range(1,3): ← [1,2]             |                  (loop empty, return)
+#              /             \                    i=2                  ↓ POP 3 → []
+#          i=1               i=2                   |                  (i=2 done at root)
+#           /                  \                   |                      DONE ✓
+#       path=[1,2]           path=[1,3]        path=[2,3]
+#       start=2              start=3            start=3
+#    💾 SAVE [1,2]         💾 SAVE [1,3]      💾 SAVE [2,3]
+#  for i in range(2,3)      (loop empty)      (loop empty)
+#         |                 ↓ POP 3 → [1]     ↓ POP 3 → [2]
+#       i=2              (i=2 done at [1])   (i=2 done at [2])
+#         |                 ↓ POP 1 → []       ↓ POP 2 → []
+#    path=[1,2,3]          (continue to i=1) (continue to i=2)
 #    start=3
 # 💾 SAVE [1,2,3]
-# (no more elements)
+# (loop empty, return)
+#   ↓ POP 3 → [1,2]
+#   (i=2 done at [1,2])
+#   ↓ POP 2 → [1]
+#   (i=1 done, NOW try i=2) ← CONTINUES TO [1,3]
 #
+#
+# Final result: [[], [1], [1,2], [1,2,3], [1,3], [2], [2,3], [3]]
+#
+# KEY: Each level has its own for-loop. When a recursive call returns,
+#      we pop() and continue with the NEXT iteration of the current loop.
+#      If loop is done, we return up another level and pop again.
 
 sol = Solution()
 print(sol.subsets([1,2,3])) # [[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]

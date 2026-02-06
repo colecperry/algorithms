@@ -38,401 +38,128 @@ Common greedy problem types:
 - Jump games and array traversal
 - Two pointer optimization
 - Resource allocation/distribution
+- String partitioning and construction
 - Activity selection
-- Huffman coding
-
-GREEDY ALGORITHM CORE TEMPLATES
-================================
 """
 
 from typing import List
 import heapq
 from collections import Counter
 
-# ================================================================
-# INTERVAL SCHEDULING TEMPLATE
-# ================================================================
-def interval_scheduling_template(intervals):
-    """
-    Template for interval scheduling and merging problems
-    
-    TC: O(n log n) - sorting dominates
-    SC: O(1) for counting, O(n) for returning merged intervals
-    
-    SOLVES: Problems involving time intervals, meetings, or ranges
-    
-    WHEN TO USE:
-    - Problem gives you intervals/ranges with start and end times
-    - Need to select maximum non-overlapping intervals
-    - Need to merge overlapping intervals
-    - Need to find minimum resources needed (meeting rooms)
-    
-    KEY INDICATORS:
-    - "intervals", "meetings", "appointments"
-    - "overlapping", "non-overlapping", "merge"
-    - Given array of [start, end] pairs
-    
-    GREEDY STRATEGY:
-    - Sort by end time (or start time depending on variant)
-    - For max non-overlapping: pick interval that ends earliest
-    - For merging: sort by start, merge if overlapping
-    """
-    if not intervals:
-        return []
-    
-    # Sort by end time (greedy choice: finish earliest activities first)
-    intervals.sort(key=lambda x: x[1])
-    
-    result = []
-    last_end = float('-inf')
-    
-    for start, end in intervals:
-        # If current interval doesn't overlap with last selected
-        if start >= last_end:
-            result.append([start, end])
-            last_end = end
-    
-    return result
-
-print("Interval Scheduling:", interval_scheduling_template([[1,3],[2,4],[3,5]]))
-
-# ================================================================
-# JUMP GAME TEMPLATE
-# ================================================================
-def jump_game_template(nums):
-    """
-    Template for jump/reach problems in arrays
-    
-    TC: O(n) - single pass through array
-    SC: O(1) - only track max reach
-    
-    SOLVES: Problems about reaching end of array with jump constraints
-    
-    WHEN TO USE:
-    - Array represents positions you can move through
-    - Each element tells you maximum jump distance from that position
-    - Need to determine if end is reachable OR minimum jumps needed
-    
-    KEY INDICATORS:
-    - "jump", "reach", "destination"
-    - nums[i] = max jump length from position i
-    - "can you reach the last index"
-    
-    GREEDY STRATEGY:
-    - Track maximum reachable position at each step
-    - Always try to reach as far as possible
-    - If current position > max_reach, impossible
-    """
-    max_reach = 0
-    
-    for i in range(len(nums)):
-        # If current position is unreachable, can't proceed
-        if i > max_reach:
-            return False
-        
-        # Update maximum reachable position from here
-        max_reach = max(max_reach, i + nums[i])
-        
-        # Early termination if can reach end
-        if max_reach >= len(nums) - 1:
-            return True
-    
-    return True
-
-print("Jump Game:", jump_game_template([2,3,1,1,4]))
-
-# ================================================================
-# TWO POINTER GREEDY TEMPLATE
-# ================================================================
-def two_pointer_greedy_template(nums):
-    """
-    Template for two pointer greedy optimization
-    
-    TC: O(n) - single pass with two pointers
-    SC: O(1) - only pointer variables
-    
-    SOLVES: Problems needing to optimize by choosing between two ends
-    
-    WHEN TO USE:
-    - Have two choices at each step (from left end or right end)
-    - Need to maximize/minimize some value
-    - Moving one pointer is clearly better than the other
-    
-    KEY INDICATORS:
-    - "maximize", "largest", "most water"
-    - Can only choose from two ends
-    - No need to consider middle elements first
-    
-    GREEDY STRATEGY:
-    - Start with pointers at both ends
-    - Calculate result with current pointers
-    - Move pointer that limits the result (the bottleneck)
-    """
-    left, right = 0, len(nums) - 1
-    result = 0
-    
-    while left < right:
-        # Calculate current result
-        current = min(nums[left], nums[right]) * (right - left)
-        result = max(result, current)
-        
-        # Greedy choice: move pointer with smaller value (the bottleneck)
-        if nums[left] < nums[right]:
-            left += 1
-        else:
-            right -= 1
-    
-    return result
-
-print("Two Pointer:", two_pointer_greedy_template([1,8,6,2,5,4,8,3,7]))
-
-# ================================================================
-# HEAP-BASED GREEDY TEMPLATE
-# ================================================================
-def heap_greedy_template(tasks):
-    """
-    Template for greedy with priority queue
-    
-    TC: O(n log k) - n operations, each O(log k) where k is heap size
-    SC: O(k) - heap storage
-    
-    SOLVES: Problems needing to repeatedly process highest/lowest priority element
-    
-    WHEN TO USE:
-    - Need to repeatedly get max/min element
-    - Priority of elements changes over time
-    - Order of processing matters
-    - Scheduling tasks with frequencies or priorities
-    
-    KEY INDICATORS:
-    - "schedule", "process", "frequency"
-    - "most frequent", "highest priority"
-    - Priorities change dynamically
-    
-    GREEDY STRATEGY:
-    - Use heap to always get max/min element efficiently
-    - Process highest priority element first
-    - Update priorities and reinsert into heap
-    """
-    # Build max heap (negate values for min heap in Python)
-    heap = [-count for count in tasks.values()]
-    heapq.heapify(heap)
-    
-    result = 0
-    
-    while heap:
-        # Process highest priority element
-        count = -heapq.heappop(heap)
-        result += 1
-        
-        # If more work remains, add back to heap with updated priority
-        if count > 1:
-            heapq.heappush(heap, -(count - 1))
-    
-    return result
-
-# ================================================================
-# DISTRIBUTION TEMPLATE
-# ================================================================
-def distribution_template(items, targets):
-    """
-    Template for greedy distribution/assignment problems
-    
-    TC: O(n log n + m log m) - sorting both arrays
-    SC: O(1) - no extra space (excluding sort space)
-    
-    SOLVES: Problems about matching or assigning items to targets optimally
-    
-    WHEN TO USE:
-    - Have two arrays: items to assign and targets to assign to
-    - Want to maximize number of successful assignments
-    - Each item can be assigned to at most one target
-    
-    KEY INDICATORS:
-    - "assign", "distribute", "allocate"
-    - "satisfy", "content", "happy"
-    - Two arrays with matching criteria
-    
-    GREEDY STRATEGY:
-    - Sort both arrays (usually ascending)
-    - Match smallest item to smallest target that it satisfies
-    - Use two pointers to traverse both arrays
-    """
-    items.sort()
-    targets.sort()
-    
-    i, j = 0, 0
-    count = 0
-    
-    # Greedily assign smallest item to smallest satisfiable target
-    while i < len(items) and j < len(targets):
-        if items[i] <= targets[j]:
-            # Item i satisfies target j, make assignment
-            count += 1
-            i += 1
-            j += 1
-        else:
-            # Item i too big for target j, try next target
-            j += 1
-    
-    return count
-
-# ================================================================
-# CIRCULAR ARRAY TEMPLATE
-# ================================================================
-def circular_array_template(values):
-    """
-    Template for circular array problems with cumulative tracking
-    
-    TC: O(n) - single pass
-    SC: O(1) - only track totals
-    
-    SOLVES: Problems where you traverse circular path and track surplus/deficit
-    
-    WHEN TO USE:
-    - Problem involves circular route (end connects to start)
-    - Need to find valid starting position
-    - Track cumulative gain/loss as you traverse
-    
-    KEY INDICATORS:
-    - "circular", "around", "loop"
-    - "gas station", "fuel", "journey"
-    - Each position has cost and benefit
-    
-    GREEDY STRATEGY:
-    - Track total (overall balance) and current (from current start)
-    - If current goes negative, can't start from any position up to here
-    - Try next position as new start
-    """
-    total_surplus = 0
-    current_surplus = 0
-    start = 0
-    
-    for i in range(len(values)):
-        total_surplus += values[i]
-        current_surplus += values[i]
-        
-        # If deficit at current position, can't start from here or earlier
-        if current_surplus < 0:
-            start = i + 1
-            current_surplus = 0
-    
-    # Valid start exists only if total surplus is non-negative
-    return start if total_surplus >= 0 else -1
-
-
 """
-GREEDY PATTERNS
-===============
+================================================================
+PATTERN 1: INTERVAL SELECTION
+================================================================
+
+PATTERN EXPLANATION: Select maximum non-overlapping intervals. This is GREEDY because:
+- Multiple solutions exist, you make CHOICES at each step
+- Optimizing: maximize count selected
+- Greedy choice: always pick interval that ENDS earliest
+
+KEY INSIGHT: Picking earliest-ending interval leaves most room for future selections.
+
+Example: [[1,10], [2,3], [4,5]]
+- Pick [1,10] first → only get 1 interval (bad)
+- Pick [2,3] first (ends earliest) → can also pick [4,5] → 2 intervals ✓
+
+TYPICAL STEPS:
+1. Sort by END time
+2. Select first interval, track last_end
+3. For each remaining: if start > last_end, select it
+4. Return count
+
+RELATED: MERGE INTERVALS (LC 56) - NOT GREEDY
+- Merge overlapping intervals. NOT greedy because there's only ONE correct solution (no choices - you MUST merge overlaps). Sort by START time instead of END time.
+
+Example: [[1,3], [2,6]] → MUST merge to [1,6] (deterministic, no choice)
+================================================================
 """
 
-from typing import List
-import heapq
-from collections import Counter
-
-# ================================================================
-# PATTERN 1: INTERVAL SCHEDULING (GREEDY CHOICE)
-# PATTERN EXPLANATION: Select optimal intervals from a collection while respecting
-# overlap constraints. Sort intervals by a key property (usually end time or start time)
-# and greedily make selections. For maximum non-overlapping intervals, always choose
-# the one that ends earliest to leave maximum room for future choices. For merging,
-# sort by start time and combine overlapping intervals as you go.
-#
-# TYPICAL STEPS:
-# 1. Sort intervals by end time (for max selection) or start time (for merging)
-# 2. Initialize tracking variable (last end time, count, result array)
-# 3. Iterate through sorted intervals
-# 4. For each interval, check if it overlaps with last selected
-# 5. If no overlap, select it; if overlap, skip or merge
-# 6. Return count, merged intervals, or selected intervals
-#
-# Applications: Meeting rooms, activity selection, merge intervals, remove overlapping.
-# ================================================================
-
-class IntervalScheduling:
+class IntervalSelection:
     """
-    Problem: Given an array of intervals where intervals[i] = [starti, endi], return the
-    minimum number of intervals you need to remove to make the rest non-overlapping.
-    
-    TC: O(n log n) - sorting intervals by end time
-    SC: O(1) or O(log n) - depending on sorting implementation
+    You are given an array of n pairs pairs where pairs[i] = [lefti, righti] and lefti < righti. A pair p2 = [c, d] follows a pair p1 = [a, b] if b < c. A chain of pairs can be formed in this fashion.
+
+    Return the length longest chain which can be formed. You do not need to use up all the given intervals. You can select pairs in any order.
+
+    Example 1:
+    Input: pairs = [[1,2],[2,3],[3,4]]
+    Output: 2
+    Explanation: The longest chain is [1,2] -> [3,4].
+
+    Example 2:
+    Input: pairs = [[1,2],[7,8],[4,5]]
+    Output: 3
+    Explanation: The longest chain is [1,2] -> [4,5] -> [7,8].
     
     How it works:
-    1. Sort intervals by end time (greedy choice: earliest ending first)
-    2. Keep track of last selected interval's end time
-    3. For each interval, if it starts after last end, select it (non-overlapping)
-    4. Count intervals we can keep, return total - kept
-    5. Greedy works: earliest ending leaves most room for future intervals
+    1. Sort pairs by end time (greedy choice: earliest ending first)
+    2. Always select pair that finishes earliest
+    3. For each pair, if it doesn't overlap with last selected, take it
+    4. Count total pairs selected
+    5. Greedy works: earliest ending leaves most room for future selections
     """
-    def eraseOverlapIntervals(self, intervals: List[List[int]]) -> int: # LC 435
-        if not intervals:
+    def findLongestChain(self, pairs: List[List[int]]) -> int: # LC 646
+        """
+        - TC: O(n log n) - sorting intervals by end time, loop through pairs
+        - SC: O(1) or O(log n) - depending on sorting implementation
+        """
+        if not pairs:
             return 0
         
         # Sort by end time (greedy: finish earliest activities first)
-        intervals.sort(key=lambda x: x[1])
+        pairs.sort(key=lambda x: x[1])
         
-        kept = 1  # Always keep first interval after sorting
-        last_end = intervals[0][1]
+        count = 1  # Always select first pair after sorting
+        last_end = pairs[0][1] # get end of first interval
         
-        for i in range(1, len(intervals)):
-            start, end = intervals[i]
+        for i in range(1, len(pairs)):
+            start, end = pairs[i]
             
-            # If current interval doesn't overlap with last kept interval
-            if start >= last_end:
-                kept += 1
-                last_end = end
-            # Otherwise, skip this interval (it overlaps)
+            # If current pair doesn't overlap with last selected pair
+            # (pair follows: previous end < current start)
+            if start > last_end:
+                count += 1
+                last_end = end # update end of prev interval
         
-        # Return number of intervals we need to remove
-        return len(intervals) - kept
+        return count
 
-# Example:
-# intervals = [[1,2],[2,3],[3,4],[1,3]]
-#
-# After sorting by end time: [[1,2],[2,3],[1,3],[3,4]]
-#
-# Step 1: Keep [1,2], last_end = 2
-# Step 2: [2,3] starts at 2 >= 2, keep it, last_end = 3
-# Step 3: [1,3] starts at 1 < 3, overlaps, remove it
-# Step 4: [3,4] starts at 3 >= 3, keep it, last_end = 4
-#
-# Kept: 3 intervals [[1,2],[2,3],[3,4]]
-# Remove: 4 - 3 = 1
-# Output: 1
+sol = IntervalSelection()
+print("Longest chain:", sol.findLongestChain([[1,2],[2,3],[3,4]]))  # 2
+print("Longest chain:", sol.findLongestChain([[1,2],[7,8],[4,5]]))  # 3
 
-sol = IntervalScheduling()
-print("Min intervals to remove:", sol.eraseOverlapIntervals([[1,2],[2,3],[3,4],[1,3]]))  # 1
-print("Min intervals to remove:", sol.eraseOverlapIntervals([[1,2],[1,2],[1,2]]))  # 2
+"""
+================================================================
+PATTERN 2: JUMP GAME (MAXIMIZE REACH)
 
+PATTERN EXPLANATION: Determine reachability or minimum steps in array where each element represents maximum jump length. Track the maximum position reachable at each step. Greedy works because if we can reach position i, we should always try to reach as far as possible from i - there's no benefit to stopping short. For minimum jumps, use BFS-like level counting to track jumps needed.
 
-# ================================================================
-# PATTERN 2: JUMP GAME (MAXIMIZE REACH)
-# PATTERN EXPLANATION: Determine reachability or minimum steps in array where each element
-# represents maximum jump length. Track the maximum position reachable at each step. Greedy
-# works because if we can reach position i, we should always try to reach as far as possible
-# from i - there's no benefit to stopping short. For minimum jumps, use BFS-like level
-# counting to track jumps needed.
-#
-# TYPICAL STEPS:
-# 1. Initialize max_reach = 0
-# 2. For each position i in array:
-#    - If i > max_reach, return False (unreachable)
-#    - Update max_reach = max(max_reach, i + nums[i])
-#    - If max_reach >= last index, return True (early termination)
-# 3. Return True if completed loop
-#
-# Applications: Jump game, minimum jumps, gas station variants.
-# ================================================================
+TYPICAL STEPS:
+1. Initialize max_reach = 0
+2. For each position i in array:
+   - If i > max_reach, return False (unreachable)
+   - Update max_reach = max(max_reach, i + nums[i])
+   - If max_reach >= last index, return True (early termination)
+3. Return True if completed loop
+
+Applications: Jump game, minimum jumps, gas station variants.
+================================================================
+"""
 
 class JumpGame:
     """
-    Problem: You are given an integer array nums. You are initially positioned at the
-    array's first index, and each element represents your maximum jump length.
+    You are given an integer array nums. You are initially positioned at the array's first index, and each element in the array represents your maximum jump length at that position.
     
     Return true if you can reach the last index, or false otherwise.
-    
-    TC: O(n) - single pass through array
-    SC: O(1) - only track max reachable position
+
+    Example 1:
+    Input: nums = [2,3,1,1,4]
+    Output: true
+    Explanation: Jump 1 step from index 0 to 1, then 3 steps to the last index.
+
+    Example 2:
+    Input: nums = [3,2,1,0,4]
+    Output: false
+    Explanation: You will always arrive at index 3 no matter what. Its maximum jump length is 0, which makes it impossible to reach the last index.
     
     How it works:
     1. Track maximum position we can reach at each step
@@ -441,66 +168,48 @@ class JumpGame:
     4. Greedy works: always maximize reach, no benefit to stopping short
     """
     def canJump(self, nums: List[int]) -> bool: # LC 55
-        max_reach = 0
+        """
+        - TC: O(n) - single pass through array
+        - SC: O(1) - only track max reachable position
+        """
+        farthest = 0 # Track the farthest index we can reach
         
+        # Check each position we can actually reach
         for i in range(len(nums)):
-            # If current position is unreachable, return False
-            if i > max_reach:
+            # If current position is beyond our reach, we're stuck
+            if i > farthest:
                 return False
             
-            # Update maximum reachable position from current position
-            max_reach = max(max_reach, i + nums[i])
+            # Update the farthest position we can reach from here
+            farthest = max(farthest, i + nums[i])
             
-            # Early termination: if we can reach the end, return True
-            if max_reach >= len(nums) - 1:
+            # Early exit: if we can already reach the end
+            if farthest >= len(nums) - 1:
                 return True
         
         return True
-
-# Example:
-# nums = [2,3,1,1,4]
-#
-# i=0: nums[0]=2, max_reach = max(0, 0+2) = 2
-# i=1: nums[1]=3, max_reach = max(2, 1+3) = 4
-# i=2: max_reach = 4 >= 4 (last index), return True
-#
-# Can reach end!
-# Output: True
-#
-# Example 2:
-# nums = [3,2,1,0,4]
-#
-# i=0: max_reach = 3
-# i=1: max_reach = max(3, 1+2) = 3
-# i=2: max_reach = max(3, 2+1) = 3
-# i=3: max_reach = max(3, 3+0) = 3
-# i=4: i=4 > max_reach=3, unreachable!
-# Output: False
 
 sol = JumpGame()
 print("Can jump to end:", sol.canJump([2,3,1,1,4]))  # True
 print("Can jump to end:", sol.canJump([3,2,1,0,4]))  # False
 
+"""
+================================================================
+PATTERN 3: TWO POINTER GREEDY
+PATTERN EXPLANATION: Optimize by choosing between two ends of array. Start with pointers at leftmost and rightmost positions. At each step, calculate result with current pointers and decide which pointer to move. Key insight: move the pointer that limits (bottlenecks) the result. Moving the better pointer would only make things worse, while moving the limiting pointer might find a better option.
 
-# ================================================================
-# PATTERN 3: TWO POINTER GREEDY
-# PATTERN EXPLANATION: Optimize by choosing between two ends of array. Start with pointers
-# at leftmost and rightmost positions. At each step, calculate result with current pointers
-# and decide which pointer to move. Key insight: move the pointer that limits (bottlenecks)
-# the result. Moving the better pointer would only make things worse, while moving the
-# limiting pointer might find a better option.
-#
-# TYPICAL STEPS:
-# 1. Initialize left = 0, right = len(array) - 1
-# 2. Initialize result variable
-# 3. While left < right:
-#    - Calculate current result with pointers
-#    - Update best result
-#    - Move pointer that limits the result
-# 4. Return best result
-#
-# Applications: Container with most water, trapping rain water, two sum in sorted array.
-# ================================================================
+TYPICAL STEPS:
+1. Initialize left = 0, right = len(array) - 1
+2. Initialize result variable
+3. While left < right:
+   - Calculate current result with pointers
+   - Update best result
+   - Move pointer that limits the result
+4. Return best result
+
+Applications: Container with most water, trapping rain water, two sum in sorted array.
+================================================================
+"""
 
 class TwoPointerGreedy:
     """
@@ -509,9 +218,11 @@ class TwoPointerGreedy:
     
     Find two lines that together with the x-axis form a container that holds the most water.
     Return the maximum amount of water a container can store.
-    
-    TC: O(n) - single pass with two pointers
-    SC: O(1) - only pointer variables
+
+    Example 1:
+    Input: height = [1,8,6,2,5,4,8,3,7]
+    Output: 49
+    Explanation: The above vertical lines are represented by array [1,8,6,2,5,4,8,3,7]. In this case, the max area of water (blue section) the container can contain is 49 goes from index 1 (8) to index 8 (7).
     
     How it works:
     1. Water contained = min(height[left], height[right]) * (right - left)
@@ -521,6 +232,10 @@ class TwoPointerGreedy:
     5. Greedy works: always move the limiting pointer
     """
     def maxArea(self, height: List[int]) -> int: # LC 11
+        """
+        - TC: O(n) - single pass with two pointers
+        - SC: O(1) - only pointer variables
+        """
         left, right = 0, len(height) - 1
         max_water = 0
         
@@ -541,169 +256,155 @@ class TwoPointerGreedy:
         
         return max_water
 
-# Example:
-# height = [1,8,6,2,5,4,8,3,7]
-#
-# Visual:
-#     |
-#     |       |               |
-#     |       |       |       |       |
-# |   |   |   |   |   |   |   |   |
-# 0 1 2 3 4 5 6 7 8
-#
-# Start: left=0 (height=1), right=8 (height=7)
-# Water = min(1,7) * 8 = 8
-# Move left (shorter)
-#
-# left=1 (height=8), right=8 (height=7)
-# Water = min(8,7) * 7 = 49
-# Move right (shorter)
-#
-# left=1 (height=8), right=7 (height=3)
-# Water = min(8,3) * 6 = 18 (not better)
-# Continue...
-#
-# Maximum water = 49
-# Output: 49
-
 sol = TwoPointerGreedy()
 print("Max water:", sol.maxArea([1,8,6,2,5,4,8,3,7]))  # 49
 print("Max water:", sol.maxArea([1,1]))  # 1
 
+"""
+================================================================
+PATTERN 4: GREEDY WITH HEAP (PRIORITY QUEUE)
+================================================================
 
-# ================================================================
-# PATTERN 4: GREEDY WITH HEAP (PRIORITY QUEUE)
-# PATTERN EXPLANATION: Use heap to always process highest or lowest priority element first.
-# Useful when priorities change dynamically or when scheduling tasks with frequencies/cooldowns.
-# Heap provides O(log k) access to max/min element, much better than repeatedly sorting.
-# Process element from heap, update its priority, and reinsert if needed.
-#
-# TYPICAL STEPS:
-# 1. Build heap from initial elements (max heap or min heap)
-# 2. While heap not empty (or until goal met):
-#    - Extract highest/lowest priority element
-#    - Process element
-#    - Update priority if needed
-#    - Reinsert into heap if more work remains
-# 3. Return result (time, count, schedule, etc.)
-#
-# Applications: Task scheduler, meeting rooms II, merge k sorted lists, IPO.
-# ================================================================
+PATTERN EXPLANATION: Combine greedy choices with a heap to track and optimize decisions.
+This is GREEDY because:
+- Multiple solutions exist, you make CHOICES at each step
+- Optimizing: maximize reach/minimize cost/maximize profit
+- Heap maintains best candidates for optimization
+
+KEY INSIGHT: Heap enables "retroactive greedy" - make optimistic choices, then use heap
+to find and fix suboptimal past decisions when constraints are violated.
+
+Why not just greedy without heap?
+- Greedy alone: might need future information you don't have yet
+- Heap solution: make optimistic choices, use heap to retroactively optimize
+
+TYPICAL STEPS:
+1. Process elements sequentially (or sort first)
+2. Make optimistic greedy choices
+3. Use heap to track choices that can be "swapped" or "revised"
+4. When constraint violated, use heap to find and fix worst past choice
+5. Repeat until all elements processed
+
+Applications: Resource allocation, task scheduling, k-way merges, capital optimization.
+================================================================
+"""
 
 class HeapGreedy:
     """
-    Problem: Given a char array tasks representing tasks and an integer n representing
-    cooldown period, return the minimum number of intervals required to complete all tasks.
-    Same task can't be done within n intervals.
+    Problem: You are climbing buildings. To go from building i to i+1:
+    - If heights[i+1] <= heights[i]: free (going down or same)
+    - If heights[i+1] > heights[i]: need bricks OR a ladder for the climb
     
-    TC: O(m log m) where m = number of unique tasks (at most 26)
-    SC: O(m) - heap stores unique tasks
+    Bricks: Use (heights[i+1] - heights[i]) bricks for the climb
+    Ladders: Skip any climb (unlimited height), but you have limited ladders
+    
+    Return the furthest building index you can reach.
+    
+    Example 1:
+    Input: heights = [4,2,7,6,9,14,12], bricks = 5, ladders = 1
+    Output: 4
+    Explanation: Starting at 0, you can reach 4:
+    - 0→1: down (free)
+    - 1→2: climb 5, use ladder
+    - 2→3: down (free)  
+    - 3→4: climb 3, use bricks (5-3=2 left)
+    - 4→5: climb 5, need 5 bricks but only have 2 ❌
     
     How it works:
-    1. Use max heap to always schedule most frequent remaining task
-    2. Schedule task, reduce its count, wait n intervals before scheduling again
-    3. During cooldown, schedule other tasks or idle
-    4. Greedy works: prioritizing most frequent task minimizes total time
+    1. Greedy strategy: Save ladders for BIGGEST climbs (but we don't know future!)
+    2. Solution: Use ladders OPTIMISTICALLY, track in min heap
+    3. When out of ladders, swap SMALLEST ladder-climb for bricks (heap gives us this)
+    4. This ensures ladders end up on the biggest climbs
+    5. Greedy works: retrospectively optimizing ensures optimal resource allocation
     """
-    def leastInterval(self, tasks: List[str], n: int) -> int: # LC 621
-        # Count frequency of each task
-        task_counts = Counter(tasks)
-        
-        # Build max heap (negate values for Python's min heap)
-        heap = [-count for count in task_counts.values()]
-        heapq.heapify(heap)
-        
-        time = 0
-        
-        while heap:
-            temp = []  # Store tasks to be added back after cooldown
-            
-            # Try to schedule n+1 tasks (1 task + n cooldown)
-            for i in range(n + 1):
-                if heap:
-                    count = -heapq.heappop(heap)
-                    time += 1
-                    
-                    # If task has remaining count, store for later
-                    if count > 1:
-                        temp.append(-(count - 1))
-            
-            # Add back tasks with remaining count
-            for count in temp:
-                heapq.heappush(heap, count)
-            
-            # If heap empty, we're done (don't add idle time at end)
-            if not heap:
-                break
-            
-            # If we didn't fill all n+1 slots, we were idle
-            # Add idle time to reach n+1 interval
-            if len(temp) == 0:
-                break
-        
-        return time
+    def furthestBuilding(self, heights: List[int], bricks: int, ladders: int) -> int: # LC 1642
+        """
+        TC: O(n * log(ladders)) where n = number of buildings
+            - Iterate through n-1 gaps between buildings: O(n)
+            - For each gap with a climb:
+                - heappush: O(log k) where k = heap size
+                - heappop: O(log k)
+            - Heap size is bounded by (ladders + 1) since we pop when exceeding
+            - Therefore: O(n * log(ladders))
     
-    # Simpler mathematical approach
-    def leastInterval_math(self, tasks: List[str], n: int) -> int:
-        # Count frequencies
-        task_counts = Counter(tasks)
-        max_freq = max(task_counts.values())
+        SC: O(ladders)
+            - Min heap stores at most (ladders + 1) elements temporarily
+            - After popping, heap maintains exactly 'ladders' elements
+            - No other data structures scale with input size
+        """
+        # Min heap tracks climbs where we've used ladders
+        # Stores the HEIGHT of each climb, smallest on top
+        ladder_climbs = []
         
-        # Count how many tasks have max frequency
-        max_count = sum(1 for count in task_counts.values() if count == max_freq)
+        for i in range(len(heights) - 1):
+            climb_height = heights[i + 1] - heights[i]
+            
+            # No resources needed for going down or staying level
+            if climb_height <= 0:
+                continue
+            
+            # Use a ladder for this climb (optimistic choice)
+            heapq.heappush(ladder_climbs, climb_height)
+            
+            # If we've used more ladders than available
+            if len(ladder_climbs) > ladders:
+                # Swap the smallest ladder-climb for bricks instead (min heap)
+                # This keeps ladders on the biggest climbs
+                smallest_climb = heapq.heappop(ladder_climbs)
+                bricks -= smallest_climb
+                
+                # Can't proceed without enough bricks
+                if bricks < 0:
+                    return i
         
-        # Minimum intervals = (max_freq - 1) * (n + 1) + max_count
-        # OR total tasks if no idle time needed
-        return max(len(tasks), (max_freq - 1) * (n + 1) + max_count)
+        # Successfully reached the last building
+        return len(heights) - 1
 
-# Example:
-# tasks = ["A","A","A","B","B","B"], n = 2
+# Example walkthrough:
+# heights = [4,2,7,6,9,14,12], bricks = 5, ladders = 1
 #
-# Frequencies: A=3, B=3
-# Max heap: [-3, -3]
+# i=0: 4→2, climb=-2, going down (skip)
+# i=1: 2→7, climb=5, use ladder → heap=[5], ladders_used=1
+# i=2: 7→6, climb=-1, going down (skip)
+# i=3: 6→9, climb=3, use ladder → heap=[3,5], ladders_used=2
+#      But we only have 1 ladder! Swap smallest:
+#      Pop 3 from heap, use bricks instead → bricks=5-3=2, heap=[5]
+# i=4: 9→14, climb=5, use ladder → heap=[5,5], ladders_used=2
+#      But we only have 1 ladder! Swap smallest:
+#      Pop 5 from heap, use bricks instead → bricks=2-5=-3 ❌
+#      Not enough bricks! Return i=4
 #
-# Round 1 (schedule 3 tasks: current + 2 cooldown):
-#   Schedule A (count 3->2), time=1
-#   Schedule B (count 3->2), time=2
-#   Idle, time=3
-#   Add back A (count 2), B (count 2)
+# Output: 4 (can reach building at index 4)
 #
-# Round 2:
-#   Schedule A (count 2->1), time=4
-#   Schedule B (count 2->1), time=5
-#   Idle, time=6
-#   Add back A (count 1), B (count 1)
-#
-# Round 3:
-#   Schedule A (count 1->0), time=7
-#   Schedule B (count 1->0), time=8
-#   Heap empty, done
-#
-# Output: 8
-# Schedule: A -> B -> idle -> A -> B -> idle -> A -> B
+# Why greedy works:
+# By always swapping smallest ladder-climb for bricks, we ensure ladders
+# end up on the BIGGEST climbs. Since ladders can handle any height but
+# bricks are limited, this minimizes brick usage and maximizes reach.
 
 sol = HeapGreedy()
-print("Minimum intervals:", sol.leastInterval(["A","A","A","B","B","B"], 2))  # 8
-print("Minimum intervals:", sol.leastInterval(["A","A","A","B","B","B"], 0))  # 6
+print("Furthest building:", sol.furthestBuilding([4,2,7,6,9,14,12], 5, 1))  # 4
+print("Furthest building:", sol.furthestBuilding([4,12,2,7,3,18,20,3,19], 10, 2))  # 7
+print("Furthest building:", sol.furthestBuilding([14,3,19,3], 17, 0))  # 3
 
+"""
+================================================================
+PATTERN 5: GREEDY DISTRIBUTION/ASSIGNMENT
+PATTERN EXPLANATION: Match items to targets optimally by sorting both arrays and using
+two pointers. Greedy works because assigning smallest item to smallest satisfiable target
+leaves larger items for larger targets. Sort both arrays in ascending order and greedily
+match from smallest to largest.
 
-# ================================================================
-# PATTERN 5: GREEDY DISTRIBUTION/ASSIGNMENT
-# PATTERN EXPLANATION: Match items to targets optimally by sorting both arrays and using
-# two pointers. Greedy works because assigning smallest item to smallest satisfiable target
-# leaves larger items for larger targets. Sort both arrays in ascending order and greedily
-# match from smallest to largest.
-#
-# TYPICAL STEPS:
-# 1. Sort both items array and targets array
-# 2. Initialize two pointers i=0, j=0
-# 3. While both pointers in bounds:
-#    - If items[i] satisfies targets[j], make assignment, increment both
-#    - Else, move to next target (current item too large)
-# 4. Return count of successful assignments
-#
-# Applications: Assign cookies, distribute candies, task assignment with constraints.
-# ================================================================
+TYPICAL STEPS:
+1. Sort both items array and targets array
+2. Initialize two pointers i=0, j=0
+3. While both pointers in bounds:
+   - If items[i] satisfies targets[j], make assignment, increment both
+   - Else, move to next target (current item too large)
+4. Return count of successful assignments
+
+Applications: Assign cookies, distribute candies, task assignment with constraints.
+================================================================
+"""
 
 class DistributionGreedy:
     """
@@ -713,168 +414,154 @@ class DistributionGreedy:
     
     Return maximum number of content children.
     
-    TC: O(n log n + m log m) - sorting both arrays
-    SC: O(1) - no extra space besides pointers
-    
     How it works:
     1. Sort both greed factors and cookie sizes
     2. Try to satisfy each child with smallest cookie that works
     3. Greedy works: wasting small cookies on greedy children is suboptimal
     4. Match smallest available cookie to least greedy unsatisfied child
     """
-    def findContentChildren(self, g: List[int], s: List[int]) -> int: # LC 455
+    def findContentChildren(self, g: List[int], s: List[int]) -> int:
+        """
+        TC: O(n log n + m log m) where n = len(g), m = len(s)
+            - Sorting greed factors: O(n log n)
+            - Sorting cookie sizes: O(m log m)
+            - Iterating through cookies: O(m)
+            - Dominated by sorting: O(n log n + m log m)
+    
+        SC: O(n + m)
+            - Python's sort uses O(n) and O(m) auxiliary space worst case
+            - Child pointer: O(1)
+        """
         # Sort greed factors and cookie sizes
         g.sort()
         s.sort()
         
-        child = 0  # Pointer for children
-        cookie = 0  # Pointer for cookies
+        child = 0  # Pointer for children (tracks next child to satisfy)
         
-        # Try to satisfy each child with smallest suitable cookie
-        while child < len(g) and cookie < len(s):
-            if s[cookie] >= g[child]:
-                # Cookie satisfies this child
-                child += 1
-                cookie += 1
-            else:
-                # Cookie too small, try next cookie
-                cookie += 1
+        # Try each cookie in order (smallest to largest)
+        for cookie_size in s:
+            # If current cookie satisfies current child's greed
+            if child < len(g) and cookie_size >= g[child]:
+                child += 1  # Move to next child
         
         # Number of children satisfied
         return child
-
-# Example:
-# g = [1,2,3], s = [1,1]
-# (children's greed factors, cookie sizes)
-#
-# After sorting: g = [1,2,3], s = [1,1]
-#
-# child=0 (greed=1), cookie=0 (size=1):
-#   1 >= 1, satisfy child 0, move both pointers
-#
-# child=1 (greed=2), cookie=1 (size=1):
-#   1 < 2, cookie too small, move cookie pointer
-#
-# cookie=2 (out of bounds), stop
-#
-# Satisfied 1 child
-# Output: 1
-#
-# Example 2:
-# g = [1,2], s = [1,2,3]
-#
-# After sorting: g = [1,2], s = [1,2,3]
-#
-# child=0 (greed=1), cookie=0 (size=1):
-#   1 >= 1, satisfy, move both
-#
-# child=1 (greed=2), cookie=1 (size=2):
-#   2 >= 2, satisfy, move both
-#
-# All children satisfied
-# Output: 2
 
 sol = DistributionGreedy()
 print("Content children:", sol.findContentChildren([1,2,3], [1,1]))  # 1
 print("Content children:", sol.findContentChildren([1,2], [1,2,3]))  # 2
 
+"""
+================================================================
+PATTERN 6: STRING PARTITIONING (GREEDY EXTENSION)
+PATTERN EXPLANATION: Partition string or array into optimal segments by tracking boundaries
+and greedily extending partitions. Key insight: once we see a character, we must include
+all its occurrences in current partition. Track the furthest position we must reach before
+closing current partition, then start new partition.
 
-# ================================================================
-# PATTERN 6: CIRCULAR ARRAY/GAS STATION
-# PATTERN EXPLANATION: Find valid starting position in circular array by tracking cumulative
-# surplus/deficit. Key insight: if total surplus is non-negative, valid start exists. If we
-# fail starting from position i and reach position j, all positions between i and j also fail.
-# Next possible start is j+1. Track both total and current surplus.
-#
-# TYPICAL STEPS:
-# 1. Initialize total_surplus = 0, current_surplus = 0, start = 0
-# 2. For each position i:
-#    - Add balance[i] to both totals
-#    - If current_surplus < 0:
-#      * Can't start from current start or any position before
-#      * Set start = i + 1
-#      * Reset current_surplus = 0
-# 3. Return start if total_surplus >= 0, else -1
-#
-# Applications: Gas station, circular candy distribution.
-# ================================================================
+TYPICAL STEPS:
+1. Precompute last occurrence of each character/element
+2. Initialize partition start and end boundaries
+3. For each position:
+   - Update partition end to max(end, last_occurrence[char])
+   - If reached partition end, close partition and start new one
+4. Return list of partition sizes or boundaries
 
-class CircularArrayGreedy:
+Applications: Partition labels, split array into consecutive subsequences, string construction.
+================================================================
+"""
+
+class StringPartitioning:
     """
-    Problem: There are n gas stations along a circular route. You have a car with unlimited
-    gas tank. It costs cost[i] gas to travel from station i to station i+1.
-    You begin with an empty tank at one of the stations.
-    
-    Given gas[] and cost[], return starting station index if you can travel around circuit
-    once, otherwise return -1. Solution is guaranteed to be unique if it exists.
-    
-    TC: O(n) - single pass through arrays
-    SC: O(1) - only track totals
+    Problem: You are given a string s. Partition s into as many parts as possible so that
+    each letter appears in at most one part. Return a list of integers representing the
+    size of these parts.
     
     How it works:
-    1. Track total surplus (gas - cost for all stations)
-    2. Track current surplus from current starting position
-    3. If current goes negative, can't start from any position up to here
-    4. Try next position as new start
-    5. If total >= 0, valid start exists (must be after last failure)
+    1. Precompute last occurrence index for each character
+    2. Track current partition boundary (end)
+    3. For each character, GREEDY CHOICE: immediately commit to extending current partition 
+       to include its last occurrence (no backtracking, no trying alternatives)
+    4. Keep extending until we reach partition boundary, then close it (all chars complete)
+    5. Why greedy works: once we see a character, we MUST include all its occurrences in 
+       current partition. Extending to furthest occurrence guarantees this while maximizing 
+       number of partitions (we close as soon as possible)
     """
-    def canCompleteCircuit(self, gas: List[int], cost: List[int]) -> int: # LC 134
-        total_surplus = 0
-        current_surplus = 0
-        start = 0
+    def partitionLabels(self, s: str) -> List[int]:
+        """
+        Example: "ababcbacadefegdehijhklij"
+                -> [9, 7, 8]
         
-        for i in range(len(gas)):
-            # Net gain/loss at this station
-            balance = gas[i] - cost[i]
-            
-            total_surplus += balance
-            current_surplus += balance
-            
-            # If current surplus negative, can't start from here or earlier
-            if current_surplus < 0:
-                start = i + 1  # Try next station as start
-                current_surplus = 0  # Reset for new start
+        - TC: O(n) - two passes (one for last occurrence, one for partitioning)
+        - SC: O(1) - hash map stores at most 26 characters
+        """
+        # Store last occurrence of each character
+        # Key insight: Once we reach a char's last occurrence, we'll NEVER see it again
+        # This tells us when it's safe to close a partition (all chars in it are complete)
+        last_occurrence = {}
+        for i, char in enumerate(s):
+            last_occurrence[char] = i  # Overwrites previous value if char seen before
         
-        # Valid start exists only if total surplus is non-negative
-        return start if total_surplus >= 0 else -1
+        result = []
+        partition_start = 0
+        partition_end = 0
+        
+        for i, char in enumerate(s):
+            # Greedy choice -> If I see a character, I immediately commit to extending my current partition to include ALL occurrences of that character.
+            partition_end = max(partition_end, last_occurrence[char])
+            
+            # When we reach partition boundary, all chars are complete
+            if i == partition_end:
+                result.append(partition_end - partition_start + 1)
+                partition_start = i + 1
+        
+        return result
 
 # Example:
-# gas  = [1,2,3,4,5]
-# cost = [3,4,5,1,2]
+# s = "ababcbaca"
 #
-# Balance at each station: [-2, -2, -2, 3, 3]
-#
-# i=0: balance=-2
-#   total=-2, current=-2
-#   current < 0, start=1, current=0
-#
-# i=1: balance=-2
-#   total=-4, current=-2
-#   current < 0, start=2, current=0
-#
-# i=2: balance=-2
-#   total=-6, current=-2
-#   current < 0, start=3, current=0
-#
-# i=3: balance=3
-#   total=-3, current=3
-#   current >= 0, continue
-#
-# i=4: balance=3
-#   total=0, current=6
-#   current >= 0, continue
-#
-# total=0 >= 0, start=3 is valid
-# Output: 3
-#
-# Verification from station 3:
-# Station 3: gas=4, cost=1, have 3 left
-# Station 4: gas=5, cost=2, have 3+5-2=6 left
-# Station 0: gas=1, cost=3, have 6+1-3=4 left
-# Station 1: gas=2, cost=4, have 4+2-4=2 left
-# Station 2: gas=3, cost=5, have 2+3-5=0 left
-# Back to station 3: Success!
+# last_occurrence = {'a': 8, 'b': 5, 'c': 7}
+# partition_start = 0
+# partition_end = 0
 
-sol = CircularArrayGreedy()
-print("Starting station:", sol.canCompleteCircuit([1,2,3,4,5], [3,4,5,1,2]))  # 3
-print("Starting station:", sol.canCompleteCircuit([2,3,4], [3,4,3]))  # -1
+# i=0, char='a':
+#     partition_end = max(0, 8) = 8     -> Must go to index 8 to include all 'a's
+#     i (0) != partition_end (8)        -> Can't close partition yet
+    
+# i=1, char='b':
+#     partition_end = max(8, 5) = 8     -> Still need to reach 8 (already extended)
+#     i (1) != partition_end (8)
+    
+# i=2, char='a':
+#     partition_end = max(8, 8) = 8     -> Already planning to go to 8
+#     i (2) != partition_end (8)
+    
+# i=3, char='b':
+#     partition_end = max(8, 5) = 8
+#     i (3) != partition_end (8)
+    
+# i=4, char='c':
+#     partition_end = max(8, 7) = 8     -> Still need to reach 8
+#     i (4) != partition_end (8)
+    
+# i=5, char='b':
+#     partition_end = max(8, 5) = 8
+#     i (5) != partition_end (8)
+    
+# i=6, char='a':
+#     partition_end = max(8, 8) = 8
+#     i (6) != partition_end (8)
+    
+# i=7, char='c':
+#     partition_end = max(8, 7) = 8
+#     i (7) != partition_end (8)
+    
+# i=8, char='a':
+#     partition_end = max(8, 8) = 8
+#     i (8) == partition_end (8)        -> ✓ Reached the boundary!
+#     result.append(9)                   -> Partition size = 8 - 0 + 1 = 9
+#     partition_start = 9                -> Next partition starts here
+
+sol = StringPartitioning()
+print("Partition sizes:", sol.partitionLabels("ababcbacadefegdehijhklij"))  # [9, 7, 8]
+print("Partition sizes:", sol.partitionLabels("eccbbbbdec"))  # [10]

@@ -57,8 +57,7 @@ class Solution:
             # RECURSIVE CASE: Try adding each candidate
             for i in range(start, len(candidates)):
                 # PRUNING OPTIMIZATION: Since array is sorted,
-                # if adding candidates[i] exceeds target, all remaining will too
-                # So we can break early instead of continuing loop
+                # if adding candidates[i] exceeds target, all remaining will too, so we break early instead of continuing loop
                 if current_sum + candidates[i] > target:
                     break  # Not 'continue' - everything after is also too big!
                 
@@ -78,6 +77,7 @@ class Solution:
         return result
     
 sol = Solution()
+print(sol.combinationSum([2,3], 5)) # [[2,3]]
 print(sol.combinationSum([2,3,6,7], 7)) # [[2,2,3],[7]]
 print(sol.combinationSum([2,3,5], 8)) # [[2,2,2,2],[2,3,3],[3,5]]
 print(sol.combinationSum([2], 1)) # []

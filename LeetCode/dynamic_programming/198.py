@@ -25,13 +25,15 @@ class Solution:
     """
     def rob(self, nums: List[int]) -> int: # O(n) space
         n = len(nums)
-        dp = [0] * (n + 1)  # Max money we can rob up to each house
+        dp = [0] * (n + 1)  # dp[i] = max profit you can make robbing up to house i
         dp[0] = 0  # No houses robbed = $0
-        dp[1] = nums[0]  # Rob first house only
+        dp[1] = nums[0]  # Rob up to first house only -> only one option
 
-        for i in range(2, n + 1):
-            # Either skip current house (take prev max) OR rob current house + take max from 2 houses back
-            dp[i] = max(dp[i-1], dp[i-2] + nums[i-1])
+        for i in range(2, n + 1): # Recurrence relation
+            rob = nums[i-1] + dp[i-2] # Rob curr house and take money from 2 houses ago
+            skip = dp[i-1] # Skip this house and take money from prev house
+
+            dp[i] = max(rob, skip)
 
         return dp[-1] # Max money after considering all houses
     

@@ -14,19 +14,32 @@
 # Output: 0
 # Explanation: In this case, no transactions are done and the max profit = 0.
 
+from typing import List
+
 class Solution(object):
-    """
-    This is a greedy algorithm - not dynamic programming. At each step, we make the locally optimal choice (update min, calculate profit). This works because the problem has optimal substructure (solving smaller versions of the problem optimally leads to solving the full problem optimally).
+    def maxProfitDP(self, prices: List[int]) -> int:
+        """
+        TC: O(n) -> One iteration through prices
+        SC: O(n) -> Track max profit for each day n where n = price on ith day
+        """
+        n = len(prices)
+        dp = [0] * n # dp[i] = max profit you can make by day i
+        min_price = float('inf') # min price we've seen so far
 
-    KEY INSIGHT: You don't need to check every buy sell pair - Realize the only thing we need to calculate the profit is the min so far. 
+        for i in range(len(prices)):
+            min_price = min(min_price, prices[i]) # Update min price we've seen
+            # Recurrence relation -> don't sell today or sell today
+            hold = dp[i-1]
+            sell = prices[i] - min_price
+            dp[i] = max(hold, sell) # which makes us more profit?
 
-    TC:
-        - One iteration through the prices array: O(n)
-    SC:
-        - O(1) -> only need to track variables
+        return dp[-1]
 
-    """
-    def maxProfit(self, prices):
+    def maxProfitGreedy(self, prices):
+        """
+        - TC: O(n) -> One iteration through the prices array
+        - SC: O(1) -> only need to track variables
+        """
         min_price = float('inf') # Create variable to track min price
         max_profit = 0 # Create variable to track max profit
 
@@ -36,23 +49,6 @@ class Solution(object):
             max_profit = max(max_profit, profit) # Update max profit
 
         return max_profit
-
-
-# Solution 2 -> BRUTE FORCE
-# Step 1: Create the first "for" loop that loops through the array starting at index 0
-# Step 2: Create a second "for" loop that loops through the array starting at index 1, and once it finishes it adds i+1 and loops through again
-# Step 3: Since i is always one ahead in the j loop, subtract prices[j] - prices[i] in each loop
-# Step 4: At the end of each loop, subtract the prices of the index that j is currently at minus the index that i is currently at. During the first loop, that would be prices[1] - prices[0]
-
-
-    def maxProfit2(self, prices):
-        x=0
-        for i in range(len(prices)):
-            for j in range(i+1, len(prices)):
-                diff = prices[j] - prices[i]
-                # print("diff", diff)
-                x=max(x, diff)
-        return x
 
 solution = Solution()
 print(solution.maxProfit2([7,1,5,3,6,4]))

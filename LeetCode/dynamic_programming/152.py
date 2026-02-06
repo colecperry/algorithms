@@ -14,61 +14,78 @@
 # Output: 0
 # Explanation: The result cannot be 2, because [-2,-1] is not a subarray.
 
-# How to Solve: Brute Force O(n^2) -> gets time limit exceeded
-# Initialize a largest variable, which holds the largest sum, which we initally assume is the first number in the array (a sub array can be 1 element)
-# Iterate over the array
-    # Update the product -> If the next number (a single element) is larger than the current largest sub array, update largest
-    # Iterate over each element starting at i+1
-    # Calculate the product by multiplying the current product with the new number
-    # If the new product is greater than the largest product, update largest
 
-# How to solve (optimal):
-# Big Idea : On each iteration, we are going to have the max and min sub array values for all of the elements that came before it and update the values with the next element, updating our result if we find something bigger
-
-# Start by taking the maximum and minimum products of the subarray of the first two elements and store in variables (create variables currMax and currMin and initialize them to 1, and multiply by the first element)
-# As we move to the next number, multiply the next element by the minimum and maximum products of the subarray so far and store the maximum and minimum products for that specific element which includes the possibility of the number itself (we don't know which combination is going to produce the biggest result, since we are dealing with negatives)
-# Edge case: If we have a zero in our array, it's going to make the min and max products, zero, and even if we continue on to positive or negative numbers after, anything * 0 = 0
-    # We need to reset our max and min to 1
-
-# Example: 
-# arr = [-1, -2, -3, 4]
-# arr [-1, -2] -> max = 2, min = -2
-# arr[-1, -2, -3] -> max = 2 * -3 = 6, min =  -2 * 3 = -6
-# arr[-1, -2, -3, 4] -> max = 6 * 4 = 24, min = -6 * 4 = -24
-# ans = 24 
-
-
-class Solution(object):
+class Solution:
     def maxProduct(self, nums):
-        res = max(nums) # Set res initially to max num in arr
-        curMin, curMax = 1, 1 # Store currentMin and currentMax
-        for n in nums: # Iterate through input arr
-            if n == 0: # If we hit 0
-                curMin, curMax = 1,1 # Reset our min and max
-                continue
-            temp = curMax * n # Calculate curr max
-            curMax = max(n * curMax, n * curMin, n) # The max will be either the num * curMin, curMax, or n itself
-            curMin = min(temp, n * curMin, n) # Need to use temp since we reassigned curMax in code before
-            res = max(res, curMax, curMin) # Take the max of the old res, or the new values we just calc'd
-        return res
+        """
+        LC 152 - Maximum Product Subarray
+        
+        Key insight: Track BOTH max and min products ending at each position
+        Why? Negative numbers flip max ↔ min
+        
+        TC: O(n) - single pass through array
+        SC: O(1) - only tracking a few variables
+        """
+        # Max and min products can only initially be the first number
+        max_product = nums[0]  # Best product ending here
+        min_product = nums[0]  # Worst product ending here
+        result = nums[0]       # Overall best answer
+        
+        # Process each element starting from index 1
+        for i in range(1, len(nums)):
+            curr = nums[i] # get current number
+            
+            # Save old max before we update (needed for min calculation)
+            temp_max = max_product
+            
+            # New max is the LARGEST of:
+            # 1. Start fresh at current number
+            # 2. Extend previous max (prev max * curr number)
+            # 3. Extend previous min (prev min * curr number)
+            max_product = max(curr, temp_max * curr, min_product * curr)
+            
+            # New min is the SMALLEST of:
+            # 1. Start fresh at current number
+            # 2. Extend previous max (prev max * curr number)
+            # 3. Extend previous min (prev min * curr number)
+            min_product = min(curr, temp_max * curr, min_product * curr)
+            
+            # Update global result
+            result = max(result, max_product)
+        
+        return result
 
 
-    def maxProduct2(self, nums):
-        largest = nums[0]
-        for i in range(len(nums)):
-            product = nums[i]
-            if product > largest:
-                largest = product
-            for j in range(i+1, len(nums)):
-                product = product * nums[j]
-                if product > largest:
-                    largest = product
-        return largest
+# ═══════════════════════════════════════════════════════════════════
+# TRACE: maxProduct([2, 3, -2, -5])
+# ═══════════════════════════════════════════════════════════════════
+# 
+# Initial: max_product=2, min_product=2, result=2
+# 
+# i=1 (curr=3):
+#   temp_max = 2
+#   max_product = max(3, 2*3=6, 2*3=6) = 6
+#   min_product = min(3, 2*3=6, 2*3=6) = 3
+#   result = max(2, 6) = 6
+#   State: max=6, min=3
+# 
+# i=2 (curr=-2):
+#   temp_max = 6
+#   max_product = max(-2, 6*-2=-12, 3*-2=-6) = -2
+#   min_product = min(-2, 6*-2=-12, 3*-2=-6) = -12  ← Keep this!
+#   result = max(6, -2) = 6
+#   State: max=-2, min=-12
+# 
+# i=3 (curr=-5):
+#   temp_max = -2
+#   max_product = max(-5, -2*-5=10, -12*-5=60) = 60  ← min*negative flipped!
+#   min_product = min(-5, -2*-5=10, -12*-5=60) = -5
+#   result = max(6, 60) = 60
+#   State: max=60, min=-5
+# 
+# 🎯 FINAL ANSWER: 60 (subarray [2,3,-2,-5])
+# ═══════════════════════════════════════════════════════════════════
 
-my_solution = Solution()
-
-nums1 = [2,3,-2,4]
-nums2 = [-2,0,-1]
-
-print(my_solution.maxProduct(nums1))
-print(my_solution.maxProduct(nums2))
+sol = Solution()
+print(sol.maxProduct([2,3,-2,4])) # 6
+print(sol.maxProduct([-2,0,-1])) # 0

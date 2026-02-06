@@ -1,44 +1,36 @@
+# 78. Subsets
+
+# Given an integer array nums of unique elements, return all possible subsets (the power set).
+
+# The solution set must not contain duplicate subsets. Return the solution in any order.
+
+# Example 1:
+# Input: nums = [1,2,3]
+# Output: [[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]
+
+# Example 2:
+# Input: nums = [0]
+# Output: [[],[0]]
+
 from typing import List
 
-class Solution:
-    def combine(self, n: int, k: int) -> List[List[int]]:
+class Solution: # LC 78: Subsets
+    def subsets(self, nums: List[int]) -> List[List[int]]:
         res = []
-
         def backtrack(start, path):
-            if len(path) == k:
-                res.append(path[:])
-                return
-            
-            for i in range(start, n + 1):
-                path.append(i)
+            res.append(path[:])
+
+            for i in range(start, len(nums)):
+                path.append(nums[i])
                 backtrack(i + 1, path)
+
                 path.pop()
-        
-        backtrack(1, [])
+
+        backtrack(0, [])
 
         return res
-    
-# ============================================
-# VISUALIZATION FOR COMBINATIONS: n=4, k=2
-# ============================================
-#
-#                           backtrack(start=1, path=[])
-#                      /          |            |           \
-#                  TRY 1        TRY 2         TRY 3       TRY 4
-#                    /            |            |             \
-#              path=[1]       path=[2]      path=[3]        path=[4]
-#              start=2        start=3       start=4         start=5
-#             /  |   \          /  \           |        (k not reached)
-#         TRY   TRY   TRY     TRY   TRY      TRY 4
-#          2     3     4       3     4         |
-#          |     |     |       |     |         |
-#       [1,2]  [1,3] [1,4]   [2,3] [2,4]     [3,4]
-#         ✓      ✓     ✓       ✓     ✓         ✓
-#       SAVE   SAVE  SAVE    SAVE   SAVE     SAVE
-#
-# Result: [[1,2],[1,3],[1,4],[2,3],[2,4],[3,4]]
 
 
 sol = Solution()
-print(sol.combine(4, 2)) # [[1,2],[1,3],[1,4],[2,3],[2,4],[3,4]]
-print(sol.combine(1, 1)) # [[1]]
+print(sol.subsets([1,2,3])) # [[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]
+print(sol.subsets([0])) # [[],[0]]

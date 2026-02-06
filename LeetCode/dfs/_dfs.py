@@ -688,7 +688,7 @@ class CoinChange:  # LC 322
     
     def coinChange(self, coins: list[int], amount: int) -> int:
         """
-        TC: O(amount × len(coins)) - each amount computed once, trying all coins
+        TC: O(amount * len(coins)) - each amount computed once, trying all coins
         SC: O(amount) - memo dict + recursion stack
         """
         memo = {}

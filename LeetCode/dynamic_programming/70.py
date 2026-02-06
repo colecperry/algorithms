@@ -28,11 +28,12 @@ class Solution:
             - O(n) - must store dp for each ele in n
         """
         dp = [0] * (n + 1) # Number of ways to reach that step
-        dp[0] = 1 # DP base cases -> 1 way to get to steps 1 & 2
-        dp[1] = 1
+        dp[0] = 1 # Only one way to get to starting point (before 1st step)
+        dp[1] = 1 # Only one way to get to 1st step (take one step)
 
         for i in range(2, n + 1):
-            dp[i] = dp[i-1] + dp[i-2] # Ways to get to curr step = ways from 1 step back + ways from 2 steps back
+            dp[i] = dp[i-1] + dp[i-2] # Ways to get to curr step = ways from 1 step back (take 1 step) + ways from 2 steps back (take 2 steps)
+
         return dp[-1]
     
     def climbStairs2(self, n: int) -> int: # O(1) space

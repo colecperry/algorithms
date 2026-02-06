@@ -1,20 +1,44 @@
-class HelperRecursion:
-    """
-    Problem 4: Sum all root-to-leaf numbers.
-    
-    Example:
-        Tree:    1
-                / \
-               2   3
-        
-        Paths: 12, 13
-        Sum: 12 + 13 = 25
-    
-    How it works:
-    1. Helper accumulates number as we traverse
-    2. At each node: current_num = prev * 10 + node.val
-    3. At leaf: add to total sum
-    """
+# 129. Sum Root to Leaf Numbers
+
+# You are given the root of a binary tree containing digits from 0 to 9 only.
+
+# Each root-to-leaf path in the tree represents a number.
+
+# For example, the root-to-leaf path 1 -> 2 -> 3 represents the number 123.
+# Return the total sum of all root-to-leaf numbers. Test cases are generated so that the answer will fit in a 32-bit integer.
+
+# A leaf node is a node with no children.
+
+# Example 1:
+#
+#             1
+#            / \
+#           2   3
+
+# Input: root = [1,2,3]
+# Output: 25
+# Explanation:
+# The root-to-leaf path 1->2 represents the number 12.
+# The root-to-leaf path 1->3 represents the number 13.
+# Therefore, sum = 12 + 13 = 25.
+
+# Example 2:
+
+#              4
+#            /   \
+#           /     \
+#          9       0
+#         /   
+#        5     
+
+# Input: root = [4,9,0,5]
+# Output: 535
+# Explanation:
+# The root-to-leaf path 4->9->5 represents the number 495.
+# The root-to-leaf path 4->0 represents the number 40.
+# Therefore, sum = 495 + 40 = 535.
+
+class Solution:
     def sumNumbers(self, root):  # LC 129 - Sum Root to Leaf Numbers
         """
         - TC: O(n) - visit each node once
@@ -26,7 +50,8 @@ class HelperRecursion:
             - node: current node being visited
             - current_num: accumulated number built so far (0 → 1 → 12)
             """
-            # Base case: null node contributes nothing
+            # Base case: end of path -> null node contributes nothing to sum
+            # Hit when a node has one child
             if not node:
                 return 0
             
@@ -34,14 +59,14 @@ class HelperRecursion:
             # Example: current_num=1, node.val=2 → 1*10 + 2 = 12
             current_num = current_num * 10 + node.val
             
-            # BASE CASE: Leaf node? We've completed a path, return the number
+            # BASE CASE: Leaf node -> no children? Completed a path, return the number
             if not node.left and not node.right:
                 return current_num
             
-            # RECURSIVE CASE: Internal node? Sum both subtree paths
-            # Pass accumulated number to children (they'll build on it)
+            # RECURSIVE CASE: 2 children -> Explore both directions, pass accumulated number
             left_sum = helper(node.left, current_num)
             right_sum = helper(node.right, current_num)
+
             return left_sum + right_sum
         
         # Start recursion: root node, number starts at 0
@@ -78,12 +103,20 @@ class HelperRecursion:
 # 🎯 FINAL ANSWER: 25
 
 class TreeNode:
-    def __init__(self, val=0, next=None):
+    def __init__(self, val=0, left=None, right=None):
         self.val = val
-        self.next = next
+        self.left = left
+        self.right = right
 
-sol = HelperRecursion()
+sol = Solution()
 
 # Test sum numbers
 tree = TreeNode(1, TreeNode(2), TreeNode(3))
 print("Sum Root to Leaf:", sol.sumNumbers(tree))  # 25
+
+# Example 2
+root = TreeNode(4)
+root.left = TreeNode(9)
+root.right = TreeNode(0)
+root.left.left = TreeNode(5)
+print("Sum Root to Leaf:", sol.sumNumbers(root))  # 535
