@@ -26,13 +26,12 @@ class Solution:
         def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
             n = len(temperatures)
             answer = [0] * n 
-            stack = []  # Stores indices of days waiting for a warmer day - maintains DECREASING temperature order
+            stack = []  # Stores indices of days waiting for a warmer temp - maintains DECREASING temperature order
             
             for i, temp in enumerate(temperatures):            
-                # While current temp is warmer than stack top:
-                # Pop those days - they found their answer (today is their warmer day!)
+                # Found warmer temp at index i
                 while stack and temp > temperatures[stack[-1]]:
-                    prev_index = stack.pop()
+                    prev_index = stack.pop() # i of day waiting for warmer temp
                     answer[prev_index] = i - prev_index  # Days waited = today - that day
                 
                 # Add current day to stack (it's now waiting for a warmer day)

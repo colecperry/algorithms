@@ -5,9 +5,7 @@ MATH COMPLETE GUIDE
 
 WHAT IS THE MATH CATEGORY?
 ---------------------------
-Math problems involve number theory, arithmetic properties, and digit
-manipulation rather than data structure traversal. Solutions almost
-always exploit a mathematical shortcut to avoid brute force.
+Math problems involve number theory, arithmetic properties, and digit manipulation rather than data structure traversal. Solutions almost always exploit a mathematical shortcut to avoid brute force.
 
 Core ideas:
 - Use mod properties to keep intermediate values in range
@@ -36,12 +34,14 @@ Common math problem types (most → least common):
 
 from typing import List
 
-# ================================================================
-# PATTERN 1: DIGIT MANIPULATION
-# PATTERN EXPLANATION: Extract digits with % 10 and // 10, reconstruct numbers with * 10. Building a reversed number: accumulate into a result by multiplying the running result by 10 then adding the next digit each iteration. Overflow detection: check before multiplying if result will exceed INT_MAX // 10.
-#
-# Applications: Reverse integer (LC 7), palindrome number (LC 9), happy number digit sum (LC 202), plus one (LC 66), add digits (LC 258).
-# ================================================================
+"""
+================================================================
+PATTERN 1: DIGIT MANIPULATION
+PATTERN EXPLANATION: Extract digits with % 10 and // 10, reconstruct numbers with * 10. Building a reversed number: accumulate into a result by multiplying the running result by 10 then adding the next digit each iteration. Overflow detection: check before multiplying if result will exceed INT_MAX // 10.
+
+Applications: Reverse integer (LC 7), palindrome number (LC 9), happy number digit sum (LC 202), plus one (LC 66), add digits (LC 258).
+================================================================
+"""
 
 class DigitManipulationPattern:
     """
@@ -93,18 +93,15 @@ sol2 = DigitManipulationPattern()
 print("Reverse 123:", sol2.reverse(123))             # 321
 print("Reverse -123:", sol2.reverse(-123))            # -321
 
+"""
+================================================================
+PATTERN 2: GCD / LCM
+PATTERN EXPLANATION: GCD via Euclidean algorithm: repeatedly replace (a, b) with (b, a % b) until b == 0; the last non-zero value of a is the GCD. LCM is not a separate algorithm — it is derived directly from GCD: lcm(a, b) = a * b // gcd(a, b). The reasoning: a*b counts every prime factor from both numbers; dividing by gcd removes the shared factors counted twice, leaving the smallest number divisible by both.
 
-# ================================================================
-# PATTERN 2: GCD / LCM
-# PATTERN EXPLANATION: GCD via Euclidean algorithm: repeatedly replace (a, b) with
-# (b, a % b) until b == 0; the last non-zero value of a is the GCD. LCM is not a
-# separate algorithm — it is derived directly from GCD: lcm(a, b) = a * b // gcd(a, b).
-# The reasoning: a*b counts every prime factor from both numbers; dividing by gcd
-# removes the shared factors counted twice, leaving the smallest number divisible by both.
-#
-# Applications: GCD of array (LC 1979), reduce fractions, any problem involving
-# divisibility, common periods, or repeating structure.
-# ================================================================
+Applications: GCD of array (LC 1979), reduce fractions, any problem involving
+divisibility, common periods, or repeating structure.
+================================================================
+"""
 
 class GCDPattern:
     """
@@ -144,18 +141,79 @@ sol2 = GCDPattern()
 print("GCD of [2,5,6,9,10]:", sol2.findGCD([2, 5, 6, 9, 10]))   # 2
 print("LCM of 4 and 6:", 4 * 6 // sol2.findGCD([4, 6]))          # 12
 
+"""
+================================================================
+PATTERN 3: PRIME SIEVE
+PATTERN EXPLANATION: To find all primes up to n, start by assuming every number is prime. Then for each prime p starting at 2, mark all its multiples as not prime — starting at p² because every smaller multiple was already marked by an earlier prime. Only iterate up to √n: any composite number ≤ n must have a factor ≤ √n, so all composites are guaranteed marked by then.
 
-# ================================================================
-# PATTERN 3: FAST EXPONENTIATION & INTEGER SQUARE ROOT
-# PATTERN EXPLANATION: Compute x^n in O(log n) by halving the exponent each step.
-# If n is even: x^n = (x²)^(n//2). If n is odd: factor out one x, then fall into
-# the even case. Track the "leftover" x factors in a running result — when n is odd,
-# multiply result by x before squaring and halving. Integer sqrt is the same idea
-# applied as binary search on the answer space [0, x//2].
-#
-# Applications: Pow(x, n) (LC 50), Sqrt(x) (LC 69), modular exponentiation,
-# Super Pow (LC 372), any problem computing large powers efficiently.
-# ================================================================
+Applications: Count Primes (LC 204), any problem asking for prime counts or
+prime membership up to a bound.
+================================================================
+"""
+
+import math
+
+class PrimeSievePattern:
+    """
+    Problem: Given an integer n, return the number of prime numbers strictly less than n. 
+    
+    NOTE: A prime number is a number greater than 1 that has no positive divisors other than 1 and itself.
+
+    Example:
+        Input: n = 10   Output: 4   (primes: 2, 3, 5, 7)
+        Input: n = 1    Output: 0
+
+    Steps (Prime Sieve Algorithm):
+    1. If n < 2, return 0
+    2. is_prime = [True] * n; mark 0 and 1 as False
+    3. For i from 2 to √n (inclusive): 
+       a. If is_prime[i]:
+          b. For j from i*i to n, step i: is_prime[j] = False
+    4. Return sum(is_prime)
+
+    NOTE: isqrt(n) returns the largest integer whose square doesn't exceed n
+    Ex. isqrt(10) → 3 because 3² = 9 ≤ 10, and 4² = 16 is too big
+    """
+    def countPrimes(self, n: int) -> int:  # LC 204
+        """
+        - TC: O(n log log n) - sieve eliminates each composite once
+        - SC: O(n) - boolean array of size n
+        """
+        if n < 2:
+            return 0
+
+        is_prime = [True] * n
+        is_prime[0] = is_prime[1] = False   # 0 and 1 are not prime
+
+        for i in range(2, math.isqrt(n) + 1): #isqrt is integer square root fn
+            if is_prime[i]: # get all multiples of each prime
+                for j in range(i * i, n, i): # Find all multiples of i starting at i² 
+                    is_prime[j] = False
+
+        return sum(is_prime)
+
+    # Example trace (countPrimes, n=10):
+    # is_prime = [F, F, T, T, T, T, T, T, T, T]  (indices 0-9)
+    #
+    # i=2: mark 4, 6, 8     → [F,F,T,T,F,T,F,T,F,T]
+    # i=3: mark 9           → [F,F,T,T,F,T,F,T,F,F]
+    # i=√10 = 3 → stop
+    #
+    # sum = 4 (indices 2,3,5,7) ✓
+
+sol5 = PrimeSievePattern()
+print("Count primes < 10:", sol5.countPrimes(10))   # 4
+print("Count primes < 1:", sol5.countPrimes(1))     # 0
+
+"""
+================================================================
+PATTERN 4: FAST EXPONENTIATION & INTEGER SQUARE ROOT
+PATTERN EXPLANATION: Compute x^n in O(log n) by halving the exponent each step. If n is even: x^n = (x²)^(n//2). If n is odd: factor out one x, then fall into the even case. Track the "leftover" x factors in a running result — when n is odd, multiply result by x before squaring and halving. Integer sqrt is the same idea applied as binary search on the answer space [0, x//2].
+
+Applications: Pow(x, n) (LC 50), Sqrt(x) (LC 69), modular exponentiation,
+Super Pow (LC 372), any problem computing large powers efficiently.
+================================================================
+"""
 
 class FastExponentiationPattern:
     """
@@ -179,86 +237,42 @@ class FastExponentiationPattern:
         - TC: O(log n) - halve n each iteration
         - SC: O(1) - iterative
         """
-        if n < 0:
-            x = 1 / x
-            n = -n
+        negative = n < 0
+        n = abs(n)
 
         result = 1.0
         while n > 0:
-            if n % 2 == 1:     # Odd exponent — absorb one x factor into result
-                result *= x
-            x *= x             # Square the base
-            n //= 2            # Halve the exponent
+            if n % 2 == 1: # Odd exponent — absorb one x factor into result
+                result *= x # Update result with the "leftover" x
+            x *= x             # Square the base each iteration
+            n //= 2            # Halve the exponent each iteration
 
-        return result
+        return 1 / result if negative else result
+    
+sol = FastExponentiationPattern()
+print(sol.myPow(2.0, 10))   # 1024.0
+print(sol.myPow(2.0, -2))   # 0.25
 
-    # Example trace (myPow, x=2.0, n=10):
-    # n=10 (even):  result=1,    x=4,   n=5
-    # n=5  (odd):   result=4,    x=16,  n=2
-    # n=2  (even):  result=4,    x=256, n=1
-    # n=1  (odd):   result=1024, x=..., n=0
-    # n=0 → stop → return 1024.0
+# Example trace (myPow, x=2.0, n=10):
+# n=10 (even):  result=1,    x=4,   n=5
+# n=5  (odd):   result=4,    x=16,  n=2
+# n=2  (even):  result=4,    x=256, n=1
+# n=1  (odd):   result=1024, x=..., n=0
+# n=0 → stop → return 1024.0
 
-    # Application 2: Integer Square Root
-    def mySqrt(self, x: int) -> int:  # LC 69
-        """
-        Return floor(√x) without using built-in sqrt.
+"""
+================================================================
+PATTERN 5: STRING-BASED BIG-NUMBER ARITHMETIC
+PATTERN EXPLANATION: When numbers exceed integer width or conversion is forbidden, represent them as strings and simulate grade-school column arithmetic. Addition: two pointers start at the rightmost digit of each string, add digit-by-digit carrying any overflow, then reverse the collected digits at the end. Multiplication: each digit pair (i, j) contributes to exactly two positions in the result array — p1 = i+j (carry position) and p2 = i+j+1 (current digit position).
 
-        Example:
-        Input: x = 8   Output: 2   (√8 ≈ 2.828, floor = 2)
-        Input: x = 4   Output: 2
-
-        Strategy: Binary search on the answer space [1, x//2].
-        Track the last valid candidate — the largest k where k² ≤ x.
-
-        - TC: O(log x), SC: O(1)
-        """
-        if x < 2:
-            return x
-
-        lo, hi = 1, x // 2    # √x ≤ x/2 for all x ≥ 2
-        result = 1
-
-        while lo <= hi:
-            mid = (lo + hi) // 2
-            if mid * mid <= x:
-                result = mid           # Valid candidate — try to go larger
-                lo = mid + 1
-            else:
-                hi = mid - 1          # Too large — go smaller
-
-        return result
-
-    # Example trace (mySqrt, x=8):
-    # lo=1, hi=4
-    # mid=2: 4 ≤ 8  → result=2, lo=3
-    # mid=3: 9 > 8  → hi=2
-    # lo=3 > hi=2   → stop → return 2
-
-sol4 = FastExponentiationPattern()
-print("2^10:", sol4.myPow(2.0, 10))    # 1024.0
-print("2^-2:", sol4.myPow(2.0, -2))    # 0.25
-print("sqrt(8):", sol4.mySqrt(8))      # 2
-print("sqrt(4):", sol4.mySqrt(4))      # 2
-
-
-# ================================================================
-# PATTERN 4: STRING-BASED BIG-NUMBER ARITHMETIC
-# PATTERN EXPLANATION: When numbers exceed integer width or conversion is forbidden,
-# represent them as strings and simulate grade-school column arithmetic. Addition:
-# two pointers start at the rightmost digit of each string, add digit-by-digit
-# carrying any overflow, then reverse the collected digits at the end. Multiplication:
-# each digit pair (i, j) contributes to exactly two positions in the result array
-# — p1 = i+j (carry position) and p2 = i+j+1 (current digit position).
-#
-# Applications: Add strings (LC 415), add binary (LC 67), multiply strings (LC 43),
-# any "big number" problem where int conversion is off-limits.
-# ================================================================
+Applications: Add strings (LC 415), add binary (LC 67), multiply strings (LC 43),
+any "big number" problem where int conversion is off-limits.
+================================================================
+"""
 
 class StringArithmeticPattern:
     """
-    Problem: Given two non-negative integers as strings, return their sum as a string.
-    Must not convert inputs to integers directly.
+    Problem: Given two non-negative integers as strings, return their sum as a string. Must not convert inputs to integers directly.
 
     Example:
         Input: num1 = "456", num2 = "77"   Output: "533"
@@ -279,16 +293,17 @@ class StringArithmeticPattern:
         - TC: O(max(m, n)) - one pass through both strings
         - SC: O(max(m, n)) - result list
         """
-        i, j = len(num1) - 1, len(num2) - 1
-        carry = 0
-        result = []
+        i, j = len(num1) - 1, len(num2) - 1 # ptrs at end of each str
+        carry = 0 # carry for sums >= 10
+        result = [] # collect digits in reverse order
 
-        while i >= 0 or j >= 0 or carry:
+        # continue until both strings are exhausted and no carry remains
+        while i >= 0 or j >= 0 or carry: 
             val1 = int(num1[i]) if i >= 0 else 0
             val2 = int(num2[j]) if j >= 0 else 0
-            total = val1 + val2 + carry
-            result.append(str(total % 10))    # Current column digit
-            carry = total // 10               # Carry to next column
+            total = val1 + val2 + carry # sum curr digits + carry
+            result.append(str(total % 10)) # Current column digit
+            carry = total // 10            # Carry to next column
             i -= 1
             j -= 1
 
@@ -302,46 +317,6 @@ class StringArithmeticPattern:
     # Col 3: 4+0+1=5   → result=["3","3","5"], carry=0, i=-1
     # reversed → "533"
 
-    # Application 2: Multiply Strings
-    def multiply(self, num1: str, num2: str) -> str:  # LC 43
-        """
-        Multiply two non-negative integers given as strings without converting to int.
-
-        Example:
-        Input: num1 = "123", num2 = "456"   Output: "56088"
-
-        Strategy: Grade-school multiplication. Digit pair (i, j) contributes to
-        positions p1=i+j and p2=i+j+1 in a result array of size len(num1)+len(num2).
-        Accumulate all contributions in the array, then strip leading zeros.
-
-        - TC: O(m * n) - every digit pair touched once
-        - SC: O(m + n) - result array
-        """
-        m, n = len(num1), len(num2)
-        pos = [0] * (m + n)       # Max digits in product is m+n
-
-        for i in range(m - 1, -1, -1):
-            for j in range(n - 1, -1, -1):
-                mul = int(num1[i]) * int(num2[j])
-                p1, p2 = i + j, i + j + 1          # Carry and current positions
-                total = mul + pos[p2]
-
-                pos[p2] = total % 10                # Place current digit
-                pos[p1] += total // 10              # Propagate carry
-
-        result = "".join(str(d) for d in pos).lstrip("0")
-        return result or "0"
-
-    # Example trace (multiply, "12" * "3"):
-    # m=2, n=1, pos=[0,0,0]
-    #
-    # i=1 (digit=2), j=0 (digit=3): mul=6, p1=1, p2=2
-    #   total=6+pos[2]=6; pos[2]=6, pos[1]+=0 → pos=[0,0,6]
-    # i=0 (digit=1), j=0 (digit=3): mul=3, p1=0, p2=1
-    #   total=3+pos[1]=3; pos[1]=3, pos[0]+=0 → pos=[0,3,6]
-    # "036".lstrip("0") = "36" ✓
-
 sol5 = StringArithmeticPattern()
 print("Add '456'+'77':", sol5.addStrings("456", "77"))      # 533
-print("Multiply '123'*'456':", sol5.multiply("123", "456")) # 56088
-print("Multiply '2'*'3':", sol5.multiply("2", "3"))         # 6
+

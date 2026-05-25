@@ -19,10 +19,8 @@ from typing import List
 
 class Solution:
     """
-    TC:
-        - O(n)^2 for nested iteration
-    SC:
-        - O(n) for storing one num per index in DP
+    - TC: O(n)^2 for nested iteration
+    - SC: O(n) for storing one num per index in DP
     """
     def lengthOfLIS(self, nums: List[int]) -> int:
         # dp[i] stores the length of the longest increasing subsequence that ends at index i

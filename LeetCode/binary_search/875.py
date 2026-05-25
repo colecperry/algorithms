@@ -43,20 +43,15 @@
 #   - If current speed fails: try faster (left = mid + 1)
 #   - We want the MINIMUM speed that works
 
-# Time Complexity: O(n * log(max(piles)))
-    # - Binary search on answer space [1, max(piles)] takes O(log(max(piles))) iterations since
-    #   we are not searching through an array, we are searching through possible speed values
-    # - Binary search complexity = O(log(search_space_size))
-    # - Each iteration calls helper function that loops through all n piles
-    # - Total: O(n * log(max(piles)))
-
-# Space Complexity: O(1)
-    # - Only using constant extra variables, no additional data structures
-
-
 import math
 
 def min_eating_speed(piles, h):  # LC 875
+    """
+    - TC: O(n * log(max_piles))
+        - Binary Search Loop: O(log(max_piles)): Search space is [1: max(piles)], halves the search space each loop
+        - can_finish: O(n): Must check every pile to calc total hours
+    - SC: O(1) -> no data structures needed
+    """
 
     def can_finish(speed):
         total_hours = 0
@@ -65,12 +60,12 @@ def min_eating_speed(piles, h):  # LC 875
         return total_hours <= h
 
     left, right = 1, max(piles)  # Starting answer space: 
-    result = right # min speed starts at the largest possible pile so she can finish each pile in one hour
+    result = right # When we find a valid speed, save it
 
     while left <= right:
         mid = left + (right - left) // 2
         if can_finish(mid):  # Check if this speed works
-            result = mid     # Save this answer
+            result = mid     # Preserve our best answer (mid will change)
             right = mid - 1  # Try to find smaller speed
         else:                # This speed too slow
             left = mid + 1   # Need faster speed

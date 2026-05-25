@@ -24,15 +24,20 @@
 
 class Solution(object):
     def findMaxAverage(self, nums, k):
-        window_sum = sum(nums[:k])
-        max_avg = window_sum / float(k)
+        """
+        - TC: O(n) - iterate through nums once
+        - SC: O(1)
+        """
+        window_sum = sum(nums[:k]) # Calc starting window sum
+        max_avg = window_sum / float(k) # Find avg -> float
+        l = 0
 
-        for r in range(k, len(nums)):
-            window_sum += nums[r] - nums[r - k]
-            max_avg = max(max_avg, window_sum / float(k))
+        for r in range(k, len(nums)): # Loop through rest of window
+            window_sum += nums[r] - nums[l] # Add val entering window, subtract val leaving 
+            l += 1
+            max_avg = max(max_avg, window_sum / float(k)) # Update max average sum
 
         return max_avg
-    
 
 
 my_solution = Solution()

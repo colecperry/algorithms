@@ -5,14 +5,14 @@
 # Given the root of a binary tree, invert the tree, and return its root.
 
 # Ex. 1
-#
+
 #               4                    4
 #              / \                  / \
 #             /   \                /   \
 #            2     7      ->      7     2
 #           / \   / \            / \   / \
 #          1   3 6   9          9   6 3   1
-#
+
 # Input: root = [4,2,7,1,3,6,9]
 # Output: [4,7,2,9,6,3,1]
 
@@ -24,28 +24,6 @@
 # Input: root = []
 # Output: []
 
-# How to solve (Recursive):
-    # (Base Case):
-        # Scenario A: I'm at a null node -> Return null immediately (nothing to invert)
-    # Swap the children
-    # Recursively call the fn on left and right subtrees (inverts them)
-    # Return the root
-
-# Time Complexity: O(n)
-# - We visit every node exactly once
-
-# Space Complexity: O(h), where h is the height of the tree
-# - Due to recursive call stack
-# - Worst case: O(n) for a skewed tree
-# - Best case: O(log n) for a balanced tree
-
-# How to solve (Iterative):
-    # Create a stack and append the root node
-    # Loop, pop node off the stack, swap it's children, then append it's children if not null
-
-# Time complexity: O(n) -> we process every node once 
-# Space complexity: Best case O(1) -> in a linked list like tree, we only store one node in the array at a time because we pop and push one each loop, O(h) worst case -> the number of nodes in the array at one time equals the height of the tree
-
 from typing import Optional
 
 # Definition for a binary tree node.
@@ -56,16 +34,35 @@ class TreeNode:
         self.right = right
 class Solution:
     def invertTreeRecursive(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        """
+        TC: O(n) -> visit each node once
+        SC: O(h) -> call stack depth equals tree height
+                -> O(log n) balanced, O(n) worst case skewed
+        """
         if not root: # Edge case for empty tree 
             return  # & base case for end of recursion
         # Swap the children
         root.left, root.right = root.right, root.left
         # Recur on the children
-        self.invertTreeRecursive(root.left)
+        self.invertTreeRecursive(root.left) # ignore return values
         self.invertTreeRecursive(root.right)
-        return root
+        
+        return root # matters for original caller only
+    
+    #               4                    4
+    #              / \                  / \
+    #             /   \                /   \
+    #            2     7      ->      7     2
+    #           / \   / \            / \   / \
+    #          1   3 6   9          9   6 3   1
     
     def invertTreeIterative(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        """
+        - TC: O(n) -> visit each node once
+        - SC: O(w) -> stack holds at most w nodes where w is max width of the tree
+            -> O(n) worst case for a perfect binary tree (bottom level has n/2 nodes)
+            -> O(1) best case for a skewed tree (only one node in stack at a time)
+        """
         if not root: # Empty tree
             return None
         
@@ -74,10 +71,10 @@ class Solution:
         while stack:
             node = stack.pop() # Pop node off the end of the stack
             node.left, node.right = node.right, node.left # Swap children
-            if node.left:
-                stack.append(node.left) # Add the children
             if node.right:
-                stack.append(node.right)
+                stack.append(node.right) # Add the children -> R then L for DFS
+            if node.left:
+                stack.append(node.left)
         
         return root
 

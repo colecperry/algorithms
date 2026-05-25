@@ -3,24 +3,24 @@
 # Given the head of a singly linked list, reverse the list, and return the reversed list.
 
 # How to solve
-    # Use two pointer approach - Use a pre and current pointer: current to the head and set pre to None (one node before the head)
-    # Iterate through the linked list
-        # Save the current node's next pointer to a variable (because when we reverse it we will break the .next link from current, we need a way to move current ptr forward)
-        # Point current's .next backwards to pre to reverse the LL
-        # Move pre to current's place
-        # Move current to the variable we saved before
-    # Return the head (pre ends on the last node which is the new head)
+#     Use two pointer approach - Use a pre and current pointer: current to the head and set pre to None (one node before the head)
+#     Iterate through the linked list
+#         Save the current node's next pointer to a variable (because when we reverse it we will break the .next link from current, we need a way to move current ptr forward)
+#         Point current's .next backwards to pre to reverse the LL
+#         Move pre to current's place
+#         Move current to the variable we saved before
+#     Return the head (pre ends on the last node which is the new head)
 
 
 # Example 1:
-    # Input: head = [1,2,3,4,5]
-    # Output: [5,4,3,2,1]
+#     Input: head = [1,2,3,4,5]
+#     Output: [5,4,3,2,1]
 # Example 2:
-    # Input: head = [1,2]
-    # Output: [2,1]
+#     Input: head = [1,2]
+#     Output: [2,1]
 # Example 3:
-    # Input: head = []
-    # Output: []
+#     Input: head = []
+#     Output: []
 
 class ListNode(object):
     def __init__(self, value=0, next=None):

@@ -380,13 +380,6 @@ SORTING PATTERNS
 # custom function to define sorting logic. Can sort by multiple keys, computed values, or
 # complex conditions. Most common pattern in real-world sorting problems.
 #
-# TYPICAL STEPS:
-# 1. Identify sorting criteria (what determines order?)
-# 2. Define key function that extracts/computes sort value
-# 3. Use sorted(arr, key=...) or arr.sort(key=...)
-# 4. For multiple criteria, return tuple of keys
-# 5. Use reverse=True for descending order
-#
 # Applications: Sort by multiple keys, sort objects, relative ordering, priority sorting.
 # ================================================================
 
@@ -406,11 +399,12 @@ class CustomComparator:
     
     TC: O(n log n) - sorting dominates
     SC: O(n) - for sorted() output or O(1) for sort()
-    
-    How it works:
-    1. Primary key: string length
-    2. Secondary key: lexicographic order
-    3. Return tuple (len, string) for multi-key sorting
+
+    Steps:
+    1. Identify sorting criteria: primary = string length, secondary = alphabetical
+    2. Define key function that returns tuple (len(x), x)
+    3. Call sorted(words, key=...) with the tuple key
+    4. Tuple comparison handles multi-key: length first, then lexicographic
     """
     def sortByLengthThenAlpha(self, words: List[str]) -> List[str]:
         # Sort by length first, then alphabetically
@@ -443,12 +437,13 @@ class CustomComparator:
         
         TC: O(n log n) - sorting
         SC: O(n) - string conversion
-        
-        How it works:
-        1. Convert numbers to strings
-        2. Custom comparator: compare concatenations
-        3. For a, b: if a+b > b+a, then a should come first
-        4. Use functools.cmp_to_key for custom comparator
+
+        Steps:
+        1. Convert all numbers to strings
+        2. Define comparator: for a, b compare concatenation a+b vs b+a
+        3. If a+b > b+a, return -1 (a before b); if less, return 1; if equal, return 0
+        4. Sort nums_str using functools.cmp_to_key with the custom comparator
+        5. Join sorted strings; handle edge case where result starts with "0"
         """
         from functools import cmp_to_key
         
@@ -495,12 +490,13 @@ class CustomComparator:
         
         TC: O(n) - single pass
         SC: O(1) - in-place
-        
-        How it works (Three-way partitioning):
-        1. Three pointers: left (0s boundary), right (2s boundary), current
-        2. If 0: swap with left, move both forward
-        3. If 2: swap with right, move right backward
-        4. If 1: just move current forward
+
+        Steps:
+        1. Initialize three pointers: left=0 (0s boundary), current=0, right=len-1 (2s boundary)
+        2. While current <= right:
+           a. If nums[current] == 0: swap with left, increment both left and current
+           b. If nums[current] == 2: swap with right, decrement right only (recheck current)
+           c. If nums[current] == 1: increment current only
         """
         left, current, right = 0, 0, len(nums) - 1
         
@@ -552,14 +548,6 @@ print("Sort Colors:", nums)
 # time by eliminating half of array each iteration. Alternative: use heap for O(n log k).
 # Essential for "top K" problems where full sort is unnecessary.
 #
-# TYPICAL STEPS:
-# 1. Choose pivot and partition array
-# 2. Check pivot position against k
-# 3. If pivot at k: found answer
-# 4. If pivot > k: recurse on left side
-# 5. If pivot < k: recurse on right side
-# 6. Average case eliminates half each time → O(n)
-#
 # Applications: Kth largest/smallest, median finding, top K elements, percentile.
 # ================================================================
 
@@ -576,12 +564,13 @@ class QuickSelect:
     
     TC: O(n) average, O(n²) worst
     SC: O(1) - in-place
-    
-    How it works:
-    1. Partition array around pivot
-    2. If pivot at (n-k)th position, it's kth largest
-    3. Otherwise recurse on relevant partition
-    4. Each iteration reduces search space by ~half
+
+    Steps:
+    1. Convert kth largest to (n-k)th smallest index
+    2. Partition array around rightmost pivot, return pivot's final index
+    3. If pivot index == target k_smallest: return nums[pivot_idx]
+    4. If pivot index > k_smallest: recurse on left partition
+    5. If pivot index < k_smallest: recurse on right partition
     """
     def findKthLargest(self, nums: List[int], k: int) -> int:  # LC 215
         def partition(left, right):
@@ -638,13 +627,15 @@ class QuickSelect:
         
         TC: O(n) average with quick select
         SC: O(n) - frequency map
-        
+
         Alternative: Min heap O(n log k)
-        
-        How it works:
-        1. Count frequencies
-        2. Use quick select on unique elements by frequency
-        3. Partition by comparing frequencies
+
+        Steps:
+        1. Count frequencies of all elements using Counter
+        2. Extract list of unique elements
+        3. Partition unique elements by their frequency (instead of value)
+        4. Use quick select to find (n-k)th position by frequency
+        5. Return the last k elements (highest frequency) after partitioning
         """
         # Count frequencies
         freq_map = Counter(nums)
@@ -711,19 +702,6 @@ print("Top K Frequent (Heap):", sol.topKFrequent_heap([1,1,1,2,2,3], 2))  # [1, 
 # into buckets then sorts each. Non-comparison based, can beat O(n log n) lower bound for
 # comparison sorts. Use when range k is not too large (k = O(n)).
 #
-# TYPICAL STEPS:
-# Counting Sort:
-# 1. Find range of values [min, max]
-# 2. Create count array of size (max - min + 1)
-# 3. Count occurrences of each value
-# 4. Reconstruct sorted array from counts
-#
-# Bucket Sort:
-# 1. Create k buckets for value ranges
-# 2. Distribute elements into buckets
-# 3. Sort each bucket individually
-# 4. Concatenate all buckets
-#
 # Applications: Sort limited range integers, sort by digit, color sorting, age sorting.
 # ================================================================
 
@@ -737,11 +715,12 @@ class LinearTimeSorting:
     
     TC: O(n + k) - count occurrences + rebuild
     SC: O(k) - count array
-    
-    How it works (Counting Sort):
-    1. Count frequency of each number
-    2. Iterate through counts rebuilding sorted array
-    3. Each value appears count[value] times
+
+    Steps:
+    1. Find min and max values to determine range size
+    2. Create count array of size (max - min + 1), initialized to 0
+    3. Count occurrences of each value: count[num - min_val] += 1
+    4. Rebuild sorted array: for each index i, extend result with (i + min_val) repeated count[i] times
     """
     def countingSort(self, nums: List[int]) -> List[int]:
         if not nums:
@@ -789,11 +768,12 @@ class LinearTimeSorting:
         
         TC: O(n) - single pass
         SC: O(1) - in-place with two pointers
-        
-        How it works:
-        1. Two pointers: left (even position), right (odd position)
-        2. When left is odd and right is even, swap
-        3. Move appropriate pointer
+
+        Steps:
+        1. Initialize left=0, right=len-1
+        2. Advance left pointer until it finds an odd number
+        3. Retreat right pointer until it finds an even number
+        4. Swap nums[left] and nums[right], then move both pointers inward
         """
         left, right = 0, len(nums) - 1
         
@@ -826,13 +806,13 @@ class LinearTimeSorting:
         
         TC: O(n) - bucket sort approach
         SC: O(n) - buckets
-        
-        How it works (Bucket Sort):
-        1. Divide range into n-1 buckets
-        2. By pigeonhole principle, max gap >= bucket size
-        3. Max gap must be between buckets (not within)
-        4. Track min/max in each bucket
-        5. Find max gap between bucket max and next bucket min
+
+        Steps:
+        1. Compute min, max, and bucket_size = (max - min) // (n - 1)
+        2. Create buckets, each tracking [bucket_min, bucket_max]
+        3. Distribute each number into its bucket: idx = (num - min_val) // bucket_size
+        4. Track running prev_max starting at min_val
+        5. Iterate non-empty buckets: max_gap = max(max_gap, bucket_min - prev_max); update prev_max
         """
         if len(nums) < 2:
             return 0
@@ -899,13 +879,6 @@ print("Maximum Gap:", sol.maximumGap([3,6,9,1]))  # 3
 # one attribute, then greedily process in order. Sorting enables the greedy choice property
 # where local optimal leads to global optimal.
 #
-# TYPICAL STEPS:
-# 1. Sort input by key attribute (start time, end time, value, etc.)
-# 2. Initialize greedy variables (count, last selected, etc.)
-# 3. Iterate through sorted elements
-# 4. Make greedy choice at each step
-# 5. Update state and accumulate result
-#
 # Applications: Interval scheduling, job sequencing, fractional knapsack, meeting rooms.
 # ================================================================
 
@@ -923,14 +896,13 @@ class SortAndGreedy:
     
     TC: O(n log n) - sorting dominates
     SC: O(n) - for heap
-    
-    How it works:
+
+    Steps:
     1. Sort intervals by start time
-    2. Use min heap to track room end times
-    3. For each interval:
-       - If earliest ending room finishes before current starts: reuse
-       - Otherwise: allocate new room
-    4. Heap size = number of rooms needed
+    2. Initialize a min heap to track end times of active rooms
+    3. For each interval, if heap's earliest end time <= current start: pop (reuse room)
+    4. Push current interval's end time onto heap
+    5. Return heap size (number of rooms needed)
     """
     def minMeetingRooms(self, intervals: List[List[int]]) -> int:  # LC 253
         if not intervals:
@@ -983,17 +955,17 @@ class SortAndGreedy:
         
         TC: O(n log n) - sorting
         SC: O(1) - in-place
-        
-        How it works (Greedy by end time):
-        1. Sort by end time
-        2. Keep track of last selected interval's end
-        3. If current starts before last end: overlaps, must remove
-        4. Otherwise: select current interval
-        5. Always keep interval that ends earliest
+
+        Steps:
+        1. Sort intervals by end time (greedy: keep intervals that end earliest)
+        2. Initialize last_end = -inf, removed = 0
+        3. For each interval: if start >= last_end, keep it and update last_end = end
+        4. Otherwise overlap detected: increment removed (discard current, keep earlier-ending one)
+        5. Return removed count
         """
         if not intervals:
             return 0
-        
+
         # Sort by end time (greedy: prefer intervals that end early)
         intervals.sort(key=lambda x: x[1])
         
@@ -1037,12 +1009,12 @@ class SortAndGreedy:
         
         TC: O(m + n) - single pass
         SC: O(1) - in-place
-        
-        How it works (Merge from back):
-        1. Three pointers: p1 (end of nums1), p2 (end of nums2), p (end of result)
-        2. Compare nums1[p1] and nums2[p2]
-        3. Place larger at nums1[p]
-        4. Work backwards to avoid overwriting
+
+        Steps:
+        1. Set p1 = m-1, p2 = n-1, p = m+n-1 (three back pointers)
+        2. While both p1 and p2 >= 0: compare nums1[p1] vs nums2[p2]
+           a. Place the larger value at nums1[p], decrement that pointer and p
+        3. Copy any remaining nums2 elements into nums1[:p2+1]
         """
         p1 = m - 1  # Last element in nums1
         p2 = n - 1  # Last element in nums2
@@ -1103,13 +1075,6 @@ print("Merge Sorted Array:", nums1)  # [1,2,2,3,5,6]
 # - O(1) space requirement mentioned
 # - Numbers "should" map to indices
 #
-# TYPICAL STEPS:
-# 1. Iterate through array
-# 2. For each position, check if current number is at correct index
-# 3. If not, swap it to its correct position
-# 4. Keep swapping until current position has correct number or can't swap
-# 5. Second pass finds anomalies (missing, duplicate, etc.)
-#
 # Applications: Find missing number, find duplicate, first missing positive,
 # find all duplicates, find all missing numbers.
 # ================================================================
@@ -1126,13 +1091,13 @@ def findDuplicates(nums: List[int]) -> List[int]: # LC 442
     
     TC: O(n) - each number swapped at most once to correct position
     SC: O(1) - only swap operations, output doesn't count
-    
-    How it works:
-    1. Each number should be at index (number - 1)
-    2. Swap numbers to correct positions using cyclic sort
-    3. After sorting, duplicates will be where incorrect numbers remain
-    4. If nums[i] != i+1, then nums[i] is a duplicate
-    
+
+    Steps:
+    1. Iterate with pointer i; compute correct_idx = nums[i] - 1
+    2. If nums[i] != nums[correct_idx]: swap nums[i] with nums[correct_idx] (don't advance i)
+    3. Otherwise advance i (already correct or duplicate found at target)
+    4. Second pass: for each i, if nums[i] != i+1, append nums[i] to result
+
     Why this problem: Best demonstrates cyclic sort core concept. Shows how
     to leverage the [1,n] range property to achieve O(1) space solution.
     """
@@ -1168,19 +1133,6 @@ print("Find Duplicates:", findDuplicates([4,3,2,7,8,2,3,1]))  # [3, 2]
 # internal order that must be preserved. Common in divide-and-conquer sorting and external
 # sorting. Key: compare current elements from each sequence and pick smallest.
 #
-# TYPICAL STEPS:
-# For 2 arrays:
-# 1. Two pointers, one for each array
-# 2. Compare current elements
-# 3. Add smaller to result, advance pointer
-# 4. Copy remaining elements
-#
-# For K arrays:
-# 1. Min heap with (value, array_idx, element_idx)
-# 2. Pop minimum, add to result
-# 3. Push next element from same array
-# 4. Repeat until heap empty
-#
 # Applications: Merge sort, merge k sorted lists/arrays, external sorting.
 # ================================================================
 
@@ -1199,13 +1151,13 @@ class MergeSorted:
     
     TC: O(n log k) where n = total nodes, k = number of lists
     SC: O(k) - heap size
-    
-    How it works:
-    1. Use min heap with (value, list_index, node)
-    2. Initially add head of each list
-    3. Pop minimum, add to result
-    4. Push next node from same list
-    5. Repeat until heap empty
+
+    Steps:
+    1. Push (node.val, list_index, node) for each non-null head into min heap
+    2. Pop the minimum (val, i, node), attach node to result linked list
+    3. If node.next exists, push (node.next.val, i, node.next) into heap
+    4. Repeat until heap is empty
+    5. Return dummy.next as the merged list head
     """
     def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]:  # LC 23
         if not lists:
@@ -1264,17 +1216,18 @@ class MergeSorted:
         
         TC: O(n log n) - sorting
         SC: O(n) - output
-        
-        How it works:
+
+        Steps:
         1. Sort intervals by start time
-        2. For each interval:
-           - If overlaps with last merged: extend last
-           - Otherwise: add as new interval
-        3. Overlap check: current.start <= last.end
+        2. Initialize merged list with the first interval
+        3. For each subsequent interval: check if start <= merged[-1][1] (overlap)
+           a. If overlap: extend last interval's end to max(last_end, current_end)
+           b. If no overlap: append current interval as new entry
+        4. Return merged list
         """
         if not intervals:
             return []
-        
+
         # Sort by start time
         intervals.sort(key=lambda x: x[0])
         
@@ -1326,12 +1279,12 @@ class MergeSorted:
         
         TC: O(k log n) where n = number of rows
         SC: O(n) - heap size
-        
-        How it works (Merge k sorted arrays):
-        1. Treat each row as sorted array
-        2. Min heap with (value, row, col)
-        3. Initially add first element of each row
-        4. Pop k times, each time adding next in same row
+
+        Steps:
+        1. Push (matrix[r][0], r, 0) for the first element of each row into min heap
+        2. Pop the minimum (val, r, c) exactly k times
+        3. After each pop, if c+1 < n push (matrix[r][c+1], r, c+1) from same row
+        4. The value from the kth pop is the answer
         """
         n = len(matrix)
         heap = []
@@ -1392,15 +1345,6 @@ print("Kth Smallest in Matrix:", sol.kthSmallest([[1,5,9],[10,11,13],[12,13,15]]
 # finding pairs, triplets, or subarrays with specific sum/property. Sorting creates order
 # that allows strategic pointer movement.
 #
-# TYPICAL STEPS:
-# 1. Sort array
-# 2. Initialize two pointers (both ends or same start)
-# 3. While pointers valid:
-#    a. Check current pair/window
-#    b. If condition met: record result
-#    c. Move pointer(s) based on comparison with target
-# 4. Return accumulated results
-#
 # Applications: Two sum, three sum, closest sum, container with most water.
 # ================================================================
 
@@ -1414,14 +1358,15 @@ class SortTwoPointers:
     
     TC: O(n²) - O(n log n) sort + O(n²) two pointers
     SC: O(1) excluding output
-    
-    How it works:
-    1. Sort array
-    2. Fix first element, use two pointers for remaining
-    3. If sum = 0: found triplet
-    4. If sum < 0: move left pointer right
-    5. If sum > 0: move right pointer left
-    6. Skip duplicates to avoid duplicate triplets
+
+    Steps:
+    1. Sort nums
+    2. Fix index i; skip i if nums[i] == nums[i-1] (duplicate)
+    3. Set left = i+1, right = len-1, target = -nums[i]
+    4. While left < right: compute nums[left] + nums[right]
+       a. If sum == target: record triplet, skip duplicate left/right values, move both pointers
+       b. If sum < target: left++
+       c. If sum > target: right--
     """
     def threeSum(self, nums: List[int]) -> List[List[int]]:  # LC 15
         nums.sort()
@@ -1490,11 +1435,13 @@ class SortTwoPointers:
         
         TC: O(n²)
         SC: O(1)
-        
-        How it works:
-        1. Similar to three sum
-        2. Track closest sum seen so far
-        3. Update closest when current sum is closer to target
+
+        Steps:
+        1. Sort nums; initialize closest = infinity
+        2. Fix index i; set left = i+1, right = len-1
+        3. Compute current_sum = nums[i] + nums[left] + nums[right]
+        4. If |current_sum - target| < |closest - target|: update closest
+        5. If current_sum < target: left++; if > target: right--; if exact: return target
         """
         nums.sort()
         closest = float('inf')
@@ -1532,12 +1479,12 @@ class SortTwoPointers:
         
         TC: O(n) - single pass with two pointers
         SC: O(1)
-        
-        How it works:
-        1. Two pointers at both ends
-        2. Calculate area with current pair
-        3. Move pointer with shorter height inward
-        4. Why? Moving taller doesn't help (limited by shorter)
+
+        Steps:
+        1. Initialize left=0, right=len-1, max_area=0
+        2. While left < right: area = (right - left) * min(height[left], height[right])
+        3. Update max_area if current area is larger
+        4. Move the pointer with the shorter height inward (moving the taller can't improve area)
         """
         left, right = 0, len(height) - 1
         max_area = 0

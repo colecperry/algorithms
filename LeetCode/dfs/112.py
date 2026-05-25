@@ -16,8 +16,8 @@
 #         11 x  13    4
 #        /  \          \
 #       7    2 x        1
-#
-#
+
+
 # Input: root = [5,4,8,11,null,13,4,7,2,null,null,null,1], targetSum = 22
 # Output: true
 # Explanation: The root-to-leaf path with the target sum is shown.
@@ -57,7 +57,7 @@ class Solution:
         - NOTE: If we have only a left child or right child, we recurse and hit Base Case 1
         """
         # Base Case 1
-        if not root: # Empty Tree
+        if not root: # Empty Tree -> Prev node not a leaf b/c base case 2 didn't hit
             return False
         
         # Base Case 2

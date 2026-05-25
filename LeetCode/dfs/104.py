@@ -1,47 +1,8 @@
-#104 - Maximum Depth of Binary Tree
+# 104 - Maximum Depth of Binary Tree
 
 # Given the root of a binary tree, return its maximum depth.
 
 # A binary tree's maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.
-
-# How to Solve
-# Solution 1: Recursive DFS
-    # Make base case -> Stop the recursion when we reach an empty node and return 0
-    # Recursively call the left and right children
-    # Return the current node (1) plus the max depth of left and right children to caller
-
-# Example walk through
-# maxDepth(3)	Calls maxDepth(9)
-# maxDepth(9)	Calls maxDepth(None) (returns 0)
-# maxDepth(9)	Calls maxDepth(None) (returns 0)
-# maxDepth(9)	Computes 1 + max(0, 0) = 1, returns 1
-# maxDepth(3)	Calls maxDepth(20)
-# maxDepth(20)	Calls maxDepth(15)
-# maxDepth(15)	Calls maxDepth(None) (returns 0)
-# maxDepth(15)	Calls maxDepth(None) (returns 0)
-# maxDepth(15)	Computes 1 + max(0, 0) = 1, returns 1
-# maxDepth(20)	Calls maxDepth(7)
-# maxDepth(7)	Calls maxDepth(None) (returns 0)
-# maxDepth(7)	Calls maxDepth(None) (returns 0)
-# maxDepth(7)	Computes 1 + max(0, 0) = 1, returns 1
-# maxDepth(20)	Computes 1 + max(1, 1) = 2, returns 2
-# maxDepth(3)	Computes 1 + max(1, 2) = 3, returns 3 (Final Answer)
-
-# Time complexity: O(n): each node is visited once
-# Space complexity: O(h): height of the tree, worst case O(n) for skewed tree: This is due to the recursion call stack, which stores function calls during the recursive traversal.
-
-# Solution 2: BFS: 
-# Big idea: Create a deque and start with the root as the only element, process each level by popping off that element and adding it's children
-
-# Handle edge case if root is None
-# Initialize variable to count the tree levels and a deque to insert children nodes
-# Loop until the deque is empty
-# Loop over each element in the deque
-    # Pop off the node (popleft() for a queue since it's FIFO
-    # Add left and right children nodes if they exist
-# Increment the level
-
-# Solution 3: Iterative DFS
 
 # Example 1:
 #                3
@@ -64,17 +25,21 @@
 # Input: root = [1,null,2]
 # Output: 2
 
+from collections import deque
+
 class TreeNode(object):
     def __init__(self, val=0, left=None, right=None):
         self.val = val
         self.left = left
         self.right = right
 
-from collections import deque
-
 class Solution(object):
     # Recursive DFS
     def maxDepth1(self, root):
+        """
+        - TC: O(n) — visit each node once
+        - SC: O(h) — call stack depth equals tree height → O(log n) balanced, O(n) worst case skewed
+        """
         if not root: # Base case
             return 0
         
@@ -84,40 +49,30 @@ class Solution(object):
 
         return 1 + max(left_depth, right_depth) # Take max of both children and add one for current node
 
-    # BFS
+    # Iterative DFS
     def maxDepth2(self, root):
+        """
+        TC: O(n) -> visit each node once
+        SC: O(h) -> stack holds at most h nodes
+                -> O(log n) balanced, O(n) worst case skewed
+        """
         if not root:
             return 0
-        
-        level = 0 # Store the levels of the tree
-        q = deque([root]) # Create a doubly ended queue
 
-        while q: # While the deque is not empty
-
-            for i in range(len(q)): # It for each ele in deque
-                node = q.popleft() # Pop the node off the deque
-                if node.left: # Check if it has a left child
-                    q.append(node.left) # Append to the deque
-                if node.right:
-                    q.append(node.right)
-            
-            level += 1 # Increment the level
-        
-        return level
-
-    # Iterative DFS
-    def maxDepth3(self, root):
-        stack = [[root, 1]]
-        res = 1
+        stack = [(root, 1)]  # (node, depth at this node)
+        max_depth = 0
 
         while stack:
             node, depth = stack.pop()
 
-            if node:
-                res = max(res, depth)
-                stack.append([node.left, depth + 1])
-                stack.append([node.right, depth + 1])
-        return res
+            max_depth = max(max_depth, depth)  # Is this the deepest node we've seen?
+
+            if node.left:
+                stack.append((node.left, depth + 1))   # Go deeper left
+            if node.right:
+                stack.append((node.right, depth + 1))  # Go deeper right
+
+        return max_depth
 
 
 my_solution = Solution()

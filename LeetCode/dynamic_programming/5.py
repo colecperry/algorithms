@@ -15,7 +15,7 @@
 class Solution:
     def longestPalindrome(self, s: str) -> str:
         """
-        - TC: O(n^2) -> outer loop iterates from 2 to n, inner loop iteraes through valid start positons (O(n) worst case), each loop does O(1) work
+        - TC: O(n^2) -> outer loop iterates from 2 to n, inner loop iterates through valid start positons (O(n) worst case), each loop does O(1) work
         - SC: O(n^2) -> dp table is n x n
         """
         n = len(s)
@@ -28,15 +28,15 @@ class Solution:
         start_pos = 0 # starting pos of the longest palindrome (track for output)
 
         for length in range(2, n + 1):  # lengths from 2 to n (valid palindrome lengths)
-            for i in range(n - length + 1): # all valid start positions
-                j = i + length - 1 # string ending pos
+            for start in range(n - length + 1): # num of valid start positions
+                end = start + length - 1 # string ending pos
 
                 # check: characters match AND (inner string is palindrome OR length is 2)
-                if s[i] == s[j] and (length == 2 or dp[i + 1][j - 1]):
-                    dp[i][j] = True # if we find palindrome
+                if s[start] == s[end] and (length == 2 or dp[start + 1][end - 1]):
+                    dp[start][end] = True # if we find palindrome
                     if length > max_length: # check if it's longer
                         max_length = length # update result
-                        start_pos = i
+                        start_pos = start
                 
         return s[start_pos : start_pos + max_length] # return longest palindrome
     

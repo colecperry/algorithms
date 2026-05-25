@@ -4,24 +4,6 @@
 
 # Given a string s, return true if it is a palindrome, or false otherwise.
 
-# How to solve: 
-    # Method 1: Generator expression + .join method + reversed method
-    # Use a generator expression which is a consise and efficient way to create an iterator in python (generator = (expression for item in iterable if condition))
-    # Use the .join method to concatenate elements of an iterable. '' is the seperator
-    # Use a generator expression + the join method to clean the string
-    # Get a reversed string of the clean string: The reversed() function takes an iterable (like a string, list, or tuple) and returns an iterator that yields the elements in reverse order.
-    # Compare the two elements, if they are the same it is a palindrome
-
-    # Method 2: Two pointer
-    # Create left and right pointer
-    # Create a while loop
-        # Check if left and right are alphanumeric, if not move right and left pointers
-        # If they are both alphanumeric, compare them
-            # If equal, move both pointers
-            # If not equal, return False
-            # Once we get to where l = r, return True
-
-
 # Example 1: Input: s = "A man, a plan, a canal: Panama"
 # Output: true
 # Explanation: "amanaplanacanalpanama" is a palindrome.
@@ -36,12 +18,11 @@
 # Since an empty string reads the same forward and backward, it is a palindrome.
 
 class Solution(object):
-    def isPalindrome(self, s):
-        clean_string = ''.join(char.lower() for char in s if char.isalnum()) # Use a generator expression and join method
-        reversed_string = ''.join(reversed(clean_string))
-        return clean_string == reversed_string
-    
-    def isPalindrome2(self, s):
+    """
+    - TC: O(n)
+    - SC: O(1)
+    """
+    def isPalindrome(self, s): # 0(1) space
         l, r = 0, len(s) - 1 # Create left and right pointers
         while l < r:
             # Skip non-alphanumeric characters
@@ -55,7 +36,7 @@ class Solution(object):
             else: # If they are equal move pointers
                 l += 1
                 r -= 1
-        return True
+        return True # if l meets r all chars were equal
 
 
 solution = Solution()

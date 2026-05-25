@@ -19,19 +19,26 @@
 # Explanation: The answer is "wke", with the length of 3.
 # Notice that the answer must be a substring, "pwke" is a subsequence and not a substring.
 
+
 class Solution:
+    """
+    - TC: O(n) -> right pointer visits each character once, left pointer never exceeds right
+    - SC: O(n) -> set stores at most n characters in the worst case
+    """
     def lengthOfLongestSubstring(self, s: str) -> int:
         left = 0
-        seen = set()
+        seen = set()  # Characters currently in the window
         longest = 0
+
         for right in range(len(s)):
-            while s[right] in seen:
+            while s[right] in seen:  # Duplicate found — shrink window from left until it's gone
                 seen.remove(s[left])
                 left += 1
-            seen.add(s[right])
-            longest = max(longest, right - left + 1)
+            
+            seen.add(s[right])  # Window is valid — add new character
+            longest = max(longest, right - left + 1)  # Is this window the longest we've seen?
+
         return longest
-        
 
 sol = Solution()
 print(sol.lengthOfLongestSubstring("abcabcbb"))

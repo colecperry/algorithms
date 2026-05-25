@@ -5,8 +5,7 @@ BUCKET SORT COMPLETE GUIDE
 
 WHAT IS BUCKET SORT?
 --------------------
-Bucket sort distributes elements into buckets based on some property (frequency, value range, etc.),
-then processes buckets in order. It achieves O(n) time by avoiding comparison-based sorting.
+Bucket sort distributes elements into buckets based on some property (frequency, value range, etc.), then processes buckets in order. It achieves O(n) time by avoiding comparison-based sorting.
 
 Key Insight:
 - Use array index as implicit sorting mechanism

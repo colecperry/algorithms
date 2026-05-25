@@ -16,12 +16,21 @@
 # Input: head = [1,2], n = 1
 # Output: [1]
 
+# Example 4:
+# Input: head = [1,2,3], n = 3
+# Output: [2,3]
+
 class ListNode(object):
     def __init__(self, val=0, next=None):
         self.val = val
         self.next = next
 
 class Solution(object):
+    """
+    - TC: O(n) -> iterate over every node
+    - SC: O(1)
+    - NOTE: Always use a dummy node any time you might need to remove or insert at the head of a linked list - it takes away the edge cases (your pointer needs to land before the head)
+    """
     def removeNthFromEnd(self, head, n):
         dummy = ListNode(0, head)  # Handles edge case of removing head
         slow, fast = dummy, dummy
@@ -58,11 +67,18 @@ solution = Solution()
 solution.removeNthFromEnd(head1, 2)
 print_linked_list(head1)  # Expected Output: 1 -> 2 -> 3 -> 5
 
+# Edge Case 1: Single node list
 head2 = ListNode(1)
 solution.removeNthFromEnd(head2, 1)
 print_linked_list(head2)   # Expected Output: []
 
+# Edge Case 2: Two Node list, remove last node
 head3 = ListNode(1, (ListNode(2, None)))
 solution.removeNthFromEnd(head3, 1)
 print_linked_list(head3)   # Expected Output: []
+
+# Edge Case 4: Remove the head node
+head4 = ListNode(1, (ListNode(2, ListNode(3, None))))
+solution.removeNthFromEnd(head4, 3)
+print_linked_list(head4)   # Expected Output: [2,3]
 

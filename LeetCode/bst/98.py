@@ -11,17 +11,17 @@
 # Both the left and right subtrees must also be binary search trees.
 
 # Ex. 1
-#
+
 #            2
 #          /   \
 #         /     \
 #        1       3
-#
+
 # Input: root = [2,1,3]
 # Output: true
 
 # Ex. 2
-#
+
 #            5
 #          /   \
 #         /     \
@@ -29,28 +29,10 @@
 #               / \
 #              /   \
 #             3     6
-# 
+
 # Input: root = [5,1,4,null,null,3,6]
 # Output: false
 # Explanation: The root node's value is 5 but its right child's value is 4.
-
-# BST Pattern 1: BST Validation using In-order Traversal Property
-# Key insight: In-order traversal on a valid BST builds a strictly increasing array
-
-# APPROACH:
-    # 1. Perform in-order traversal to collect all node values in order
-    # 2. Check if resulting array is strictly increasing (no duplicates, no decreasing values)
-    # 3. Return True if strictly increasing, False otherwise
-
-# INORDER + ARRAY SOLUTION:
-    # - Traversal: DFS in-order to build sorted array from BST
-    # - Validation: Check if array[i] > array[i-1] for all consecutive pairs
-    # - TC: O(n) - visit each node once + O(n) array validation = O(n) total
-    # - SC: O(n) for array storage + O(h) for recursion stack = O(n) total
-
-# KEY INSIGHT: 
-# Valid BST property: In-order traversal produces strictly increasing sequence
-# Invalid BST indicators: Duplicates or decreasing values in in-order sequence
 
 from typing import Optional
 
@@ -61,61 +43,46 @@ class TreeNode:
         self.left = left
         self.right = right
 class Solution:
-    def isValidBST(self, root: Optional[TreeNode]) -> bool: # O(n) Space
-        arr = [] # In order traversal on a BST builds a sorted array of strictly increasing values (no dupliates)
-        def dfs(root):
-            if not root:
-                return 
-            dfs(root.left)
-            arr.append(root.val)
-            dfs(root.right)
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        """
+        TC: O(n) -> visit each node once for DFS + O(n) for validation loop = O(n)
+        SC: O(n) -> arr stores all n node values
+        """
+        arr = []
+
+        def dfs(node):
+            if not node:
+                return
+            dfs(node.left)
+            arr.append(node.val)  # In-order appends values in sorted order for a valid BST
+            dfs(node.right)
+
         dfs(root)
-        
-        # Check if the array is sorted -> don't use sorted() because it includes duplicates
-        for i in range(1, len(arr)): 
-            if arr[i] <= arr[i - 1]: # If curr val is less than or equal to the prev value, array is not sorted
+
+        # A valid BST's in-order traversal produces strictly increasing values
+        for i in range(1, len(arr)):
+            if arr[i] <= arr[i - 1]:  # Equal values also invalid — BST requires strictly increasing
                 return False
+
         return True
     
-    # BST Pattern 6: Top Down Context Passing
-
-    # APPROACH:
-    # 1. Pass valid range bounds (min, max) down to each node during traversal
-    # 2. Check if current node value violates its inherited bounds
-    # 3. Update bounds for children: left gets (min, node.val), right gets (node.val, max)
-    # 4. Return True only if current node is valid AND both subtrees are valid
-
-    # BOUNDS CHECKING SOLUTION:
-        # - Traversal: DFS with min/max bounds passed down to each recursive call
-        # - Validation: Each node checks if node.val is within (min_val, max_val) range
-        # - TC: O(n) - visit each node once with constant time bound checks
-        # - SC: O(h) for recursion stack only, no extra array storage needed
-
-    # KEY INSIGHT: 
-    # Valid BST property: Each node must satisfy bounds inherited from ancestors
-    # Left child bounds: (ancestor_min, parent_val), Right child bounds: (parent_val, ancestor_max)
-    # Validation happens during traversal, eliminating need for array storage
-    
-    def isValidBSTBounds(self, root: Optional[TreeNode]) -> bool: # O(1) Space
+    def isValidBSTBounds(self, root: Optional[TreeNode]) -> bool:
         """
-        Validate BST using bounds checking - O(1) extra space
-        Time: O(n), Space: O(h) recursion stack only
+        TC: O(n) -> visit each node once
+        SC: O(h) -> call stack depth equals tree height
+                 -> O(log n) balanced, O(n) worst case skewed
         """
-        def validate(node, min_val, max_val):
-            if not node: # Base case -> an empty node is a valid BST, we reached the end of the path
+        def pre_order(node, min, max):
+            if not node:  # Reached end without violation
                 return True
-            
-            # Check if current node violates BST property
-            if node.val <= min_val or node.val >= max_val:
+            if node.val <= min or node.val >= max:  # Bounds violated — not a valid BST
                 return False
-            
-            # Recursively validate subtrees with updated bounds:
-                # between -inf and node.val for left subtree
-                # between node.val and inf for right subtree
-            return (validate(node.left, min_val, node.val) and 
-                    validate(node.right, node.val, max_val)) # Both subtrees must return True for the subtree to be a valid BST
-        
-        return validate(root, float('-inf'), float('inf')) # Pass in inf bounds for the root node
+            left_is_valid = pre_order(node.left, min, node.val)   # Left child must be < current node
+            right_is_valid = pre_order(node.right, node.val, max) # Right child must be > current node
+
+            return left_is_valid and right_is_valid  # Both subtrees must be valid
+
+        return pre_order(root, float('-inf'), float('inf'))  # Root has no constraints yet
     
 #            2
 #          /   \

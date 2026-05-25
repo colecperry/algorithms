@@ -131,12 +131,6 @@ PATTERN 1: FIND INSERTION POSITION
 
 PATTERN EXPLANATION: Find index where target should be inserted to maintain sorted order. When binary search completes without finding target, left pointer naturally points to correct insertion position. This works because left tracks the smallest index where nums[index] >= target.
 
-TYPICAL STEPS:
-1. Initialize left=0, right=len(nums)-1
-2. Binary search as normal
-3. If target found, return its index
-4. If not found, return left (insertion position)
-
 Why left is insertion position:
 - Think of left as: "first position I haven't ruled out yet"
 - [1, 3, 5, 7], target = 4
@@ -160,6 +154,12 @@ class InsertionPositionPattern:
     Example 1:
         Input: nums = [1,3,5,6], target = 5
         Output: 2
+
+    Steps:
+    1. Initialize left=0, right=len(nums)-1
+    2. Binary search as normal
+    3. If target found, return its index
+    4. If not found, return left (insertion position)
     """
     def searchInsert(self, nums: List[int], target: int) -> int: # LC 35
         """
@@ -202,16 +202,6 @@ The break point can only be in one half — the other half is guarenteed to be s
     Left half:  [4, 5, 6, 7]  ← no break, sorted ✓
     Right half: [7, 0, 1, 2]  ← break is here, not sorted ✗
 
-TYPICAL STEPS:
-1. Compare nums[left] with nums[mid] to identify sorted half
-2. If left half sorted (nums[left] <= nums[mid]):
-   - Check if target in range [nums[left], nums[mid]]
-   - If yes: search left, if no: search right
-3. If right half sorted (nums[mid] <= nums[right]):
-   - Check if target in range [nums[mid], nums[right]]
-   - If yes: search right, if no: search left
-4. Repeat until found or exhausted
-
 Applications: Search rotated sorted array, find minimum in rotated array.
 ================================================================
 """
@@ -223,6 +213,16 @@ class RotatedArrayPattern:
     Example 1:
     - Input: nums = [4,5,6,7,0,1,2], target = 0
     - Output: 4
+
+    Steps:
+    1. Compare nums[left] with nums[mid] to identify sorted half
+    2. If left half sorted (nums[left] <= nums[mid]):
+       a. Check if target in range [nums[left], nums[mid]]
+       b. If yes: search left, if no: search right
+    3. If right half sorted (nums[mid] <= nums[right]):
+       a. Check if target in range [nums[mid], nums[right]]
+       b. If yes: search right, if no: search left
+    4. Repeat until found or exhausted
     """
     def search(self, nums: List[int], target: int) -> int: # LC 33
         """
@@ -284,14 +284,6 @@ PATTERN EXPLANATION: Instead of searching in a given array, search a range of
 possible answers. Define min and max possible answers, then binary search to 
 find the smallest or largest value that satisfies a condition. Use helper function to test if candidate answer satisfies constraints. Common in "minimize maximum" or "maximize minimum" problems.
 
-TYPICAL STEPS:
-1. Define answer range: [min_answer, max_answer]
-2. Write is_valid(candidate) helper that checks if candidate works
-3. Binary search on range:
-   - If candidate valid: save it, try to optimize (smaller or larger)
-   - If invalid: adjust search direction
-4. Return best valid answer found
-
 Applications: Capacity to ship packages, koko eating bananas, split array, minimize max.
 ================================================================
 """
@@ -311,17 +303,15 @@ class AnswerSpacePattern:
     Input: piles = [3,6,7,11], h = 8
     Output: 4
     
-    How it works:
-    1. Answer range: [1, max(piles)]
-        - Minimum speed: 1 banana/hour
-        - Maximum speed: max(piles) (eat largest pile in 1 hour)
-    2. For each candidate speed, calculate total hours needed to finish all bananas
-    3. Binary search to find minimum speed that works
-    
-    Why binary search on speed:
-    - If speed K works, all speeds > K also work (monotonic)
-    - Want minimum K, so when K works, try smaller
-    - When K doesn't work, try larger
+    Steps:
+    1. Define answer range: [1, max(piles)]
+       a. Minimum speed: 1 banana/hour
+       b. Maximum speed: max(piles) (eat largest pile in 1 hour)
+    2. Write can_finish(speed) helper that calculates total hours needed and checks if <= h
+    3. Binary search on speed range:
+       a. If can_finish(mid): save mid as result, try smaller (right = mid - 1)
+       b. If not can_finish(mid): speed too slow, search larger (left = mid + 1)
+    4. Return best valid speed found
     """
     def minEatingSpeed(self, piles: List[int], h: int) -> int: # LC 875
         """
@@ -382,15 +372,6 @@ print("Min eating speed:", sol.minEatingSpeed([30,11,23,4,20], 5))  # 30
 PATTERN 4: SEARCH IN 2D MATRIX (FLATTENED SEARCH)
 PATTERN EXPLANATION: Treat 2D sorted matrix as flattened 1D array. Convert between 1D index and 2D coordinates to apply standard binary search. Works when matrix is sorted row by row and each row's first element is greater than previous row's last element.
 
-TYPICAL STEPS:
-1. Treat matrix as 1D array with rows*cols elements
-2. Binary search on range [0, rows*cols - 1]
-3. For each mid:
-   - Convert to 2D: row = mid // cols, col = mid % cols
-   - Access value: matrix[row][col]
-   - Compare and update search bounds
-4. Return true if found, false otherwise
-
 Applications: 2D matrix search, grid search with sorted property.
 ================================================================
 """
@@ -401,11 +382,15 @@ class MatrixSearchPattern:
     - Each row sorted in ascending order
     - First integer of each row > last integer of previous row
     
-    How it works:
-    1. Conceptually flatten matrix into 1D sorted array
-    2. Apply binary search on flattened representation
-    3. Convert 1D index back to 2D coordinates for access
-    
+    Steps:
+    1. Treat matrix as 1D array with rows*cols elements
+    2. Binary search on range [0, rows*cols - 1]
+    3. For each mid:
+       a. Convert to 2D: row = mid // cols, col = mid % cols
+       b. Access value: matrix[row][col]
+       c. Compare and update search bounds
+    4. Return true if found, false otherwise
+
     Key conversions:
     - Total elements: rows * cols
     - 1D index to 2D: row = index // cols, col = index % cols
@@ -475,11 +460,6 @@ print("Matrix search:", sol.searchMatrix([[1,3,5,7],[10,11,16,20],[23,30,34,60]]
 PATTERN 5: FIND PEAK ELEMENT (ELIMINATION LOGIC)
 PATTERN EXPLANATION: Find peak in unsorted array using comparison with neighbor to eliminate half the search space. Even without global sorting, local comparisons reveal which direction guarantees a peak. If slope increases (mid < mid+1), peak must be to right. If slope decreases (mid > mid+1), peak is at mid or to left.
 
-    How it works:
-    1. Compare mid with mid+1 to determine slope
-    2. If mid < mid+1 (going up): search right — peak must be ahead
-    3. If mid > mid+1 (going down): search left — peak is at mid or behind
-    
     Why this works:
     - A peak exists somewhere (boundaries are -∞)
     - Follow the upward slope — it must eventually turn down or hit a boundary
@@ -499,6 +479,12 @@ class PeakElementPattern:
     - Input: nums = [1,2,3,1]
     - Output: 2
     - Explanation: 3 is a peak element and your function should return the index number 2.
+
+    Steps:
+    1. Compare nums[mid] with nums[mid+1] to determine slope direction
+    2. If nums[mid] < nums[mid+1] (going up): peak must be to the right, set left = mid + 1
+    3. If nums[mid] > nums[mid+1] (going down): peak is at mid or to the left, set right = mid
+    4. When left == right, return left as the peak index
     """
     def findPeakElement(self, nums: List[int]) -> int: # LC 162
         """

@@ -31,16 +31,15 @@ class Solution:
         stack = []
         
         for char in s:
-            if char in bracket_map:  # Opening bracket
-                stack.append(char) # Add it to the stack
-            else:  # Closing bracket
-                if not stack: # Nothing to match with -> closing w/o opening
+            if char in bracket_map: # opening bracket
+                stack.append(char)
+            else: # closing bracket
+                if not stack: # nothing to match with
                     return False
-                opening = stack.pop()
-                if bracket_map[opening] != char:  # Check if mismatch
+                if bracket_map[stack.pop()] != char: # mismatch
                     return False
         
-        return len(stack) == 0  # True if all brackets matched
+        return len(stack) == 0
 
 s1 = "()"
 s2 = "()[]{}"

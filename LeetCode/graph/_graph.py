@@ -25,6 +25,72 @@ Common graph types:
 - Cyclic vs Acyclic (DAG) -> has cycles vs no cycles
 - Connected vs Disconnected -> every node can reach every other node vs isolated
 
+================================================================
+ADJACENCY LIST QUICK REFERENCE
+================================================================
+Most graph problems give you edges and you need to build an adjacency list.
+This is a quick template for the most common patterns.
+"""
+
+# ================================================================
+# PATTERN 1: UNDIRECTED GRAPH (Most Common)
+# ================================================================
+def build_undirected_graph(n, edges):
+    """
+    Input: n = 5, edges = [[0,1], [1,2], [2,3], [3,4]]
+    Output: {0:[1], 1:[0,2], 2:[1,3], 3:[2,4], 4:[3]}
+    
+    Use when: "bidirectional", "connected", "can go both ways"
+    """
+    # Method 1: defaultdict (cleaner)
+    from collections import defaultdict
+    graph = defaultdict(list)
+    for u, v in edges:
+        graph[u].append(v)
+        graph[v].append(u)  # Add BOTH directions
+    return graph
+    
+    # Method 2: Regular dict (if you need to handle isolated nodes)
+    graph = {i: [] for i in range(n)}  # Initialize all nodes
+    for u, v in edges:
+        graph[u].append(v)
+        graph[v].append(u)
+    return graph
+
+# ================================================================
+# PATTERN 2: DIRECTED GRAPH
+# ================================================================
+def build_directed_graph(n, edges):
+    """
+    Input: n = 5, edges = [[0,1], [1,2], [2,3], [3,4]]
+    Output: {0:[1], 1:[2], 2:[3], 3:[4], 4:[]}
+    
+    Use when: "directed", "prerequisite", "one-way", "parent->child"
+    """
+    from collections import defaultdict
+    graph = defaultdict(list)
+    for u, v in edges:
+        graph[u].append(v)  # Only ONE direction
+    return graph
+
+# ================================================================
+# PATTERN 3: WEIGHTED GRAPH
+# ================================================================
+def build_weighted_graph(n, edges):
+    """
+    Input: n = 3, edges = [[0,1,5], [1,2,3], [0,2,10]]
+    Output: {0:[(1,5), (2,10)], 1:[(0,5), (2,3)], 2:[(1,3), (0,10)]}
+    
+    Use when: edges have weights/costs/distances
+    """
+    from collections import defaultdict
+    graph = defaultdict(list)
+    for u, v, weight in edges:
+        graph[u].append((v, weight))  # Store as tuple
+        graph[v].append((u, weight))  # Undirected
+    return graph
+
+"""
 GRAPH CORE TEMPLATES
 ====================
 """
@@ -282,14 +348,7 @@ PATTERN 1: CONNECTED COMPONENTS (DFS/BFS)
 
 PATTERN EXPLANATION: Find separate groups of connected nodes. Run DFS/BFS from each unvisited node to mark its entire group. The number of times you start DFS/BFS = the number of groups (components).
 
-TYPICAL STEPS:
-1. Initialize visited tracking (set or array)
-2. Initialize component count
-3. For each unvisited node:
-   - Increment component count (found new component)
-   - Run DFS/BFS to mark all connected nodes as visited
-4. Return component count or component assignments
-
+#
 Applications: Friend circles, network connectivity, island counting, clustering.
 ================================================================
 """
@@ -308,11 +367,12 @@ class ConnectedComponents:
     ]
     - Output: 2
     
-    How it works:
-    1. Treat each city as a node in the graph
-    2. For each unvisited city, start DFS to explore entire province
-    3. Mark all reachable cities in same province as visited
-    4. Each new starting city represents a new province
+    Steps:
+    1. Treat each city as a node, using the isConnected matrix as an adjacency list
+    2. For each unvisited city, increment the province count (new component found)
+       a. Run DFS from that city, marking it as visited
+       b. For each neighboring city with isConnected[city][neighbor] == 1, recurse if unvisited
+    3. Return the total province count
     """
     def findCircleNumDFS(self, isConnected: List[List[int]]) -> int: # LC 547
         """
@@ -388,16 +448,7 @@ PATTERN 2: BFS SHORTEST PATH (UNWEIGHTED)
 
 PATTERN EXPLANATION: Find the shortest path (minimum steps/distance) from a source to a target in an unweighted graph. BFS guarantees the shortest path because it explores nodes level by level - the first time we reach the target is always via the shortest route.
 
-TYPICAL STEPS:
-1. Initialize queue with (node, distance) starting at 0
-2. Mark starting node as visited
-3. While queue not empty:
-   - Pop current node and distance
-   - If reached target, return distance
-   - Explore all unvisited neighbors
-   - Add neighbors to queue with distance + 1
-4. If target never reached, return -1
-
+#
 Applications: Minimum steps/transformations, shortest path in graphs, word ladders, state space search.
 ================================================================
 """
@@ -414,11 +465,14 @@ class BFSShortestPath:
     - Output: 2
     - Explanation: AACCGGTT → AACCGGTA → AAACGGTA
     
-    How it works:
-    1. Treat each gene as a node in an implicit graph
-    2. Two genes are connected if they differ by exactly 1 character
-    3. Use BFS to find shortest path (minimum mutations)
-    4. Only genes in the bank are valid intermediate steps
+    Steps:
+    1. Return -1 immediately if endGene is not in the bank (unreachable)
+    2. Initialize BFS queue with (startGene, 0 mutations) and mark startGene visited
+    3. For each gene dequeued:
+       a. If it equals endGene, return the mutation count
+       b. Try every position (0–7) with each of 'A', 'C', 'G', 'T'
+       c. If the mutated gene is in the bank and unvisited, mark visited and enqueue with mutations + 1
+    4. If the queue empties without finding endGene, return -1
     """
     def minMutation(self, startGene: str, endGene: str, bank: List[str]) -> int: # LC 433
         """
@@ -488,15 +542,7 @@ A bipartite graph follows the same rule: nodes split into two groups (A and B) w
 
 Solution: Use 2-coloring. Assign nodes to groups as you traverse with BFS/DFS - if a node is Group A, all neighbors must be Group B, and vice versa. If two connected nodes end up in the same group, it's NOT bipartite.
 
-TYPICAL STEPS:
-1. Initialize color array (0 = uncolored, 1 = color A, -1 = color B)
-2. For each uncolored node (handles disconnected components):
-   - Color it with color A
-   - BFS/DFS to color all connected nodes
-   - Try to color neighbors with opposite color
-   - If neighbor already has same color, not bipartite
-3. Return true if successfully colored entire graph
-
+#
 Applications: Matching problems, scheduling conflicts, team assignments.
 ================================================================
 """
@@ -518,12 +564,14 @@ class BipartiteCheck:
     Output: false
     Explanation: Cannot partition nodes into two independent sets
     
-    How it works:
-    1. Use 2-coloring technique: assign each node to group 0 or 1
-    2. Start by assigning any unvisited node to group 0
-    3. Assign all its neighbors to group 1 (opposite group)
-    4. If a neighbor is already in the same group, graph is NOT bipartite
-    5. Repeat for all components (graph may be disconnected)
+    Steps:
+    1. Initialize a color array of -1 (unassigned) for all n nodes
+    2. For each uncolored node (to handle disconnected components):
+       a. Assign it color 0 and enqueue it
+       b. For each dequeued node, check all its neighbors
+       c. If a neighbor is uncolored, assign the opposite color (1 - current) and enqueue it
+       d. If a neighbor already has the same color as the current node, return False
+    3. Return True if the entire graph is successfully 2-colored
     """
     def isBipartite(self, graph: List[List[int]]) -> bool: # LC 785
         """
@@ -619,12 +667,13 @@ class TopologicalSort:
     Explanation: There are a total of 2 courses to take. 
     To take course 1 you should have finished course 0, and to take course 0 you should also have finished course 1. So it is impossible.
     
-    How it works:
-    1. Build directed graph: prereq -> course
-    2. Count in-degree (prerequisites) for each course
-    3. Start with courses having no prerequisites (in-degree = 0)
-    4. Process courses and reduce in-degree of dependent courses
-    5. If all courses processed, no cycle exists (can finish all)
+    Steps:
+    1. Build a directed graph (prereq -> course) and an in-degree array from the prerequisites list
+    2. Enqueue all courses with in-degree 0 (no prerequisites needed)
+    3. Dequeue each course, increment courses_taken, and for every course it unlocks:
+       a. Decrement that course's in-degree by 1
+       b. If its in-degree reaches 0, enqueue it
+    4. Return True if courses_taken == numCourses (no cycle); False otherwise
     """
     def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool: # LC 207
         """
@@ -749,11 +798,13 @@ class UnionFindCycle: # LC 684
     Output: [1,4]
     Explanation: [1,4] creates cycle in path 1-2-3-4
     
-    How it works:
-    1. Process edges in order using Union Find
-    2. For each edge, check if nodes already in same component (same root)
-    3. If same component, adding edge creates cycle → return it
-    4. Otherwise, union the two components
+    Steps:
+    1. Initialize parent array where each node is its own parent, and a rank array of 1s
+    2. For each edge [u, v] in order:
+       a. Call find(u) and find(v) to get their roots (with path compression)
+       b. If they share the same root, this edge creates a cycle — return [u, v]
+       c. Otherwise, union the two components by attaching the lower-rank root under the higher-rank root (incrementing rank on a tie)
+    3. Return [] if no redundant edge found (guaranteed not to happen per problem constraints)
     """
     def findRedundantConnection(self, edges: List[List[int]]) -> List[int]:
         """
@@ -882,11 +933,14 @@ class DijkstraShortestPath: # LC 743
     Output: -1
     Explanation: Node 1 unreachable from node 2
     
-    How it works:
-    1. Build weighted graph from edge list
-    2. Run Dijkstra from source node k
-    3. Find maximum distance (last node to receive signal)
-    4. If any node unreachable (distance = infinity), return -1
+    Steps:
+    1. Build a weighted adjacency list from the times edge list
+    2. Initialize all distances to infinity; set distances[k] = 0 and push (0, k) onto a min-heap
+    3. While the heap is not empty:
+       a. Pop the node with the smallest current distance
+       b. Skip it if a shorter path to it has already been recorded
+       c. For each neighbor, compute total_dist = current_dist + travel_time; if shorter, update distances and push onto the heap
+    4. Take the maximum value in distances; if it is infinity, return -1, otherwise return it
     """
 
     def networkDelayTime(self, times: List[List[int]], n: int, k: int) -> int:

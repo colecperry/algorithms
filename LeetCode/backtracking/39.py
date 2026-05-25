@@ -38,6 +38,41 @@ class Solution:
             - O(d) path array (reused via backtracking)
         """
         result = []
+        
+        def backtrack(start, path, current_sum):
+            """
+            Build combinations that sum to target, allowing reuse.
+            
+            Args:
+                start: Index to start considering candidates from
+                path: Current combination being built
+                current_sum: Sum of elements in path
+            """
+            # BASE CASE 1: Found valid combination
+            if current_sum == target:
+                result.append(path[:])  # Save copy
+                return
+            
+            # BASE CASE 2: Exceeded target, prune
+            if current_sum > target:
+                return
+            
+            # RECURSIVE CASE: Try each candidate
+            for i in range(start, len(candidates)):
+                # STEP 1: MAKE CHOICE
+                path.append(candidates[i])
+                
+                # STEP 2: EXPLORE - pass 'i' (not 'i+1') to allow reuse
+                backtrack(i, path, current_sum + candidates[i])
+                
+                # STEP 3: UNDO CHOICE (BACKTRACK)
+                path.pop()
+        
+        backtrack(0, [], 0)
+        return result
+
+    def combinationSumOptimized(self, candidates: List[int], target: int) -> List[List[int]]: # Op w/ sorting
+        result = []
         candidates.sort()  # Enable pruning optimization
         
         def backtrack(start, path, current_sum):
@@ -98,11 +133,19 @@ print(sol.combinationSum([2], 1)) # []
 #                    /     \                |
 #               +2 /        \ +3            | +3
 #                 /          \              |
-#             [2,2]         [2,3]           ✗
-#             sum=4         sum=5         3+3=6>5
-#            start=0       start=1        PRUNED
-#              |              |
-#              |              ▼
-#         +2   ✗           ✓ SAVE
-#        4+2=6>5         result=[[2,3]]
-#        PRUNED
+#             [2,2]         [2,3]        [3,3]
+#             sum=4         sum=5        sum=6
+#            start=0       start=1      start=1
+#              |              |            |
+#         +2   |          +3  ✗            ▼
+#              ▼              ✗         BASE 2
+#           [2,2,2]         SAVE      sum>target
+#           sum=6          [[2,3]]      RETURN
+#          start=0
+#              |
+#         +2   ✗
+#              ✗
+#              ▼
+#          BASE 2
+#        sum>target
+#          RETURN

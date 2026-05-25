@@ -37,42 +37,6 @@
 # Input: p = [1,2,1]   q = [1,1,2]
 # Output : False
 
-# How to Solve (DFS):
-    # Check the root nodes -> 4 cases
-        # 1. They are both null (empty nodes) -> Return True to prev call stack
-        # 2. Only one is null (empty node) -> Return False to caller (non identical structure)
-        # 3. The values are non equal -> Return False to the caller (non identical values)
-        # 4. The values are equal -> Continue and recursively call the function on the left subtree (continues until we reach Base Case -> one of the three returns), and on the right subtree
-        # The variables we store the boolean in represent the left subtree being the same from the node of the caller 
-            # Ex. p = [1,2,1], q = [1,2,1], left_same = True means that the left subtreee of the root nodes are identical
-            # We basically keep calling this recursively until we hit a False -> The left or right subtrees are not identical, or we hit a True -> we get to a base case where both nodes are none, so we return True all the way back to the root node caller
-        # Return the result (both left and right subtrees must be True)
-
-    # Time complexity: O(p + q) -> Worst case we have to iterate through every node in both trees
-    # Space complexity: -> O(h): If the tree is balanced, the max deapth of recursion is O(log n) because at each level the tree splits into two subtrees, and for a skewed tree, each recursive call only processes one child at a time, resulting in n recursive calls in total before reaching the base case -> O(n)
-
-# How to Solve(BFS):
-    # When comparing two trees, it almost always makes more sense to use one deque with a tuple (each tuple representing one pair of nodes to comapare at that moment). This helps:
-        # - Simplify iteration
-        # - Fewer edge cases
-        # - Less code
-        # - Less risk of synchronization issues
-
-    # Initialize a deque with a tuple of both root nodes, loop and dequeue (pop from front) -> Check:
-        # 1. If both nodes are None -> trees are still the same
-        # 2. If only one node is None (different structure) -> return False
-        # 3. If node values are None (different values) -> return False
-    # Append the left and right children (tuples) to the queue and continue to next iteration
-
-# Time Complexity: O(n)
-# - Each node in both trees is processed exactly once.
-# - Since we traverse all nodes, the time complexity is O(n), where n is the number of nodes in the trees.
-
-# Space Complexity: O(n)
-# - In the worst case (if the trees are completely unbalanced), the queue holds O(n) nodes.
-# - In the best case (if the trees are balanced), the queue holds O(log n) nodes at a time.
-# - Overall, the worst-case space complexity is O(n).
-
 from collections import deque
 
 class TreeNode(object):
@@ -83,8 +47,12 @@ class TreeNode(object):
 
 class Solution(object):
     def isSameTree(self, p, q): # DFS
+        """
+        - TC: O(p + q) -> Worst case we have to iterate through every node in both trees
+        - SC: O(h) -> recursion depth equals tree depth
+        """
         if not p and not q:  # Both trees are empty -> We reach base case
-            return True
+            return True # need to check this first or we get an error
         if not p or not q:  # One tree is empty, the other is not
             return False
         if p.val != q.val:  # Mismatched values
@@ -98,13 +66,17 @@ class Solution(object):
         return left_same and right_same
     
     def isSameTree2(self, p, q): # BFS
+        """
+        - TC: O(p + q) -> we traverse every node of each tree
+        - SC: 
+        """
         queue = deque([(p, q)])  # Always wrap root nodes/tuples in a list when creating a deque so it's iterable
 
         while queue:
             node1, node2 = queue.popleft()  # Pop off pair of nodes p, q
 
-            if not node1 and not node2:  # Both nodes are None, continue checking
-                continue
+            if not node1 and not node2:  # Both nodes are None, continue checking, need to check this first or we get an error
+                continue 
             if not node1 or not node2:  # If only one is None, trees are different
                 return False
             if node1.val != node2.val:  # Different values

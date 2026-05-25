@@ -151,13 +151,7 @@ Examples:
 PATTERN 1: BASIC RECURSION (LINEAR/SINGLE BRANCH)
 PATTERN EXPLANATION: Single recursive call that progresses linearly toward base case. Each call processes current element and delegates rest to recursive call. Build solution as stack unwinds. Simplest form of recursion, often can be converted to iteration. Used for sequential processing, validation, and simple transformations.
 
-TYPICAL STEPS:
-1. Define base case (empty, single element, or zero)
-2. Process current element
-3. Make recursive call with smaller input (n-1, rest of list)
-4. Combine current with recursive result
-5. Return combined result
-
+#
 Applications: Factorial, sum, reverse, string palindrome, power calculation.
 ================================================================
 """
@@ -169,11 +163,11 @@ class BasicRecursion:
     Example:
         factorial(5) = 5 x 4 x 3 x 2 x 1 = 120
     
-    How it works:
-    1. Base case: 0! = 1 or 1! = 1
-    2. Recursive case: n! = n x (n-1)!
-    3. Each call multiplies current n with result of (n-1)!
-    4. Stack unwinds multiplying results together
+    Steps:
+    1. Base case: if n <= 1, return 1 (0! and 1! both equal 1)
+    2. Recursive case: return n * factorial(n - 1)
+    3. Each call multiplies current n with the result returned by the next call
+    4. Stack unwinds multiplying n * (n-1) * ... * 2 * 1 back up to the original call
     """
     def factorial(self, n: int) -> int:
         """
@@ -207,13 +201,7 @@ print(sol.factorial(5)) # 120
 PATTERN 2: TREE RECURSION (MULTIPLE BRANCHES)
 PATTERN EXPLANATION: Multiple recursive calls from each invocation, creating branching structure like a tree. Each branch explores different possibility or subproblem. Without memoization, can have exponential time complexity. Common in decision problems, tree traversal, and exploring all paths. Solutions combine results from all branches.
 
-TYPICAL STEPS:
-1. Define base case(s)
-2. Make multiple recursive calls (typically 2+ branches)
-3. Process/combine results from all branches
-4. Return combined result
-5. Consider memoization if subproblems overlap
-
+#
 Applications: Fibonacci, tree traversal, counting paths, decision trees.
 ================================================================
 """
@@ -236,6 +224,12 @@ class TreeRecursion:
 
     Input: root = [3,9,20,null,null,15,7]
     Output: 3
+
+    Steps:
+    1. Base case: if root is None, return 0
+    2. Recurse left: call maxDepth(root.left) to get left subtree depth
+    3. Recurse right: call maxDepth(root.right) to get right subtree depth
+    4. Return 1 + max(left_depth, right_depth) — current node adds 1 level
     """
     def maxDepth(self, root: Optional[TreeNode]) -> int:  # LC 104
         """
@@ -282,13 +276,7 @@ print("Max Depth:", sol.maxDepth(tree))  # 3
 PATTERN 3: DIVIDE AND CONQUER
 PATTERN EXPLANATION: Break problem into independent subproblems, solve recursively, then combine results. Typically divides input in half (binary division). Each level does O(n) work across all subproblems, with O(log n) levels, giving O(n log n) complexity. Used in efficient sorting, searching, and optimization algorithms.
 
-TYPICAL STEPS:
-1. Base case: Handle small input (single element, empty)
-2. Divide: Split problem into subproblems (usually halves)
-3. Conquer: Recursively solve each subproblem
-4. Combine: Merge results from subproblems
-5. Return combined result
-
+#
 Applications: Merge sort, quick sort, binary search, closest pair, maximum subarray.
 ================================================================
 """
@@ -301,11 +289,12 @@ class DivideAndConquer:
         Input: [38, 27, 43, 3, 9, 82, 10]
         Output: [3, 9, 10, 27, 38, 43, 82]
     
-    How it works:
-    1. Divide: Split array into two halves
-    2. Conquer: Recursively sort each half
-    3. Combine: Merge two sorted halves
-    4. Recursion tree has log n height, O(n) work per level
+    Steps:
+    1. Base case: if len(nums) <= 1, return nums (already sorted)
+    2. Divide: find mid = len(nums) // 2, split into left = nums[:mid] and right = nums[mid:]
+    3. Conquer: recursively call mergeSort(left) and mergeSort(right)
+    4. Combine: call merge(left, right) — walk both sorted halves with two pointers, appending the smaller element each time
+    5. Return the merged result up to the caller
     """
     def mergeSort(self, nums: List[int]) -> List[int]:  # LC 912 - Sort an Array
         """
@@ -374,15 +363,7 @@ print("Merge Sort:", sol.mergeSort([38, 27, 43, 3]))  # [3, 27, 38, 43]
 PATTERN 4: BACKTRACKING
 PATTERN EXPLANATION: Systematically explore all possible solutions by making choices, recursing with each choice, then undoing choice (backtracking) to try alternatives. Build solution incrementally, abandoning paths that violate constraints. Returns to previous state by removing last choice before trying next option. Essential for combinatorial problems and constraint satisfaction.
 
-TYPICAL STEPS:
-1. Check if current path is valid solution (base case)
-2. If valid, store/count solution
-3. For each possible choice:
-   a. Make choice (add to path)
-   b. Recurse with updated path
-   c. Backtrack (remove choice from path)
-4. Return after exploring all branches
-
+#
 Applications: Permutations, combinations, subsets, N-Queens, Sudoku, word search.
 ================================================================
 """
@@ -395,17 +376,13 @@ class Backtracking:
         Input: [1, 2, 3]
         Output: [[], [1], [2], [1,2], [3], [1,3], [2,3], [1,2,3]]
     
-    How it works:
-    1. For each element: choose to include or exclude
-    2. Two recursive calls: with element and without
-    3. Base case: processed all elements
-    4. Collect all valid subsets
-    
-    Backtracking Pattern:
-    - Make a choice (add element to path)
-    - Explore (recurse deeper)
-    - Undo choice (remove element from path)
-    - Try next choice
+    Steps:
+    1. Save a copy of the current path into result (every path is a valid subset)
+    2. Loop over indices from start to end of nums:
+       a. Make choice: append nums[i] to path
+       b. Recurse: call backtrack(i + 1, path) to build subsets that include nums[i]
+       c. Backtrack: pop nums[i] from path to restore state before trying next element
+    3. Return result after all branches are explored
     """
     def subsets(self, nums: List[int]) -> List[List[int]]:  # LC 78
         """
@@ -481,14 +458,7 @@ print("Subsets:", sol.subsets([1,2,3]))
 PATTERN 5: RECURSION WITH MEMOIZATION (TOP-DOWN DP)
 PATTERN EXPLANATION: Optimize recursive solutions by caching results of subproblems in memo dictionary. Check cache before computing, store result after computing. Converts exponential time to polynomial by ensuring each unique subproblem solved only once. Natural bridge between naive recursion and dynamic programming. Also called top-down DP.
 
-TYPICAL STEPS:
-1. Create memo dictionary (or pass as parameter)
-2. Check if result already in memo (base case)
-3. If yes, return cached result immediately
-4. If no, compute recursively
-5. Store result in memo before returning
-6. Return result
-
+#
 Applications: Fibonacci, climbing stairs, coin change, longest common subsequence.
 ================================================================
 """
@@ -514,10 +484,13 @@ class RecursionWithMemo:
     # 2. 1 step + 2 steps
     # 3. 2 steps + 1 step
     
-    How it works:
-    1. Ways to reach step n = ways to reach (n-1) + ways to reach (n-2)
-    2. Same as Fibonacci sequence
-    3. Memoization prevents recalculating same steps
+    Steps:
+    1. Initialize an empty memo dictionary to cache results
+    2. Base case: if n <= 2, return n directly (1 way for step 1, 2 ways for step 2)
+    3. Cache check: if n is already in memo, return memo[n] immediately
+    4. Recurse: compute climb(n - 1) + climb(n - 2) — the two ways to arrive at step n
+    5. Store result in memo[n] before returning so future calls skip recomputation
+    6. Return memo[n] as the total number of distinct ways to reach step n
     """
     def climbStairs(self, n: int) -> int:  # LC 70
         """
@@ -618,14 +591,7 @@ print("Climbing Stairs(5):", sol.climbStairs(5))  # 8
 PATTERN 6: HELPER FUNCTION RECURSION (ACCUMULATED STATE)
 PATTERN EXPLANATION: Use helper function with extra parameters to accumulate state or track progress through recursion. Main function initializes state, helper carries it through recursive calls. Common for problems needing indices, accumulators, or context that main function doesn't have. Cleaner than modifying input or using global variables.
 
-TYPICAL STEPS:
-1. Main function: Set up initial state, call helper
-2. Helper function: Takes original params + accumulated state
-3. Base case: Check termination condition
-4. Recursive case: Update state, pass to next call
-5. Return or modify accumulated result
-6. Main function returns final accumulated state
-
+#
 Applications: Reverse list, flatten nested list, path collection, range recursion.
 ================================================================
 """
@@ -642,10 +608,13 @@ class HelperRecursion:
         Paths: 12, 13
         Sum: 12 + 13 = 25
     
-    How it works:
-    1. Helper accumulates number as we traverse
-    2. At each node: current_num = prev * 10 + node.val
-    3. At leaf: add to total sum
+    Steps:
+    1. Main function calls helper(root, 0) to start traversal with current_num = 0
+    2. Base case: if node is None, return 0 (no contribution)
+    3. Accumulate: compute current_num = current_num * 10 + node.val to append the digit
+    4. Leaf check: if node has no children, return current_num (path is complete)
+    5. Recurse: call helper(node.left, current_num) and helper(node.right, current_num)
+    6. Return left_sum + right_sum to bubble the total up to the root
     """
     def sumNumbers(self, root):  # LC 129 - Sum Root to Leaf Numbers
         """

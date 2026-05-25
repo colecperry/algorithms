@@ -17,6 +17,25 @@
 from typing import List
 
 class Solution:
+    """
+    - TC: O(n! * n): 
+        - Level 1: For loop runs n times (n choices)
+        - Level 2: For each of those n branches, loop runs n - 1 times (Total: n * (n - 1) calls)
+        - Level 3: For each of those n * (n - 1) branches, loop runs n - 2 times (Total: n * (n - 1) * (n - 2) calls)
+        - Level n: n! leaf nodes/complete permuations
+        - For each permutation, we need O(n) time to copy it into the result
+    - SC: O(n! * n)
+        - Recursion depth: O(n) levels deep max
+        - Path array: stores up to n elements - O(n)
+        - Used tracking: tracks n elements - O(n)
+        - Result list: stores n! permutations of size n each - O(n! * n)
+        - Total: O(n! * n) dominates
+    - NOTE: In Permutations, you are able to use ANY unused element at each step -> Track a USED Array
+    - Example: [1,2,3]
+        After picking 2, need to pick from ANY unused:
+        - Can pick 1 (before) → [2,1,3] ✓
+        - Can pick 3 (after)  → [2,3,1] ✓
+    """
     def permute(self, nums: List[int]) -> List[List[int]]:
         result = []  # Store all complete permutations
         
@@ -76,25 +95,6 @@ class Solution:
 #
 # Result: [[1,2], [2,1]]
 #
-
-
-
-# ============================================
-# VISUALIZATION FOR PERMUTATIONS: nums=[1,2,3]
-# ============================================   
-# 
-#                         path = []
-#                 /          |          \     
-#                /           |           \
-#               1            2            3    
-#         path=[1]        path=[2]        path=[3]   
-#        /      |        |       |        |       \
-#       /       |        |       |        |        \
-#      2        3        1       3        1         2
-#   [1,2]     [1,3]    [2,1]   [2,3]    [3,1]      [3,2]
-#     |         |        |       |        |          |
-#     3         2        3       1        2          1
-#  [1,2,3]   [1,3,2]  [2,1,3] [2,3,1]  [3,1,2]    [3,2,1]
 
 sol = Solution()
 print(sol.permute([1,2])) # [[1,2],[2,1]]

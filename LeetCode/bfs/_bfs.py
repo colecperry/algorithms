@@ -214,24 +214,16 @@ from typing import List, Optional
 ================================================================
 PATTERN 1: TREE LEVEL-ORDER BFS
 ================================================================
-PATTERN EXPLANATION: Traverse a tree level by level, processing all nodes at 
-depth d before moving to depth d+1. No visited set needed since trees have no 
+PATTERN EXPLANATION: Traverse a tree level by level, processing all nodes at
+depth d before moving to depth d+1. No visited set needed since trees have no
 cycles. Use level_size = len(queue) to process one complete level per iteration.
-
-TYPICAL STEPS:
-1. Initialize queue with root
-2. While queue not empty:
-   - Capture level_size = len(queue)
-   - Process exactly level_size nodes (one full level)
-   - Add children to queue (they form the next level)
-3. Collect results per level if needed
 
 KEY CHARACTERISTICS:
 - No visited set (trees are acyclic)
 - level_size loop to batch process each level
 - Result is often List[List] (values grouped by level)
 
-Applications: Level order traversal, zigzag traversal, right side view, 
+Applications: Level order traversal, zigzag traversal, right side view,
 minimum/maximum depth, level averages.
 
 Examples: LC 102, 103, 107, 111, 199, 515, 637
@@ -259,11 +251,13 @@ class TreeLevelOrderBFS: # PART A: TREE BFS
     # Input: root = [3,9,20,null,null,15,7]
     # Output: [[3],[9,20],[15,7]]
     
-    How it works:
-    1. Use queue for BFS, process nodes level by level
-    2. Capture level_size = len(queue) to know how many nodes in current level
-    3. Process exactly that many nodes before moving to next level
-    4. Children of current level become the next level
+    Steps:
+    1. Initialize queue with root
+    2. While queue not empty:
+       a. Capture level_size = len(queue) to know how many nodes are on this level
+       b. Process exactly level_size nodes, appending each value to current level list
+       c. For each node processed, add its left and right children to the queue
+    3. Append the completed level list to result after each level
     """
     def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]: # LC 102
         """
@@ -316,19 +310,9 @@ print("Level order:", sol.levelOrder(tree_root))  # [[3], [9,20], [15,7]]
 ================================================================
 PATTERN 2: SHORTEST PATH BFS
 ================================================================
-PATTERN EXPLANATION: Find the minimum distance/steps from a starting point to 
-a target in a grid or graph. BFS guarantees the first time we reach the target 
+PATTERN EXPLANATION: Find the minimum distance/steps from a starting point to
+a target in a grid or graph. BFS guarantees the first time we reach the target
 is via the shortest path. Requires visited tracking to avoid cycles.
-
-TYPICAL STEPS:
-1. Initialize queue with starting position (and distance 0 or 1)
-2. Mark start as visited
-3. While queue not empty:
-   - Dequeue current position and distance
-   - If current is target, return distance (early termination)
-   - Add unvisited neighbors to queue with distance + 1
-   - Mark neighbors as visited immediately when adding to queue
-4. Return -1 if queue exhausts without finding target
 
 KEY CHARACTERISTICS:
 - Visited set required (grids/graphs can have cycles)
@@ -350,11 +334,14 @@ class ShortestPathBFS: # PART B: GRID BFS (SHORTEST PATH)
     You can move in 8 directions (horizontal, vertical, diagonal).
     If no path exists, return -1.
     
-    How it works:
-    1. Start BFS from (0,0) with distance 1
-    2. Explore all 8 directions from current cell
-    3. First arrival at destination = shortest path (BFS guarantee)
-    4. Mark visited by modifying grid (or use visited set)
+    Steps:
+    1. Initialize queue with (0, 0, distance=1) and mark grid[0][0] as visited
+    2. Mark start as visited immediately (reuse grid cell, set to 1)
+    3. While queue not empty:
+       a. Dequeue current (row, col, dist); if it's the bottom-right cell, return dist
+       b. Explore all 8 directions from current cell
+       c. For each unvisited in-bounds cell with value 0, mark it visited and enqueue with dist + 1
+    4. Return -1 if queue exhausts without reaching the destination
     """
     def shortestPathBinaryMatrix(self, grid: List[List[int]]) -> int: # LC 1091
         """
@@ -421,13 +408,6 @@ PATTERN EXPLANATION: Begin BFS exploration from multiple starting points simulta
 
 Used when you need to find the minimum distance to ANY of several sources, or when multiple origins spread/affect their surroundings at the same rate.
 
-TYPICAL STEPS:
-1. Initialize queue with ALL starting source nodes/cells
-2. Mark all sources as visited
-3. Process BFS level by level (each level = one unit of distance/time)
-4. Spread from all current positions simultaneously
-5. Track what changes or count what's affected
-
 Applications: Rotting oranges, walls and gates, fire spreading, infection spread, 01 matrix.
 
 Examples: LC 994, 286, 542, 1162, 934
@@ -444,12 +424,14 @@ class MultiSourceBFS:
     Every minute, fresh oranges adjacent (4-directionally) to rotten oranges become rotten.
     Return minimum minutes until no fresh oranges remain. Return -1 if impossible.
     
-    How it works:
-    1. Add ALL initially rotten oranges to queue (multi-source start)
-    2. Count fresh oranges initially
-    3. BFS spreads rot level by level (each level = 1 minute)
-    4. Decrease fresh count as oranges rot
-    5. Check if any fresh oranges remain unreachable
+    Steps:
+    1. Initialize queue with ALL rotten oranges (value 2) as starting sources, and count all fresh oranges
+    2. Mark all sources as visited by their initial value (2) — no extra marking needed
+    3. Process BFS level by level, where each level represents one minute:
+       a. Dequeue current (row, col, time) and explore 4 adjacent cells
+       b. For each adjacent fresh orange (value 1), mark it rotten (set to 2) and enqueue with time + 1
+       c. Decrement fresh_count and update max_time each time an orange rots
+    4. After BFS, return max_time if fresh_count == 0, else -1 (some oranges unreachable)
     """
     def orangesRotting(self, grid: List[List[int]]) -> int: # LC 994
         """
@@ -514,15 +496,6 @@ State becomes a tuple like (position, extra_data) where extra_data might be keys
 
 KEY DISTINCTION: The extra data must affect REVISITING. If you can visit (row, col) multiple times with different states, it's extended state. If time/distance is just metadata you're carrying (each cell still visited once), it's NOT extended state.
 
-TYPICAL STEPS:
-1. Define state as tuple: (position, additional_info)
-2. Initialize queue with starting state
-3. Use visited set that tracks FULL state tuple
-4. When generating neighbors:
-   - Update position AND additional info
-   - Check if new state already visited
-5. Process until goal state reached or queue exhausted
-
 Applications: Lock combinations, collecting keys, obstacle elimination, turn limits, resource tracking.
 ================================================================
 """
@@ -543,6 +516,16 @@ class ExtendedStateBFS:
     Explanation: 
     The shortest path without eliminating any obstacle is 10.
     The shortest path with one obstacle elimination at position (3,2) is 6. Such path is (0,0) -> (0,1) -> (0,2) -> (1,2) -> (2,2) -> (3,2) -> (4,2).
+
+    Steps:
+    1. Define state as (row, col, remaining_eliminations); initialize queue with (0, 0, k, dist=0)
+    2. Initialize visited set tracking the full state tuple (row, col, remaining) — not just position
+    3. While queue not empty:
+       a. Dequeue (row, col, remaining, dist) and explore 4 directions
+       b. For each neighbor, compute new_remaining = remaining - grid[new_row][new_col]
+       c. Skip if new_remaining < 0 (out of eliminations) or state already visited
+    4. If neighbor is the destination, return dist + 1; otherwise add new state to queue and visited
+    5. Return -1 if queue exhausts without reaching the destination
     """
     def shortestPath(self, grid: List[List[int]], k: int) -> int:  # LC 1293
         """
@@ -618,13 +601,6 @@ print(sol.shortestPath([[0,0,0],[1,1,0],[0,0,0]], 1))  # 4
 PATTERN 5: IMPLICIT GRAPH BFS
 PATTERN EXPLANATION: The graph structure is not explicitly provided. Instead, generate neighbors/next states on-the-fly based on problem rules. Each state is treated as a node, and transitions between states form edges. This transforms problems into graph traversal where you define what "neighbors" means for your problem domain.
 
-TYPICAL STEPS:
-1. Define what constitutes a "state" in your problem
-2. Define rules for generating valid next states (neighbors)
-3. Implement get_neighbors() function based on problem rules
-4. Run standard BFS treating states as nodes
-5. Track visited states to avoid cycles
-
 Applications: Word transformation, sliding puzzles, DNA mutation, string transformations, state machines.
 ================================================================
 """
@@ -638,12 +614,14 @@ class GraphBFS:
     Input: startGene = "AACCGGTT", endGene = "AAACGGTA", bank = ["AACCGGTA","AACCGCTA","AAACGGTA"]
     Output: 2
     
-    How it works:
-    1. Treat each gene as a node in implicit graph
-    2. Generate neighbors by changing one character to A/C/G/T
-    3. Only consider neighbors that exist in bank
-    4. BFS finds shortest path from start to end gene
-    5. Return number of mutations (path length - 1)
+    Steps:
+    1. Define each gene string as a "state" (node) in the implicit graph
+    2. Initialize queue with (startGene, mutations=0) and a visited set containing startGene
+    3. Define get_neighbors() to generate valid next states:
+       a. For each position in the gene, try substituting each of A/C/G/T
+       b. Only include the resulting gene if it exists in the bank
+    4. While queue not empty, dequeue current gene; if it equals endGene, return mutation count
+    5. For each unvisited neighbor, mark visited and enqueue with mutations + 1; return -1 if exhausted
     """
     def minMutation(self, startGene: str, endGene: str, bank: List[str]) -> int: # LC 433
         """

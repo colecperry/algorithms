@@ -69,7 +69,7 @@ class Solution:
         island_count = 0 # output
 
         def bfs(start_row, start_col): # Nested fn keeps exploring neighbors until island disconnects
-            queue = deque([(start_row, start_col)]) # append the first ele (tuple of rows and cols)
+            queue = deque([(start_row, start_col)]) # append the first ele (tuple of rows and cols) as single iterable obj
             visited.add((start_row, start_col)) # add curr ele to visited set (tuple of rows and cols)
 
             directions = [(-1, 0), (1, 0), (0, 1), (0, -1)] # up, down, left, right (tuples of rows and cols)

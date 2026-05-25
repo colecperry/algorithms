@@ -1,19 +1,46 @@
-class Solution:
-    def fib(self, n: int) -> int:
-        if n == 0:
-            return 0
-        if n == 1:
-            return 1
-        dp = [0] * (n + 1)
-        dp[0] = 0
-        dp[1] = 1
+# 231. Power of Two
 
-        for i in range(2, n + 1):
-            dp[i] = dp[i-1] + dp[i-2]
-        
-        return dp[n]
+# Topics: Math, Bit Manipulation, Recursion
+
+# Given an integer n, return true if it is a power of two. Otherwise, return false.
+
+# An integer n is a power of two, if there exists an integer x such that n == 2x.
+
+# Example 1:
+
+# Input: n = 1
+# Output: true
+# Explanation: 2^0 = 1
+
+# Example 2:
+# Input: n = 16
+# Output: true
+# Explanation: 2^4 = 16
+
+# Example 3:
+# Input: n = 3
+# Output: false
+
+class Solution:
+    def isPowerOfTwo(self, n: int) -> bool:
+        """
+        - TC:
+        - SC:
+        """
+        # Base Cases
+        if n <= 0:
+            return False
+
+        if n == 1:
+            return True
+
+        # Recursive Case
+        if n % 2 == 0:
+            return self.isPowerOfTwo(n//2)
+        else:
+            return False
 
 sol = Solution()
-print(sol.fib(2)) # 1
-print(sol.fib(3)) # 2
-print(sol.fib(4)) # 3
+print(sol.isPowerOfTwo(1)) # 2^0 = 1, True
+print(sol.isPowerOfTwo(16)) # 2^4 = 16, True
+print(sol.isPowerOfTwo(3)) # 2^? = 3, False

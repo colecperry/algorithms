@@ -1,19 +1,31 @@
-from typing import List
+# 1 - Two Sum
 
-class Solution:
-    def longestConsecutive(self, nums: List[int]) -> int:
-        num_set = set(nums)
-        max_len = 0
-        for num in num_set:
-            curr_len = 0
-            if (num - 1) not in num_set:
-                while num in num_set:
-                    curr_len += 1
-                    num += 1
+# Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice. You can return the answer in any order.
+
+# Example 1: 
+# Input: nums = [2,7,11,15], target = 9
+# Output: [0,1]
+# Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].
+
+# Example 2:
+# Input: nums = [3,2,4], target = 6
+# Output: [1,2]
+
+# Example 3: 
+# Input: nums = [3,3], target = 6
+# Output: [0,1]
+
+class Solution(object):
+    def twoSum(self, nums, target):
+        my_dict = dict() # val:idx
+
+        for i in range(len(nums)):
+            complement = target - nums[i] # find value that we need to add up to target
+            if complement in my_dict: # check if it's there -> found both nums
+                return [i, my_dict[complement]]
             
-            max_len = max(max_len, curr_len)
-        
-        return max_len
-    
-sol = Solution()
-print(sol.longestConsecutive([100,4,200,1,3,2])) # 4
+            my_dict[nums[i]] = i # add val & index to dictionary
+
+
+solution = Solution()
+print(solution.twoSum([2, 4, 6, 8, 10], 16))

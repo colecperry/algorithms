@@ -12,9 +12,9 @@
 
 # Ex. 1 
 #          1 ------ 2
-#
+
 #              3
-#
+
 # Input: isConnected = [[1,1,0],[1,1,0],[0,0,1]]
 # Output: 2
 
@@ -82,23 +82,28 @@ class Solution:
     # Space Complexity: O(n)
     #   - Visited list + queue space in worst case
     
-    def findCircleNumBFS(self, isConnected: List[List[int]]) -> int:
-        n = len(isConnected)
-        visited = [False] * n # Track visited nodes
-        provinces = 0
+def findCircleNumBFS(self, isConnected: List[List[int]]) -> int:
+    n = len(isConnected)
+    visited = set()  # Track visited nodes
+    provinces = 0
 
-        for city in range(n): # Loop through each city (inner list)
-            if not visited[city]: # We found new disconnected component -> perform BFS
-                queue = deque([city]) # Create queue for each component (connected part of the graph)
-                while queue:
-                    current = queue.popleft() # Pop off the city
-                    visited[current] = True # Mark as visited
-                    for neighbor in range(n): # Loop thru neighbors of that city
-                        if isConnected[current][neighbor] == 1 and not visited[neighbor]: # If the current city is connected to a neighbor and the neighbor hasn't been visited
-                            queue.append(neighbor) # Add unvisited connected neighbor to the BFS queue to be explored
-                provinces += 1 # Increment provinces by one at the end of the path
+    def bfs(city):
+        queue = deque([city])  # Create queue for each component (connected part of the graph)
+        visited.add(city)  # Mark starting city as visited
+        
+        while queue:
+            current = queue.popleft()  # Pop off the city
+            for neighbor in range(n):  # Loop thru neighbors of that city
+                if isConnected[current][neighbor] == 1 and neighbor not in visited:  # If the current city is connected to a neighbor and the neighbor hasn't been visited
+                    queue.append(neighbor)  # Add unvisited connected neighbor to the BFS queue to be explored
+                    visited.add(neighbor)  # Mark as visited
 
-        return provinces
+    for city in range(n):  # Loop through each city
+        if city not in visited:  # We found new disconnected component -> perform BFS
+            bfs(city)
+            provinces += 1  # Increment provinces by one at the end of the path
+
+    return provinces
 
 
 sol = Solution()

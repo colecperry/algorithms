@@ -19,23 +19,24 @@
 from typing import List
 
 class Solution:
-    """
-    TC: O(n) -> iterate through dp array once
-    SC: O(n) -> store n values in the DP array
-    """
-    def rob(self, nums: List[int]) -> int: # O(n) space
-        n = len(nums)
-        dp = [0] * (n + 1)  # dp[i] = max profit you can make robbing up to house i
-        dp[0] = 0  # No houses robbed = $0
-        dp[1] = nums[0]  # Rob up to first house only -> only one option
+    class Solution:
+        def rob(self, nums: List[int]) -> int:
+            """
+            TC: O(n) -> one pass through nums
+            SC: O(n) -> dp array same size as nums
+            """
+            if len(nums) == 1:  # Edge case — only one house, take it
+                return nums[0]
 
-        for i in range(2, n + 1): # Recurrence relation
-            rob = nums[i-1] + dp[i-2] # Rob curr house and take money from 2 houses ago
-            skip = dp[i-1] # Skip this house and take money from prev house
+            dp = [0] * len(nums)
+            dp[0] = nums[0] # One house — only choice is to rob it
+            dp[1] = max(nums[0], nums[1]) # Two houses — take the larger one
 
-            dp[i] = max(rob, skip)
+            for i in range(2, len(nums)):
+                # Skip this house or rob it plus best two houses back
+                dp[i] = max(dp[i-1], nums[i] + dp[i-2])
 
-        return dp[-1] # Max money after considering all houses
+            return dp[-1]  # Max earnings after all houses
     
     def rob2(self, nums: List[int]) -> int: # O(1) space
         """

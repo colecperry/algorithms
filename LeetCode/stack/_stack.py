@@ -268,15 +268,22 @@ Remaining [7, 5] have no next greater element
 
                 VISUAL EXAMPLE - MONOTONIC INCREASING STACK:
 
-Array: [5, 3, 7, 2] - Build increasing stack (find next SMALLER elements)
+Array: [2, 4, 6, 1, 3] - Build increasing stack (find next SMALLER elements)
 
-Step 1: Push 5                    Stack: [5]
-Step 2: 3 < 5, pop 5, push 3      Stack: [3]     (5 found its next smaller: 3)
-Step 3: Push 7 -> 7 > 3           Stack: [3, 7]
-Step 4: 2 < 7, pop 7, push 2      Stack: [3, 2]  (7 found its next smaller: 2)
-        2 < 3, pop 3              Stack: [2]     (3 found its next smaller: 2)
+Step 1: 2, stack empty, push 2          Stack: [2]
+Step 2: 4 > 2, push 4                   Stack: [2, 4]
+Step 3: 6 > 4, push 6                   Stack: [2, 4, 6]
+Step 4: 1 < 6, pop 6                    Stack: [2, 4]     (6 found its next smaller: 1)
+        1 < 4, pop 4                    Stack: [2]        (4 found its next smaller: 1)
+        1 < 2, pop 2                    Stack: []         (2 found its next smaller: 1)
+        push 1                          Stack: [1]
+Step 5: 3 > 1, push 3                   Stack: [1, 3]
 
-Remaining [2] has no next smaller element
+Remaining [1, 3] have no next smaller element
+
+Result: 2->1,  4->1,  6->1,  1->none,  3->none
+
+INVARIANT: Stack is always in increasing order after every step.
 """
 
 # =============================================================================
@@ -428,15 +435,6 @@ When to Use Each Pattern:
 # Stack naturally tracks most recent unmatched opening symbol (LIFO property perfect for
 # nested matching). Stack must be empty at end for valid input.
 #
-# TYPICAL STEPS:
-# 1. Create mapping of closing → opening symbols
-# 2. For each character:
-#    - If opening symbol: push to stack
-#    - If closing symbol: check if matches stack top, pop if match
-#    - If no match or stack empty: invalid
-# 3. After processing all characters: stack should be empty
-# 4. Return true if empty, false otherwise
-#
 # Applications: Valid parentheses, HTML tag matching, balanced expressions, bracket validation.
 # ================================================================
 
@@ -451,13 +449,15 @@ class MatchingPairsPattern:
     TC: O(n) - single pass through string
     SC: O(n) - worst case all opening brackets (e.g., "((((")
     
-    How it works:
-    1. Stack stores unmatched opening brackets
-    2. When closing bracket appears, check if it matches top of stack
-    3. If match: pop (pair matched), if no match: invalid
-    4. LIFO property ensures most recent opening is checked first
-    5. Empty stack at end means all pairs matched
-    
+    Steps:
+    1. Create mapping of closing → opening symbols: {')': '(', '}': '{', ']': '['}
+    2. For each character in s:
+       a. If closing symbol: check if stack top matches expected opening
+       b. If match: pop from stack (pair resolved)
+       c. If no match or stack empty: return False
+       d. If opening symbol: push to stack
+    3. After all characters processed, return True if stack is empty, False otherwise
+
     Why stack works:
     - Nested brackets must close in reverse order of opening
     - LIFO perfectly matches this reverse order requirement
@@ -513,14 +513,6 @@ print("Valid:", sol.isValid("([)]"))  # False
 # INCREASING stack (top is largest): finds next SMALLER element
 # - Pop when current < stack top
 #
-# TYPICAL STEPS (Next Greater):
-# 1. Initialize stack (stores indices), result array
-# 2. For each index:
-#    - While current value > stack top value: pop (found next greater)
-#    - Calculate answer for popped index
-#    - Push current index
-# 3. Remaining stack elements have no answer
-#
 # Applications: Daily temperatures, next greater element, stock span, largest rectangle.
 # ================================================================
 
@@ -534,15 +526,15 @@ class MonotonicStackPattern:
     TC: O(n) - each index pushed and popped at most once (2n operations total)
     SC: O(n) - stack stores indices
     
-    How it works:
-    1. Use monotonic DECREASING stack (stores indices)
-    2. Stack holds indices of days waiting for warmer temperature
-    3. When current temp > stack top temp:
-       - Pop index (it found its answer)
-       - Calculate wait = current_day - popped_day
-    4. Always push current day's index
-    5. Days remaining in stack never found warmer temperature
-    
+    Steps:
+    1. Initialize result array of zeros (length n), empty stack (stores indices)
+    2. For each index i and temperature temp:
+       a. While stack is not empty AND temperatures[stack top] < temp:
+          - Pop the index of the previous cooler day
+          - Set answer[popped index] = i - popped index (days waited)
+       b. Push current index i onto stack
+    3. Indices remaining in stack never found a warmer day (answer stays 0)
+
     Why decreasing stack:
     - Want to find next GREATER (warmer) temperature
     - Maintain decreasing order so we can detect when greater appears
@@ -652,14 +644,6 @@ print("Largest rectangle:", sol.largestRectangleArea([2,1,5,6,2,3]))  # 10
 # two operands, compute result, push back. Natural fit for postfix notation where operators
 # come after operands. Can extend to handle infix with precedence.
 #
-# TYPICAL STEPS (RPN):
-# 1. For each token in expression:
-#    - If number: push to stack
-#    - If operator: pop two operands (order matters!)
-#    - Compute: second_operand operator first_operand
-#    - Push result back to stack
-# 2. Final result is only element left in stack
-#
 # Applications: Evaluate RPN, basic calculator, expression parsing, operator precedence.
 # ================================================================
 
@@ -672,15 +656,16 @@ class ExpressionPattern:
     TC: O(n) - process each token exactly once
     SC: O(n) - stack holds intermediate results
     
-    How it works:
-    1. Stack holds numbers (operands)
-    2. When operator encountered:
-       - Pop second operand (b)
-       - Pop first operand (a)
-       - Compute: a operator b (order matters for - and /)
-       - Push result back
-    3. Final result is top of stack
-    
+    Steps:
+    1. For each token in tokens:
+       a. If token is a number: push int(token) onto stack
+       b. If token is an operator:
+          - Pop second operand b (top of stack)
+          - Pop first operand a (new top of stack)
+          - Compute a operator b (order matters for '-' and '/')
+          - Push result back onto stack
+    2. Return stack[0] — the final result is the only remaining element
+
     Why RPN uses stack:
     - Operators come after operands
     - Stack provides operands in reverse order naturally
@@ -750,15 +735,6 @@ print("Eval RPN:", sol.evalRPN(["4","13","5","/","+"]))  # 6
 # bracket), push current context and reset. When exiting level (closing bracket), pop
 # context and combine with current level's result. Handles arbitrary nesting depth.
 #
-# TYPICAL STEPS:
-# 1. Initialize stack, current_string, current_number
-# 2. For each character:
-#    - If digit: accumulate into current_number
-#    - If '[': push (current_string, current_number), reset both
-#    - If ']': pop (prev_string, count), combine: prev + count * current
-#    - If letter: append to current_string
-# 3. Return current_string (fully decoded)
-#
 # Applications: Decode string, parse nested structures, directory paths, expression trees.
 # ================================================================
 
@@ -770,13 +746,15 @@ class NestedStructurePattern:
     TC: O(n) where n = length of decoded string (can be larger than input)
     SC: O(n) - stack depth proportional to nesting levels
     
-    How it works:
-    1. Stack stores (previous_string, repeat_count) for each nesting level
-    2. Build current string character by character
-    3. On '[': save current context to stack, reset for nested level
-    4. On ']': pop context, decode current level: prev_string + count * current_string
-    5. Continue building outward from innermost to outermost
-    
+    Steps:
+    1. Initialize stack, curr_str = "", curr_num = 0
+    2. For each character in s:
+       a. If digit: accumulate into curr_num (curr_num = curr_num * 10 + int(char))
+       b. If '[': push (curr_str, curr_num) onto stack, reset curr_str and curr_num to ""/ 0
+       c. If ']': pop (prev_str, count), set curr_str = prev_str + count * curr_str
+       d. If letter: append to curr_str
+    3. Return curr_str (fully decoded result)
+
     Why stack works:
     - Each nesting level needs to remember context
     - Inner levels decode first, then outer levels multiply
@@ -846,14 +824,6 @@ print("Decoded:", sol.decodeString("2[abc]3[cd]ef"))  # "abcabccdcdcdef"
 # If no, push character. Stack naturally handles cascading removals where removing one pair
 # creates new adjacent pair. Join stack at end to form final string.
 #
-# TYPICAL STEPS:
-# 1. Initialize empty stack
-# 2. For each character:
-#    - If stack not empty AND top matches current: pop (cancel pair)
-#    - Else: push current character
-# 3. Join stack elements to form final string
-# 4. Return result
-#
 # Applications: Remove adjacent duplicates, backspace string compare, simplify path.
 # ================================================================
 
@@ -866,13 +836,13 @@ class StringConstructionPattern:
     TC: O(n) - process each character once
     SC: O(n) - stack stores characters of result string
     
-    How it works:
-    1. Stack builds result string character by character
-    2. When adding character, check if it matches top
-    3. If match: pop (adjacent duplicates removed)
-    4. If no match: push (add to result)
-    5. Cascading removal happens automatically (stack property)
-    
+    Steps:
+    1. Initialize empty stack
+    2. For each character in s:
+       a. If stack is not empty AND stack top equals current char: pop (cancel the pair)
+       b. Else: push current character onto stack
+    3. Join stack elements into final string and return
+
     Why stack works:
     - After removing pair, previous character becomes adjacent to next
     - Stack top is always the last unmatched character

@@ -62,12 +62,6 @@ Example: [[1,10], [2,3], [4,5]]
 - Pick [1,10] first → only get 1 interval (bad)
 - Pick [2,3] first (ends earliest) → can also pick [4,5] → 2 intervals ✓
 
-TYPICAL STEPS:
-1. Sort by END time
-2. Select first interval, track last_end
-3. For each remaining: if start > last_end, select it
-4. Return count
-
 RELATED: MERGE INTERVALS (LC 56) - NOT GREEDY
 - Merge overlapping intervals. NOT greedy because there's only ONE correct solution (no choices - you MUST merge overlaps). Sort by START time instead of END time.
 
@@ -91,12 +85,13 @@ class IntervalSelection:
     Output: 3
     Explanation: The longest chain is [1,2] -> [4,5] -> [7,8].
     
-    How it works:
+    Steps:
     1. Sort pairs by end time (greedy choice: earliest ending first)
-    2. Always select pair that finishes earliest
-    3. For each pair, if it doesn't overlap with last selected, take it
-    4. Count total pairs selected
-    5. Greedy works: earliest ending leaves most room for future selections
+    2. Select the first pair, set last_end to its end value
+    3. For each remaining pair:
+       a. If pair's start > last_end, select it and increment count
+       b. Update last_end to the selected pair's end value
+    4. Return total count of selected pairs
     """
     def findLongestChain(self, pairs: List[List[int]]) -> int: # LC 646
         """
@@ -133,14 +128,6 @@ PATTERN 2: JUMP GAME (MAXIMIZE REACH)
 
 PATTERN EXPLANATION: Determine reachability or minimum steps in array where each element represents maximum jump length. Track the maximum position reachable at each step. Greedy works because if we can reach position i, we should always try to reach as far as possible from i - there's no benefit to stopping short. For minimum jumps, use BFS-like level counting to track jumps needed.
 
-TYPICAL STEPS:
-1. Initialize max_reach = 0
-2. For each position i in array:
-   - If i > max_reach, return False (unreachable)
-   - Update max_reach = max(max_reach, i + nums[i])
-   - If max_reach >= last index, return True (early termination)
-3. Return True if completed loop
-
 Applications: Jump game, minimum jumps, gas station variants.
 ================================================================
 """
@@ -161,11 +148,13 @@ class JumpGame:
     Output: false
     Explanation: You will always arrive at index 3 no matter what. Its maximum jump length is 0, which makes it impossible to reach the last index.
     
-    How it works:
-    1. Track maximum position we can reach at each step
-    2. If current position is beyond max reach, it's unreachable
-    3. Update max reach based on jump length at current position
-    4. Greedy works: always maximize reach, no benefit to stopping short
+    Steps:
+    1. Initialize farthest = 0 to track max reachable index
+    2. For each position i in nums:
+       a. If i > farthest, return False (position is unreachable)
+       b. Update farthest = max(farthest, i + nums[i])
+       c. If farthest >= last index, return True (early termination)
+    3. Return True if loop completes without getting stuck
     """
     def canJump(self, nums: List[int]) -> bool: # LC 55
         """
@@ -198,15 +187,6 @@ print("Can jump to end:", sol.canJump([3,2,1,0,4]))  # False
 PATTERN 3: TWO POINTER GREEDY
 PATTERN EXPLANATION: Optimize by choosing between two ends of array. Start with pointers at leftmost and rightmost positions. At each step, calculate result with current pointers and decide which pointer to move. Key insight: move the pointer that limits (bottlenecks) the result. Moving the better pointer would only make things worse, while moving the limiting pointer might find a better option.
 
-TYPICAL STEPS:
-1. Initialize left = 0, right = len(array) - 1
-2. Initialize result variable
-3. While left < right:
-   - Calculate current result with pointers
-   - Update best result
-   - Move pointer that limits the result
-4. Return best result
-
 Applications: Container with most water, trapping rain water, two sum in sorted array.
 ================================================================
 """
@@ -224,12 +204,14 @@ class TwoPointerGreedy:
     Output: 49
     Explanation: The above vertical lines are represented by array [1,8,6,2,5,4,8,3,7]. In this case, the max area of water (blue section) the container can contain is 49 goes from index 1 (8) to index 8 (7).
     
-    How it works:
-    1. Water contained = min(height[left], height[right]) * (right - left)
-    2. Height is limited by shorter line (bottleneck)
-    3. Moving shorter line might find taller line and increase water
-    4. Moving taller line only decreases width and can't increase water
-    5. Greedy works: always move the limiting pointer
+    Steps:
+    1. Initialize left = 0, right = len(height) - 1, max_water = 0
+    2. While left < right:
+       a. Calculate current water = min(height[left], height[right]) * (right - left)
+       b. Update max_water = max(max_water, current_water)
+       c. If height[left] < height[right], move left pointer inward
+       d. Else move right pointer inward (move the shorter/limiting line)
+    3. Return max_water
     """
     def maxArea(self, height: List[int]) -> int: # LC 11
         """
@@ -278,13 +260,6 @@ Why not just greedy without heap?
 - Greedy alone: might need future information you don't have yet
 - Heap solution: make optimistic choices, use heap to retroactively optimize
 
-TYPICAL STEPS:
-1. Process elements sequentially (or sort first)
-2. Make optimistic greedy choices
-3. Use heap to track choices that can be "swapped" or "revised"
-4. When constraint violated, use heap to find and fix worst past choice
-5. Repeat until all elements processed
-
 Applications: Resource allocation, task scheduling, k-way merges, capital optimization.
 ================================================================
 """
@@ -310,12 +285,14 @@ class HeapGreedy:
     - 3→4: climb 3, use bricks (5-3=2 left)
     - 4→5: climb 5, need 5 bricks but only have 2 ❌
     
-    How it works:
-    1. Greedy strategy: Save ladders for BIGGEST climbs (but we don't know future!)
-    2. Solution: Use ladders OPTIMISTICALLY, track in min heap
-    3. When out of ladders, swap SMALLEST ladder-climb for bricks (heap gives us this)
-    4. This ensures ladders end up on the biggest climbs
-    5. Greedy works: retrospectively optimizing ensures optimal resource allocation
+    Steps:
+    1. For each upward climb between buildings:
+       a. Push the climb height onto a min heap (use ladder optimistically)
+       b. If heap size exceeds available ladders:
+          i.  Pop the smallest climb height from the heap
+          ii. Subtract that height from bricks
+          iii. If bricks < 0, return current index (can't proceed)
+    2. Return len(heights) - 1 if all buildings are reachable
     """
     def furthestBuilding(self, heights: List[int], bricks: int, ladders: int) -> int: # LC 1642
         """
@@ -394,14 +371,6 @@ two pointers. Greedy works because assigning smallest item to smallest satisfiab
 leaves larger items for larger targets. Sort both arrays in ascending order and greedily
 match from smallest to largest.
 
-TYPICAL STEPS:
-1. Sort both items array and targets array
-2. Initialize two pointers i=0, j=0
-3. While both pointers in bounds:
-   - If items[i] satisfies targets[j], make assignment, increment both
-   - Else, move to next target (current item too large)
-4. Return count of successful assignments
-
 Applications: Assign cookies, distribute candies, task assignment with constraints.
 ================================================================
 """
@@ -414,11 +383,12 @@ class DistributionGreedy:
     
     Return maximum number of content children.
     
-    How it works:
-    1. Sort both greed factors and cookie sizes
-    2. Try to satisfy each child with smallest cookie that works
-    3. Greedy works: wasting small cookies on greedy children is suboptimal
-    4. Match smallest available cookie to least greedy unsatisfied child
+    Steps:
+    1. Sort greed factors g and cookie sizes s in ascending order
+    2. Initialize child pointer = 0
+    3. For each cookie size in s:
+       a. If child < len(g) and cookie_size >= g[child], increment child pointer
+    4. Return child pointer (total children satisfied)
     """
     def findContentChildren(self, g: List[int], s: List[int]) -> int:
         """
@@ -459,14 +429,6 @@ and greedily extending partitions. Key insight: once we see a character, we must
 all its occurrences in current partition. Track the furthest position we must reach before
 closing current partition, then start new partition.
 
-TYPICAL STEPS:
-1. Precompute last occurrence of each character/element
-2. Initialize partition start and end boundaries
-3. For each position:
-   - Update partition end to max(end, last_occurrence[char])
-   - If reached partition end, close partition and start new one
-4. Return list of partition sizes or boundaries
-
 Applications: Partition labels, split array into consecutive subsequences, string construction.
 ================================================================
 """
@@ -477,15 +439,15 @@ class StringPartitioning:
     each letter appears in at most one part. Return a list of integers representing the
     size of these parts.
     
-    How it works:
-    1. Precompute last occurrence index for each character
-    2. Track current partition boundary (end)
-    3. For each character, GREEDY CHOICE: immediately commit to extending current partition 
-       to include its last occurrence (no backtracking, no trying alternatives)
-    4. Keep extending until we reach partition boundary, then close it (all chars complete)
-    5. Why greedy works: once we see a character, we MUST include all its occurrences in 
-       current partition. Extending to furthest occurrence guarantees this while maximizing 
-       number of partitions (we close as soon as possible)
+    Steps:
+    1. Precompute last occurrence index for every character in s
+    2. Initialize partition_start = 0, partition_end = 0
+    3. For each index i and character in s:
+       a. Update partition_end = max(partition_end, last_occurrence[char])
+       b. If i == partition_end, close partition:
+          i.  Append (partition_end - partition_start + 1) to result
+          ii. Set partition_start = i + 1
+    4. Return result list of partition sizes
     """
     def partitionLabels(self, s: str) -> List[int]:
         """

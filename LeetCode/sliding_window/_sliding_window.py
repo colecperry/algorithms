@@ -306,15 +306,6 @@ SLIDING WINDOW PATTERNS
 # PATTERN 1: FIXED WINDOW - NUMERIC TRACKING
 # PATTERN EXPLANATION: Window size k is fixed and given. Calculate sum/product/aggregate for initial window of k elements, then slide window one position at a time. Remove leftmost element and add new rightmost element, updating aggregate. Avoid recalculating entire window each time by reusing previous result.
 #
-# TYPICAL STEPS:
-# 1. Calculate aggregate for initial window [0, k-1]
-# 2. For each position from k to n-1:
-#    - Remove element at (right - k) from window
-#    - Add element at right to window
-#    - Update aggregate
-#    - Track optimal result
-# 3. Return maximum/minimum aggregate found
-#
 # Applications: Max sum of k elements, average of k elements, max/min in fixed window.
 # ================================================================
 
@@ -325,13 +316,14 @@ class FixedNumericPattern:
     TC: O(n) - calculate initial window O(k), slide through remaining O(n-k), each slide O(1)
     SC: O(1) - only store window_sum and max_avg variables
     
-    How it works:
-    1. Calculate sum of first k elements
-    2. This is our initial window
-    3. Slide window: subtract leftmost, add rightmost
-    4. Update max average after each slide
-    5. Return maximum average found
-    
+    Steps:
+    1. Calculate sum of first k elements (initial window)
+    2. Slide window from index k to end:
+       a. Subtract element leaving on the left (nums[right - k])
+       b. Add element entering on the right (nums[right])
+       c. Update max_sum if new window_sum is larger
+    3. Return max_sum / k as the maximum average
+
     Why it's efficient:
     - Initial calculation: O(k)
     - Each slide: O(1) (one subtraction, one addition)
@@ -380,17 +372,6 @@ print("Max average:", sol.findMaxAverage([5], 1))  # 5.0
 # PATTERN 2: FIXED WINDOW - FREQUENCY MATCHING
 # PATTERN EXPLANATION: Window size equals pattern length. Build frequency maps for both pattern and current window. Slide window while maintaining frequency map - decrement count for outgoing character, increment for incoming character. Compare frequency maps at each position to detect matches (anagrams, permutations).
 #
-# TYPICAL STEPS:
-# 1. Build frequency map for target pattern
-# 2. Build frequency map for initial window (first k characters)
-# 3. Check if initial window matches pattern
-# 4. Slide window through rest of string:
-#    - Decrement frequency of outgoing character (left)
-#    - Increment frequency of incoming character (right)
-#    - Remove character from map if count becomes 0
-#    - Check if current window matches pattern
-# 5. Return all positions where match occurs
-#
 # Applications: Find anagrams, permutation in string, pattern matching with frequency.
 # ================================================================
 
@@ -405,15 +386,16 @@ class FixedFrequencyPattern:
         - Total: O(n + m) = O(n)
     SC: O(1) - frequency maps bounded by alphabet size (26 lowercase letters)
     
-    How it works:
+    Steps:
     1. Build frequency map for pattern p
-    2. Build frequency map for first k=len(p) characters of s
-    3. If maps match, found anagram at index 0
-    4. Slide window:
-       - Remove outgoing character (decrement count)
-       - Add incoming character (increment count)
-       - Compare maps to check if current window is anagram
-    5. Return all starting indices where anagrams found
+    2. Build frequency map for first len(p) characters of s (initial window)
+    3. If maps match, record index 0 as an anagram start
+    4. Slide window from index len(p) to end:
+       a. Increment count of incoming character on the right
+       b. Decrement count of outgoing character on the left
+       c. Remove outgoing character from map if its count reaches 0
+       d. If window map matches pattern map, record current start index
+    5. Return list of all recorded anagram start indices
     """
     def findAnagrams(self, s: str, p: str) -> List[int]: # LC 438
         if len(p) > len(s):
@@ -479,7 +461,7 @@ print("Anagram indices:", sol.findAnagrams("abab", "ab"))  # [0, 1, 2]
 # ================================================================
 # PATTERN 3: VARIABLE WINDOW - OPTIMIZE (MAXIMIZE/MINIMIZE)
 # PATTERN EXPLANATION: Window size varies based on constraints. Expand window by moving right pointer, contract by moving left pointer. Two sub-patterns with different shrinking logic:
-# 
+#
 # MAXIMIZE (longest/largest):
 #   - Expand until constraint violated
 #   - Shrink ONLY while constraint violated
@@ -489,26 +471,6 @@ print("Anagram indices:", sol.findAnagrams("abab", "ab"))  # [0, 1, 2]
 #   - Expand until constraint satisfied
 #   - Shrink WHILE constraint still satisfied
 #   - Track minimum window size seen
-#
-# TYPICAL STEPS (MAXIMIZE):
-# 1. Initialize left=0, track window state
-# 2. For right from 0 to n-1:
-#    - Add arr[right] to window state
-#    - While constraint violated:
-#      * Remove arr[left] from window state
-#      * Increment left
-#    - Update maximum length
-# 3. Return maximum
-#
-# TYPICAL STEPS (MINIMIZE):
-# 1. Initialize left=0, track window state
-# 2. For right from 0 to n-1:
-#    - Add arr[right] to window state
-#    - While constraint satisfied:
-#      * Update minimum length
-#      * Remove arr[left] from window state
-#      * Increment left
-# 3. Return minimum
 #
 # Applications: Longest substring without repeating, minimum window substring, longest k distinct.
 # ================================================================
@@ -521,12 +483,16 @@ class MaximizeWindowPattern:
     TC: O(n) - right pointer visits each character once O(n), left pointer moves at most n times total O(n)
     SC: O(min(n, alphabet_size)) - set stores unique chars in window
     
-    How it works:
-    1. Expand window by moving right pointer
-    2. Track characters in current window with set
-    3. If duplicate found (constraint violated), shrink from left until duplicate removed
-    4. Track maximum window size seen
-    
+    Steps:
+    1. Initialize left=0, empty set to track characters in window
+    2. For each right pointer position:
+       a. While s[right] already in set (duplicate found):
+          - Remove s[left] from set
+          - Increment left
+       b. Add s[right] to set
+       c. Update max_length with current window size (right - left + 1)
+    3. Return max_length
+
     Shrinking logic (MAXIMIZE):
     - Shrink ONLY when constraint violated (duplicate found)
     - Once valid again, stop shrinking and continue expanding
@@ -580,12 +546,18 @@ class MinimizeWindowPattern:
     TC: O(n + m) where n = len(s), m = len(t)
     SC: O(m) - frequency maps for pattern and window
     
-    How it works:
-    1. Build frequency map for target string t
-    2. Expand window until all characters from t are included
-    3. Once valid, shrink from left WHILE still valid to find minimum
-    4. Track minimum valid window size
-    
+    Steps:
+    1. Build frequency map for target string t; track required unique char count
+    2. Expand window by moving right pointer:
+       a. Add s[right] to window frequency map
+       b. If its count matches the required count in t, increment formed
+    3. While window is valid (formed == required), shrink from left:
+       a. Update min_length and min_left if current window is smaller
+       b. Remove s[left] from window frequency map
+       c. If that removal breaks a required frequency, decrement formed
+       d. Increment left
+    4. Return the minimum window substring, or "" if none found
+
     Shrinking logic (MINIMIZE):
     - Shrink WHILE constraint still satisfied (all chars present)
     - Stop when window becomes invalid
@@ -663,15 +635,6 @@ print("Minimum window:", sol_min.minWindow("a", "a"))  # "a"
 # PATTERN 4: VARIABLE WINDOW - COUNT ALL VALID
 # PATTERN EXPLANATION: Count total number of valid subarrays/substrings rather than finding one optimal window. For each position where window becomes valid, count all subarrays ending at current right pointer. Key insight: if window [left, right] is valid, there are (right - left + 1) valid subarrays ending at right.
 #
-# TYPICAL STEPS:
-# 1. Initialize left=0, count=0
-# 2. For right from 0 to n-1:
-#    - Add arr[right] to window
-#    - While constraint violated: shrink from left
-#    - Once valid, add (right - left + 1) to count
-#      (counts all subarrays ending at right)
-# 3. Return total count
-#
 # Applications: Count subarrays with sum ≤ k, count substrings satisfying condition.
 # ================================================================
 
@@ -686,15 +649,16 @@ class CountAllPattern:
     TC: O(n) - right expands n times, left contracts at most n times total
     SC: O(1) - only track counts for 0s and 1s
     
-    How it works:
-    1. Expand window by adding character at right
-    2. Track count of 0's and 1's in window
-    3. While both counts exceed k (invalid), shrink from left
-    4. For each valid window ending at right, count ALL subarrays:
-       - [left, right], [left+1, right], ..., [right, right]
-       - Total: (right - left + 1) new subarrays
-    5. Sum all counts
-    
+    Steps:
+    1. Initialize left=0, count=0, zeros=0, ones=0
+    2. For each right pointer position:
+       a. Increment zeros or ones based on s[right]
+       b. While both zeros > k and ones > k (constraint violated):
+          - Decrement zeros or ones based on s[left]
+          - Increment left
+       c. Add (right - left + 1) to count for all valid subarrays ending at right
+    3. Return total count
+
     Why (right - left + 1):
     - Window [a,b,c] ending at right has 3 subarrays: "c", "bc", "abc"
     - Window [a,b] ending at right has 2 subarrays: "b", "ab"

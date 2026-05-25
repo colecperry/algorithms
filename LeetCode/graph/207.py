@@ -19,70 +19,51 @@
 # Explanation: There are a total of 2 courses to take. 
 # To take course 1 you should have finished course 0, and to take course 0 you should also have finished course 1. So it is impossible.
 
-    # How to Solve: BFS with Kahn's Algorithm
-        # Kahn's Algorithm - helps detect cycles in a directed graph, and gives an order in which you can complete all tasks
-        # How does it apply to this problem? 
-            # Each course is a node
-            # Each prereq pair [a,b] is a directed edge b -> a (prereq -> class)
-            # If the graph has no cycles, you can finish all courses, if not, you can't
-
-        # Step by Step: Kahn's Algorithm (BFS for Topological Sort)
-            # 1. Build an adjacency list: adj_list[b] = a
-                # - every prereq pair [a, b] means to take course a, you must take course b first
-                # - in Kahn's algorithm, we need to flip the direction -> for each course we just finished, what other courses does it unlock?
-            # 2. Build an in-degree array: in_degree[a] = a list of the number prereq's a course has to see when it can be taken (when it reaches 0)
-            # 3. Start with courses that can be taken right away (in_degree = 0), and add them to a queue
-            # 4. Start BFS:
-                # - Take a course out of the queue
-                # - Count that you've taken that course
-                # - For each course that depends on it
-                    # - Subtract 1 from it's in-degree
-                    # - If it's in-degree becomes 0 -> it's ready to take, add to the queue
-            # 5. Final Check -> check that total number of courses taken == total number of courses -> return True, if not, return False. This works because if there's a cycle, some courses in_degrees will never reach 0
-
-    # ===============================
-    # ⏱️ TIME COMPLEXITY
-    # ===============================
-
-    # Let n be the number of courses (nodes), and p be the number of prerequisites (edges)
-
-    # - Building the adjacency list takes O(p)
-    # - Building the in-degree array also takes O(p)
-    # - We process each course at most once → O(n)
-    # - For each course, we look at its neighbors (edges) → total O(p)
-
-    # ✅ Total time complexity: O(n + p)
-
-    # ===============================
-    # 📦 SPACE COMPLEXITY
-    # ===============================
-
-    # - Adjacency list: O(p) space to store the edges
-    # - In-degree array: O(n)
-    # - Queue for BFS: O(n) in the worst case
-    # - Optional: a visited set or result list could take O(n)
-
-    # ✅ Total space complexity: O(n + p)
+# Kahn's Algorithm (BFS Topological Sort) - High-Level Steps:
+# 1. Build graph + calculate in-degrees
+# - Create adjacency list: prereq → [dependent courses]
+# - Count in-degrees for each node
+# 2. Initialize queue with in-degree 0 nodes
+# - These have no prerequisites, ready to process
+# 3. Process queue (BFS):
+# - Remove node from queue
+# - For each neighbor: decrease in-degree by 1
+# - If neighbor's in-degree becomes 0 → add to queue
+# 4. Check if all nodes processed
+# - If yes → valid order ✓
+# - If no → cycle exists ✗
 
 from typing import List
 from collections import defaultdict, deque
 
 class Solution:
     def canFinishBFS(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+        """
+        TC: O(V + E)
+            - Build graph and in-degree: O(E) - iterate through all prereqs (prereq list has E enteries -> each entry = one edge)
+            - Initialize queue: O(V) - check all courses for in-degree == 0
+            - Process queue: O(V) - each course dequeued at most once worst case (all courses taken)
+            - Update neighbors: O(E) - each edge traversed once via graph[course] worst case (all courses taken)
+            - Total: O(E) + O(V) + O(V) + O(E) = O(V + E)
+
+        SC: O(V + E)
+            - Graph (adjacency list): O(V + E) - stores all verticies and edges
+            - In-degree array: O(V) - one entry per course
+            - Queue: O(V) worst case - all courses with no prereqs at start
+        """
         # Step 1: Build graph and in-degree count
-        adj_list = defaultdict(list)  # adj list : prereq -> list of courses that it unlocks
+        adj_list = defaultdict(list)  # adj list : prereq -> list of courses it unlocks
         in_degree = [0] * numCourses  # in-degree for each course (num of prereqs it has)
 
-        for course, prereq in prerequisites:
-            adj_list[prereq].append(course) # prereq -> courses it unlocks
-            in_degree[course] += 1 # count # of prereqs for each course
+        for course, prereq in prerequisites: # Build in degree array and adj list
+            adj_list[prereq].append(course) 
+            in_degree[course] += 1 
 
         # Initialize an empty queue for BFS search
         queue = deque()
 
-        # Loop through all courses
+        # Init BFS with courses w/ no prereq's
         for i in range(numCourses):
-            # If a course has no prerequisites, add it to the queue
             if in_degree[i] == 0:
                 queue.append(i)
 
@@ -95,9 +76,9 @@ class Solution:
 
             # Reduce in-degree for neighbors (unlocked any new courses?)
             for unlocked_course in adj_list[current]:
-                in_degree[unlocked_course] -= 1 # update # of prereq's for each course after we took current prereq
-                if in_degree[unlocked_course] == 0: # All prereqs satisfied
-                    queue.append(unlocked_course) # Course is now ready to take
+                in_degree[unlocked_course] -= 1 # took the course, reduce it's neighbor's prereq count for it
+                if in_degree[unlocked_course] == 0: # if course has 0 in deg, it has no prereq's
+                    queue.append(unlocked_course) # take the class
 
         # Step 4: If we processed all courses, there's no cycle
         return completed_courses == numCourses

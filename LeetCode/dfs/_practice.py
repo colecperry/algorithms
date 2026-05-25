@@ -1,59 +1,53 @@
-from typing import Optional
+# 543. Diameter of Binary Tree
 
-class TreeNode:
+# Tree, Depth-First Search, Binary Tree
+
+# Given the root of a binary tree, return the length of the diameter of the tree.
+
+# The diameter of a binary tree is the length of the longest path between any two nodes in a tree. This path may or may not pass through the root.
+
+# The length of a path between two nodes is represented by the number of edges between them.
+
+# Example 1:
+# 
+#         1
+#        / \
+#       /   \
+#      2     3
+#     / \
+#    4   5
+#
+# Input: root = [1,2,3,4,5]
+# Output: 3
+# Explanation: 3 is the length of the path [4,2,1,3] or [5,2,1,3].
+
+# Example 2: 
+# Input: root = [1,2]
+# Output: 1
+
+# Definition for a binary tree node.
+class TreeNode(object):
     def __init__(self, val=0, left=None, right=None):
         self.val = val
         self.left = left
         self.right = right
 
-class Solution:
-    def minDepth(self, root: Optional[TreeNode]) -> int:
-        if not root:
-            return 0
-        # Base Case -> Leaf node
-        if not root.left and not root.right:
-            return 1 
-        
-        # Recursive Case -> 1 child: Explore one direction
-        if not root.left:
-            right = self.minDepth(root.right)
-            return 1 + right
-        
-        elif not root.right:
-            left = self.minDepth(root.left)
-            return 1 + left
-        
-        # Recursive Case -> 2 children: Explore left and right
-        else:
-            left = self.minDepth(root.left)
-            right = self.minDepth(root.right)
+class Solution(object):
+    def diameterOfBinaryTree(self, root):
+        max_diameter = float('-inf')
+        def dfs(node):
+            if not node:
+                return 0
+            left_depth = 1 + dfs(node.left)
+            right_depth = 1 + dfs(node.right)
+            max_diameter = max(max_diameter, left_depth + right_depth)
+            return 
 
-            return 1 + min(left, right)
+        return max_diameter
+        
 
+my_tree = TreeNode(1, TreeNode(2, TreeNode(4, None, None), TreeNode(5, None, None)), TreeNode(3, None, None))
+my_tree_2 = TreeNode(1, TreeNode(2), None)
 my_solution = Solution()
-
-root1 = TreeNode(3)
-root1.left = TreeNode(9)
-root1.right = TreeNode(20)
-root1.right.left = TreeNode(15)
-root1.right.right = TreeNode(17)
-
-print(my_solution.minDepth(root1)) # 2
-
-#               2
-#                \
-#                 3
-#                  \
-#                   4 
-#                    \
-#                     5
-#                      \ 
-#                       6
-
-root2 = TreeNode(2)
-root2.right = TreeNode(3)
-root2.right.right = TreeNode(4)
-root2.right.right.right = TreeNode(5)
-root2.right.right.right.right = TreeNode(6)
-
-print(my_solution.minDepth(root2)) # 5
+print(my_solution.diameterOfBinaryTree(my_tree))
+print(my_solution.diameterOfBinaryTree(my_tree_2))

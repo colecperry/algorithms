@@ -35,8 +35,8 @@ APPROACH:
 2. Take every other element starting from index 0 (these are the minimums of optimal pairs)
 3. Sum them up
 
-TC: O(n log n) - we sort the array, then iterate through it once to build the ans
-SC: O(n) for python's timsort's merge operations, although some interviewers consider this 0(1)
+TC: O(n log n) - dominated by sorting; iterating once is O(n) but doesn't change overall complexity
+SC: O(1) auxiliary space (we don't create extra data structures), though Python's Timsort uses O(n) internally
 """
 
 from typing import List

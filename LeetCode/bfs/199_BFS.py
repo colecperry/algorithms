@@ -66,19 +66,24 @@ class TreeNode:
         self.right = right
 class Solution:
     def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
-        if not root: # Edge case for empty tree
+        """
+        TC: O(n) -> we process each node once
+        SC: O(w) -> the queue gets as wide as the largest tree level
+        """
+        if not root:
             return []
-        queue = deque([root]) # init queue with root for BFS
-        res = []
+        output = []
+        queue = deque([root])
         while queue:
-            for _ in range(len(queue)): # level based logic
-                node = queue.popleft() # pop off the next node in the level
-                if node.left:
-                    queue.append(node.left) # add it's children
+            for _ in range(len(queue)): # BFS loops "level" times
+                node = queue.popleft() # queue pops right node last
+                if node.left: # Append left then right
+                    queue.append(node.left)
                 if node.right:
                     queue.append(node.right)
-            res.append(node.val) # only append last node on each level (saved in node)
-        return res
+            output.append(node.val) # last node popped from queue is rightmost
+        
+        return output
     
 sol = Solution()
 

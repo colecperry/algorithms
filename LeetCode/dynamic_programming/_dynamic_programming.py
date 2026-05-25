@@ -265,14 +265,7 @@ PATTERN EXPLANATION: Make optimal decisions at each position based on previous p
 
 Common in problems where you process elements left-to-right and current decision is affected by previous decisions. Often can be space-optimized to O(1) by keeping only last few values.
 
-TYPICAL STEPS:
-1. Define dp[i] = optimal solution up to position i
-2. Identify base case (dp[0], dp[1])
-3. Find recurrence relation: how dp[i] relates to previous values
-4. Fill dp array from left to right
-5. Return dp[n-1] or final computed value
-6. (Optional) Optimize space by keeping only needed previous values
-
+#
 Applications: House robber, climbing stairs, min cost climbing, decode ways.
 =========================================================================
 """
@@ -289,11 +282,14 @@ class LinearDP:
     # Explanation: Rob house 1 (money = 1) and then rob house 3 (money = 3).
     # Total amount you can rob = 1 + 3 = 4.
     
-    How it works:
-    1. At each house, decide: rob it or skip it
-    2. If rob current: can't rob prev, so add to max from 2 houses ago
-    3. If skip current: take max from previous house
-    4. Pattern: dp[i] = max(dp[i-1], dp[i-2] + nums[i])
+    Steps:
+    1. Define dp[i] = max money robbing from first i houses; set dp[0] = 0, dp[1] = nums[0]
+    2. For each house i from 2 to n, apply the recurrence:
+       a. Option A — skip house i: carry forward dp[i-1]
+       b. Option B — rob house i: add nums[i-1] to dp[i-2]
+       c. dp[i] = max(option A, option B)
+    3. Return dp[n] (max money after considering all houses)
+    4. (Optional) Replace dp array with two variables to reduce space to O(1)
     """
     # 1D DP with explicit DP array -> LC 198
     def rob_with_dp_array(self, nums: List[int]) -> int:
@@ -336,15 +332,8 @@ PATTERN 2: 2D GRID DP (PATH PROBLEMS)
 
 PATTERN EXPLANATION: Navigate a 2D grid where each cell's value depends on cells above and/or to the left. Build solution by filling grid from top-left to bottom-right. Each cell represents optimal solution to reach that position. Common in counting paths, finding minimum/maximum path sums, or grid traversal with constraints.
 
-TYPICAL STEPS:
-1. Define dp[i][j] = optimal solution for cell (i, j)
-2. Initialize first row and/or first column (base cases)
-3. Fill grid row by row or column by column
-4. Recurrence: dp[i][j] = f(dp[i-1][j], dp[i][j-1], grid[i][j])
-5. Return dp[m-1][n-1] (bottom-right corner)
-6. (Optional) Space optimize to O(min(m,n)) by keeping only current row
-
-Applications: Unique paths, minimum path sum, dungeon game, maximal 
+#
+Applications: Unique paths, minimum path sum, dungeon game, maximal
 square.
 =========================================================================
 """
@@ -359,11 +348,14 @@ class GridDP:
     Input: m = 3, n = 7
     Output: 28
     
-    How it works:
-    1. To reach any cell, robot must come from top or left
-    2. Number of paths to cell = paths from top + paths from left
-    3. Base case: first row and column's cells can only come from one direction (1 unique path each)
-    4. Pattern: dp[i][j] = dp[i-1][j] + dp[i][j-1]
+    Steps:
+    1. Define dp[i][j] = number of unique paths to reach cell (i, j)
+    2. Initialize base cases:
+       a. Set every cell in the first column to 1 (only one way: go straight down)
+       b. Set every cell in the first row to 1 (only one way: go straight right)
+    3. For each remaining cell (i, j), apply the recurrence:
+       a. dp[i][j] = dp[i-1][j] + dp[i][j-1] (paths from above + paths from left)
+    4. Return dp[m-1][n-1] (total paths to bottom-right corner)
     """
     def uniquePaths(self, m: int, n: int) -> int: # LC 62
         """
@@ -407,19 +399,9 @@ print("Unique Paths (3x3):", sol.uniquePaths(3, 3))  # 6
 =========================================================================
 PATTERN 3: 0/1 KNAPSACK (SUBSET SELECTION) - BOTTOM-UP APPROACH
 
-PATTERN EXPLANATION: Choose items to include or exclude to meet a target constraint (sum, weight, capacity). Each item can be used at most once. 
+PATTERN EXPLANATION: Choose items to include or exclude to meet a target constraint (sum, weight, capacity). Each item can be used at most once.
 
 Use dynamic programming with a 1D array to track which target values are achievable. Build up possible sums iteratively by processing each item once.
-
-TYPICAL STEPS (BOTTOM-UP):
-1. Check if problem is solvable (e.g., if sum is odd, can't partition equally)
-2. Define target value (e.g., total_sum / 2 for equal partition)
-3. Create dp array: dp[j] = "Can we make sum j?"
-4. Initialize base case: dp[0] = True (can always make sum 0)
-5. For each item:
-   - Iterate BACKWARDS from target to item value
-   - If dp[j - item] is True, then dp[j] = True
-6. Return dp[target]
 
 WHY BACKWARDS? 0/1 knapsack makes sure we only use Items ONCE by iterating backwards.
 
@@ -448,6 +430,7 @@ VARIATION: Unbounded Knapsack (items reusable)
       coin=5, i=5:  dp[5] = dp[0]+1 = 1   (one coin)
       coin=5, i=10: dp[10] = dp[5]+1 = 2  (two coins) ✓
 
+#
 Applications: Partition equal subset, target sum, subset sum, coin change (count ways).
 =========================================================================
 """
@@ -463,12 +446,13 @@ class KnapsackDP:
     Output: true
     Explanation: The array can be partitioned as [1, 5, 5] and [11].
     
-    How it works (Bottom-Up):
-    1. If total sum is odd, can't partition equally -> return False
-    2. Problem becomes: can we find subset with sum = total/2?
-    3. Create dp array where dp[j] = "Can we make sum j?"
-    4. For each number, iterate backwards updating which sums are achievable
-    5. Return dp[target] - can we make the target sum?
+    Steps:
+    1. If total sum is odd, return False immediately (can't partition equally)
+    2. Set target = total // 2
+    3. Create dp array of size target + 1; initialize dp[0] = True, rest False
+    4. For each num in nums, iterate backwards from target down to num:
+       a. If dp[j - num] is True, set dp[j] = True (num bridges the gap)
+    5. Return dp[target]
     """
     def canPartition(self, nums: List[int]) -> bool: # LC 416
         """
@@ -538,14 +522,7 @@ PATTERN 4: LONGEST INCREASING SUBSEQUENCE (SINGLE SEQUENCE)
 
 PATTERN EXPLANATION: Find the longest subsequence from an array where elements are in increasing order (maintain relative positions from original array). For each position, look back at all previous positions and find the longest increasing subsequence ending at those positions. Current position extends the best valid previous subsequence.
 
-TYPICAL STEPS:
-1. Define dp[i] = length of LIS ending at index i
-2. Initialize all dp[i] = 1 (each element is subsequence of length 1)
-3. For each position i, check all previous positions j < i:
-   - If nums[j] < nums[i], can extend subsequence ending at j
-   - dp[i] = max(dp[i], dp[j] + 1)
-4. Return max(dp) (longest among all positions)
-
+#
 Applications: LIS, Russian doll envelopes, maximum length of pair chain.
 =========================================================================
 """
@@ -563,12 +540,12 @@ class LISDP:
     Output: 4
     Explanation: The longest increasing subsequence is [2,3,7,101], therefore the length is 4.
     
-    How it works:
-    1. dp[i] = length of longest increasing subsequence ending at index i
-    2. For each position, look at all previous positions
-    3. If previous element is smaller, we can extend its subsequence
-    4. Pattern: dp[i] = max(dp[i], dp[j] + 1)
-        - Keep current length OR take previous length + 1 (adding current number)
+    Steps:
+    1. Initialize dp array of size n with all 1s (each element is its own subsequence)
+    2. For each position i from 1 to n-1, check all previous positions j < i:
+       a. If nums[j] < nums[i], nums[i] can extend the subsequence ending at j
+       b. dp[i] = max(dp[i], dp[j] + 1)
+    3. Return max(dp) (longest subsequence ending at any position)
     """
     def lengthOfLIS(self, nums: List[int]) -> int: # LC 300
         """
@@ -629,14 +606,7 @@ PATTERN 5: LONGEST COMMON SUBSEQUENCE (TWO SEQUENCES)
 
 PATTERN EXPLANATION: Find the longest subsequence common to two sequences while maintaining relative order in both. Compare characters from both strings and build solution in a 2D table. When characters match, extend the common subsequence. When they don't match, take the best result from either excluding current character from first string or second string.
 
-TYPICAL STEPS:
-1. Define dp[i][j] = LCS length of text1[0:i] and text2[0:j]
-2. Base case: dp[0][j] = dp[i][0] = 0 (empty string has LCS 0)
-3. For each position (i, j):
-   - If text1[i-1] == text2[j-1]: dp[i][j] = dp[i-1][j-1] + 1
-   - Else: dp[i][j] = max(dp[i-1][j], dp[i][j-1])
-4. Return dp[m][n]
-
+#
 Applications: LCS, edit distance, shortest common supersequence, diff tools.
 =========================================================================
 """
@@ -652,11 +622,12 @@ class LCSDP:
     Output: 3  
     Explanation: The longest common subsequence is "ace" and its length is 3.
     
-    How it works:
-    1. Build 2D table where dp[i][j] = LCS of first i chars of text1 and 
-    first j chars of text2
-    2. If characters match, add 1 to LCS of prev chars: dp[i][j] = dp[i-1][j-1] + 1
-    3. If they don't match, take best LCS from excluding either char: dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+    Steps:
+    1. Define dp[i][j] = LCS length of text1[0:i] and text2[0:j]; initialize all cells to 0
+    2. For each character pair (i, j) starting at (1, 1):
+       a. If text1[i-1] == text2[j-1], characters match: dp[i][j] = dp[i-1][j-1] + 1
+       b. Otherwise, take the best from skipping one character: dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+    3. Return dp[m][n]
     """
     def longestCommonSubsequence(self, text1: str, text2: str) -> int: # LC 1143
         """ 
@@ -762,15 +733,8 @@ PATTERN 6: STATE MACHINE DP (MULTIPLE STATES)
 
 PATTERN EXPLANATION: Track multiple distinct states at each position with transitions between states. Each state represents a different condition or situation (holding stock, cooldown, sold, etc). At each step, can transition from one state to another with associated costs or profits. Must track optimal value for each state and compute transitions based on allowed moves.
 
-TYPICAL STEPS:
-1. Identify all possible states (e.g., hold, sold, cooldown)
-2. Define dp[i][state] = optimal value at position i in given state
-3. Initialize base cases for each state at position 0
-4. For each position, compute transitions between states
-5. Return best final state at last position
-6. (Optional) Space optimize to keep only current and previous states
-
-Applications: Stock trading with constraints, game states, state-dependent 
+#
+Applications: Stock trading with constraints, game states, state-dependent
 decisions.
 =========================================================================
 
@@ -797,14 +761,18 @@ class StateMachineDP:
     - sold: must have been holding, sell today
     - rest: either already resting or cooldown from sold
     
-    How it works:
-    1. Three states at each day: hold stock, just sold, or resting
-    2. Track max profit for each state
-    3. Transitions: can only buy from rest, must cooldown after sell
-    4. Pattern: 
-       - hold = Either I was holding yesterday and I'm still holding today, or I was resting yesterday and I bought today
-       - sold = I was holding stock yesterday and sold today
-       - rest = Either I was resting yesterday and I'm still resting today, or I sold yesterday so I must rest today
+    Steps:
+    1. Identify the three states: hold (own stock), sold (just sold today), rest (no stock, no cooldown)
+    2. Initialize base cases for day 0:
+       a. hold = -prices[0] (buy on day 0)
+       b. sold = 0 (can't sell on day 0)
+       c. rest = 0 (do nothing on day 0)
+    3. For each subsequent day i, compute state transitions:
+       a. hold = max(dp[i-1][hold], dp[i-1][rest] - prices[i])
+       b. sold = dp[i-1][hold] + prices[i]
+       c. rest = max(dp[i-1][rest], dp[i-1][sold])
+    4. Return max(dp[n-1][sold], dp[n-1][rest])
+    5. (Optional) Replace 2D array with three variables to reduce space to O(1)
     """
     def maxProfit_2d(self, prices: List[int]) -> int: # LC 309
         """

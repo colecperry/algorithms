@@ -69,7 +69,7 @@ class Solution: # BFS Solution
 
         # Step 4: Perform BFS
         while queue:
-            current = queue.popleft()
+            current = queue.popleft() # visit current node
 
             # If we reach the destination node, return True
             if current == destination:

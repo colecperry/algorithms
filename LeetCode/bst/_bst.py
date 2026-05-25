@@ -251,15 +251,7 @@ BST with pruning: O(h) time, O(h) space
 PATTERN 1: BST SEARCH/NAVIGATION
 
 PATTERN EXPLANATION: Navigate BST using the fundamental property that left < root < right. At each node, compare target with current value to decide which subtree to explore. This eliminates half the remaining nodes at each step, giving logarithmic time in balanced trees. Used for finding values, insertion points, or navigating based on value comparisons.
-
-TYPICAL STEPS:
-1. Check if current node is null (base case)
-2. Compare target with current node value
-3. If equal, found target
-4. If less, recurse/iterate left
-5. If greater, recurse/iterate right
-6. Return result (node, boolean, or position)
-
+#
 Applications: Search, find insertion point, find successor/predecessor, navigate to value.
 ================================================================
 """
@@ -272,11 +264,11 @@ class BSTSearch:
     TC: O(h) where h = height (log n average, n worst case for skewed tree)
     SC: O(h) for recursive call stack, O(1) for iterative
     
-    How it works:
-    1. Use BST property: left < root < right
-    2. Compare target with current node to decide direction
-    3. Recursively search left if target smaller, right if larger
-    4. Return node when found or null if doesn't exist
+    Steps:
+    1. If root is null, return None (base case — val not found)
+    2. If root.val == val, return root (found the node)
+    3. If val < root.val, recurse into the left subtree
+    4. If val > root.val, recurse into the right subtree
     """
     def searchBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]: # LC 700
         # Recursive approach
@@ -331,13 +323,7 @@ PATTERN EXPLANATION: In-order traversal (Left-Root-Right) of a BST always produc
 values in sorted ascending order. This is the most important BST property for solving
 problems. Use it when you need sorted data, need to find kth smallest, compare adjacent
 values, or validate ordering. Can track previous node to compare adjacent elements.
-
-TYPICAL STEPS:
-1. Traverse left subtree completely (smallest values)
-2. Process current node (add to result, compare with previous, etc.)
-3. Traverse right subtree completely (largest values)
-4. Result is in sorted order
-
+#
 Applications: Get sorted array, kth smallest, validate ordering, find pairs, mode.
 ================================================================
 """
@@ -350,11 +336,11 @@ class InOrderPattern:
     TC: O(n) - visit each node once in in-order traversal
     SC: O(n) for storing values + O(h) average for recursion stack
     
-    How it works:
-    1. Perform in-order traversal to get sorted sequence
-    2. In sorted sequence, minimum difference must be between adjacent elements
-    3. Compare each adjacent pair to find minimum difference
-    4. Return minimum difference found
+    Steps:
+    1. Run in-order traversal (left → root → right) to collect node values in sorted order
+    2. After traversal, the minimum difference must be between adjacent elements in the sorted list
+    3. Iterate through adjacent pairs and track the running minimum difference
+    4. Return the minimum difference found
     """
     def minDiffInBST(self, root: Optional[TreeNode]) -> int: # LC 783
         values = [] # Sorted BST list
@@ -405,14 +391,7 @@ As you traverse, tighten bounds: when going left, parent value becomes upper bou
 when going right, parent value becomes lower bound. Each node must stay within its
 inherited bounds. This pattern extends beyond validation to any problem needing to
 enforce value constraints based on ancestors.
-
-TYPICAL STEPS:
-1. Start with bounds (-inf, +inf)
-2. For each node, check if value within current bounds
-3. When recursing left, update upper bound to current value
-4. When recursing right, update lower bound to current value
-5. Return false if any node violates its bounds
-
+#
 Applications: Validate BST, count valid nodes, enforce constraints, range validation.
 ================================================================
 """
@@ -429,12 +408,12 @@ class ValidationPattern:
     TC: O(n) - visit each node once
     SC: O(h) - recursion stack depth
     
-    How it works:
-    1. Each node must be within bounds set by ancestors
-    2. Initially, root can be any value (-inf to +inf)
-    3. Going left: upper bound becomes parent value (all values must be < parent)
-    4. Going right: lower bound becomes parent value (all values must be > parent)
-    5. Any node outside its bounds means invalid BST
+    Steps:
+    1. Call validate(root, -inf, +inf) — root is unconstrained initially
+    2. At each node, check if node.val is within (min_val, max_val); return False if not
+    3. Recurse left: pass current node's value as the new upper bound
+    4. Recurse right: pass current node's value as the new lower bound
+    5. Return True only if both left and right subtrees are valid
     """
     def isValidBST(self, root: Optional[TreeNode]) -> bool: # LC 98
         def validate(node, min_val, max_val):
@@ -493,14 +472,7 @@ target range by pruning entire subtrees. If current node is below range minimum,
 left subtree (all smaller). If above range maximum, skip right subtree (all larger).
 Only explore both subtrees when current node is within range. This dramatically reduces
 nodes visited compared to checking every node.
-
-TYPICAL STEPS:
-1. Check if current node is null (base case)
-2. If node.val < low: skip left subtree, only search right
-3. If node.val > high: skip right subtree, only search left
-4. If low <= node.val <= high: process node and search both subtrees
-5. Combine results from valid nodes
-
+#
 Applications: Range sum, range count, range search, delete in range, collect range values.
 ================================================================
 """
@@ -519,12 +491,14 @@ class RangeQueryPattern:
     #
     # Range: [7, 15]
     
-    How it works:
-    1. Use BST property to prune search space
-    2. If node < low: entire left subtree is too small, skip it
-    3. If node > high: entire right subtree is too large, skip it
-    4. If in range: include node and check both subtrees
-    5. Only traverse paths that might contain valid nodes
+    Steps:
+    1. If root is null, return 0 (base case)
+    2. If root.val < low, prune the left subtree and recurse only right
+       a. All nodes to the left are even smaller — none can be in range
+    3. If root.val > high, prune the right subtree and recurse only left
+       a. All nodes to the right are even larger — none can be in range
+    4. If root.val is within [low, high], include root.val and recurse both subtrees
+    5. Return root.val + left sum + right sum
     """
     def rangeSumBST(self, root: Optional[TreeNode], low: int, high: int) -> int: # LC 938
         """
@@ -583,14 +557,7 @@ PATTERN EXPLANATION: Build BST from sorted array or convert BST to other structu
 For building from sorted array, use middle element as root to maintain balance, then
 recursively build left and right subtrees. This creates height-balanced BST with
 O(log n) height. For conversions, traverse in desired order and construct new structure.
-
-TYPICAL STEPS (Build from Sorted Array):
-1. Find middle element of current range (becomes root)
-2. Recursively build left subtree from left half
-3. Recursively build right subtree from right half
-4. Connect subtrees to root
-5. Return root
-
+#
 Applications: Convert sorted array to BST, flatten BST, serialize/deserialize, rebalance.
 ================================================================
 """
@@ -603,12 +570,14 @@ class BSTConstructionPattern:
     A height-balanced BST is a binary tree in which the depth of the two subtrees of every
     node never differs by more than one.
     
-    How it works:
-    1. Choose middle element as root (ensures balance)
-    2. Elements before middle go to left subtree
-    3. Elements after middle go to right subtree
-    4. Recursively build left and right subtrees
-    5. This guarantees height = O(log n)
+    Steps:
+    1. Compute mid = (left + right) // 2 and create a TreeNode with nums[mid] as root
+    2. Recursively call buildTree(left, mid - 1) and assign the result to root.left
+       a. Elements to the left of mid are all smaller — they form the left subtree
+    3. Recursively call buildTree(mid + 1, right) and assign the result to root.right
+       a. Elements to the right of mid are all larger — they form the right subtree
+    4. Return root so the caller can attach it as a child
+    5. Base case: if left > right, return None (empty subarray)
     """
     def sortedArrayToBST(self, nums: List[int]) -> Optional[TreeNode]: # LC 108
         """  

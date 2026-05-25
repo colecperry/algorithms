@@ -22,63 +22,59 @@
 # Input: nums = [1], target = 0
 # Output: -1
 
-# Tips to solve search2:
-    # Base case: if middle == target return middle
-
-    # Check if the middle is in the left sorted portion (middle >= left)
-        # If target is >= L and <= Middle -> Search Left
-        # Else search Right
-        # Update pointers
-    # Else (middle is in right sorted portion)
-        # If target >= Middle and <= R -> Search Right
-        # Else search left
-        # Update pointers
-
-
-nums1 = [4,5,6,7,0,1,2]
-target1 = 0
-
-nums2 = [4,5,6,7,0,1,2]
-target2 = 3
-
-nums3 = [1]
-target3 = 0
-
-nums4 = [5,1,3]
-target4 = 5
-
-nums5 = [3,4,5,6,7,0,1,2]
-target5 = 1
-
 class Solution(object):
     def search(self, nums, target):
+        """
+        - TC: O(log n) -> search space is halved each iteration
+        - SC: O(1)
+        """
         l = 0
         r = len(nums) - 1
 
-        while l <= r: # Create while loop
-            mid = (l + r) // 2 # Find the middle point of l and r pointers
-            if nums[mid] == target: 
+        while l <= r:
+            mid = (l + r) // 2
+            
+            if nums[mid] == target: # Found it
                 return mid
             
-            # Check if the left half is sorted
-            if nums[l] <= nums[mid]: 
-                if nums[l] <= target < nums[mid]: # Check if the target is in the left side half
-                    r = mid - 1 # If the target is in the left side half, move r one left of the middle
+            # Step 1: Find which side is sorted
+            # Step 2: See if target falls in sorted half
+            if nums[l] <= nums[mid]: # Left half is sorted (<=, not < — when 2 elements remain l and mid are equal)
+                if nums[l] <= target < nums[mid]: # Target in left half? (<= on l, < on mid)
+                    r = mid - 1
                 else:
-                    l = mid + 1 # If the target is not in the left side half, move l one right of the middle
-            else: # The right half is sorted
-                if nums[mid] < target <= nums[r]: # If the target is in the right side
-                    l = mid + 1 # Move the left pointer one right of the middle
-                else: # If the target is not in the right side
-                    r = mid - 1 # Move the right pointer one left of the middle
-        return -1 # If you don't find the target, return -1
+                    l = mid + 1
+            
+            else: # Right half is sorted
+                if nums[mid] < target <= nums[r]: # Target in right half? (< on mid, <= on r)
+                    l = mid + 1
+                else:
+                    r = mid - 1
+        
+        return -1
 
+"""
+- In rotated arrays, you can't just compare target to mid (rotation breaks ordering).
+- Example: [4,5,6,7,0,1,2], target=0, mid=7 → 0<7 suggests "go left" but target is right!
+- SOLUTION: One half is always sorted. by finding which side is sorted (not sorting the array, just identifying the sorted half), we can:
+    - Reliably check if target falls within that sorted range
+    - Make a confident decision about which direction to search
+    - Update our pointers correctly
+"""
+
+# TWO ELEMENT EDGE CASE: use <= on sorted half check (nums[l] <= nums[mid])
+# when 2 elements remain, l and mid point to the same index so nums[l] == nums[mid]
+# using < would make the condition False and misroute to the else branch
+
+# BOUNDARY RULE: < on mid, <= on everything else
+# mid gets < because target == mid is already handled above
+# l and r get <= because target could equal either boundary
 
 
 
 my_solution = Solution()
-print(my_solution.search(nums1, target1))
-print(my_solution.search(nums2, target2))
-print(my_solution.search(nums3, target3))
-print(my_solution.search(nums4, target4))
-print(my_solution.search(nums5, target5))
+print(my_solution.search([4,5,6,7,0,1,2], 0)) # 4
+print(my_solution.search([4,5,6,7,0,1,2], 3)) # -1
+print(my_solution.search([1], 0)) # -1
+print(my_solution.search([4,5,6,0,1,2,3], 5)) # 1
+print(my_solution.search([8,1,2,3], 3)) # 3

@@ -1,10 +1,5 @@
 import heapq
 
-# PROBLEM: LC 23 - Merge k Sorted Lists
-
-# Key Insight: Use min heap to track the smallest current element from each list.
-#              Pop smallest, add to result, push next node from same list.
-
 class ListNode:
     def __init__(self, val=0, next=None):
         self.val = val

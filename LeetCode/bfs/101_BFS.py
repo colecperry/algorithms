@@ -47,7 +47,6 @@
 # - O(N) in the worst case for the queue (BFS), especially if the tree is wide.
 # - Balanced trees use O(log N) space; skewed or full trees may use O(N).
 
-
 from typing import Optional
 from collections import deque
 

@@ -78,9 +78,10 @@ Brute Force:
 
 Backtracking:
   1. Build subsets step-by-step: [], [1], [1,2], [1,2,3], [1,3], [2], [2,3], [3]
-     → Each decision: "include this element or skip it?"
+     → Each decision: "include this element or skip it?" (2 branches)
+     → Depth: n levels (one per element)
      → Only creates valid subsets (no filtering needed)
-  TC: O(2^n) = O(8) - each element has 2 choices
+  TC: O(2^n) = O(8) using (branches)^(depth) = 2^n
   
 💡 Win: Backtracking is 8x more efficient (no wasted generation)
 
@@ -95,11 +96,12 @@ Brute Force:
 
 Backtracking:
   1. Place queens row-by-row (1 per row)
-     → Row 1: try 8 columns
-     → Row 2: only try columns that don't conflict with Row 1
-     → Row 3: only try columns safe from Rows 1 & 2
+     → Row 1: try 8 columns (8 branches)
+     → Row 2: try fewer columns (heavy pruning!)
+     → Row 3: even fewer safe columns
      → Most branches die early!
-  TC: O(n!) = O(40,320) - huge pruning effect
+  TC: O(n!) ≈ O(40,320) - shrinking branches at each level
+      Think: n × (n-1) × (n-2) × ... = n!
   
 💡 Win: Backtracking is 100,000x faster by abandoning bad paths early
 
@@ -116,24 +118,32 @@ Brute Force:
 
 Backtracking:
   1. Build permutations one position at a time
-     → Position 1: choose from [1,2,3,4] (4 choices)
-     → Position 2: choose from remaining 3 numbers
-     → Position 3: choose from remaining 2 numbers
-     → Position 4: only 1 number left
-  TC: O(n!) = O(24) - only builds valid permutations
+     → Position 1: choose from [1,2,3,4] (4 branches)
+     → Position 2: choose from remaining (3 branches)
+     → Position 3: choose from remaining (2 branches)
+     → Position 4: only 1 number left (1 branch)
+     → Branches shrink: 4 × 3 × 2 × 1
+  TC: O(n!) = O(24) using shrinking branches = n!
   
 💡 Win: Backtracking is 10x more efficient (no invalid sequences created)
 
-COMPLEXITY SUMMARY:
 ┌─────────────────────────────────────────────────────────────────────┐
-│ Problem          │ Brute Force TC    │ Backtracking TC              │
-├──────────────────┼───────────────────┼──────────────────────────────┤
-│ Subsets          │ O(2^n * 2^n)      │ O(2^n)                       │
-│ Permutations     │ O(n^n)            │ O(n!)                        │
-│ Combinations     │ O(2^n * n)        │ O(C(n,k))                    │
-│ N-Queens         │ O(C(n^2,n) * n)   │ O(n!)                        │
-│ Sudoku 9x9       │ O(9^81)           │ O(9^m) m=empty cells         │
+│ TIME COMPLEXITY MENTAL MODEL: (Branches)^(Depth)                    │
+├─────────────────────────────────────────────────────────────────────┤
+│ Pattern              │ Branches          │ Depth    │ TC            │
+├──────────────────────┼───────────────────┼──────────┼───────────────┤
+│ Subsets              │ 2 (in/out)        │ n        │ O(2^n)        │
+│ Permutations         │ Shrinking (n→1)   │ n        │ O(n!)         │
+│ Combinations         │ 2 (in/out)        │ k        │ O(2^n)        │
+│ Combination Sum      │ n (w/ reuse)      │ t/min    │ O(n^d)        │
+│ N-Queens             │ Shrinking         │ n        │ O(n!)         │
+│ Sudoku 9x9           │ 9 (digits)        │ m empty  │ O(9^m)        │
 └─────────────────────────────────────────────────────────────────────┘
+
+Quick Decision Guide:
+  • Fixed 2 choices per level? → O(2^n)
+  • Choices shrink each level? → O(n!)
+  • Same n choices every level? → O(n^depth)
 
 Space Complexity:
 - Brute Force: O(total_solutions) - stores everything before filtering
@@ -144,6 +154,7 @@ WHEN BACKTRACKING DOESN'T HELP:
 - If there are better algorithms (DP, Greedy) for the problem
 - If only need one solution and it's early in search tree
 
+============================
 BACKTRACKING CORE TEMPLATE
 ============================
 """
@@ -225,17 +236,7 @@ from typing import List
 PATTERN 1: PERMUTATIONS (ORDER MATTERS)
 ================================================================
 PATTERN EXPLANATION: Generate all possible orderings of a collection where each element appears exactly once. Order matters means that [A,B] and [B,A] are both unique permutations. Uses backtracking to systematically explore all arrangements by making choices at each position, then undoing choices to try alternatives. Tracks used elements with boolean array to ensure no duplicates in a single permutation.
-
-TYPICAL STEPS:
-1. Initialize result list and helper function with path and used array
-2. Base case: When path length equals input size, save permutation
-3. Loop through all elements in input array
-4. Skip if element already used (check used array)
-5. Make choice: Add element to path, mark as used
-6. Recursively build rest of permutation
-7. Undo choice: Remove element from path, mark as unused
-8. Return all collected permutations
-
+#
 Applications: Arranging elements, generating orderings, scheduling problems, TSP variants, password cracking, generating test cases, exploring all sequences.
 ================================================================
 """
@@ -249,9 +250,19 @@ class PermutationsPattern: # LC 46: Permutations
         Output: [[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]
         Explanation: All 3! = 6 ways to arrange 3 distinct elements
     
-    Key insight: 
+    Key insight:
     - Try ALL elements at each position (unlike combinations which only try remaining)
-    - Track used elements with boolean array to stop you from using the same element twice 
+    - Track used elements with boolean array to stop you from using the same element twice
+
+    Steps:
+    1. Initialize result list and backtrack helper with empty path and all-False used array
+    2. Base case: when path length equals len(nums), append a copy to result and return
+    3. Loop through every index i in nums
+       a. Skip index i if used[i] is True
+       b. Make choice: append nums[i] to path, set used[i] = True
+       c. Recurse: call backtrack to fill the next position
+       d. Undo choice: pop from path, set used[i] = False
+    4. Return result
     """
     def permute(self, nums: List[int]) -> List[List[int]]:
         """
@@ -349,16 +360,7 @@ print(sol.permute([1,2])) # [[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]
 PATTERN 2: COMBINATIONS (CHOOSE K ELEMENTS) - ORDER DOESN'T MATTER
 ==================================================================
 PATTERN EXPLANATION: Select k elements from n elements where order doesn't matter. Order doesn't matter means that [A,B] and [B,A] are both not unique combinations -  we only count those two elements once. Uses backtracking with a start index to systematically build combinations by trying elements in forward order only. Prevents duplicates like [1,2] and [2,1] by ensuring we always move forward through candidates.
-
-TYPICAL STEPS:
-1. Initialize result list and helper function with start index and path
-2. Base case: When path length equals k, save combination
-3. Loop from start index to n (or end of array)
-4. Make choice: Add current element to path
-5. Recursively build rest with start=i+1 (move forward only)
-6. Undo choice: Remove element from path
-7. Return all collected combinations
-
+#
 Applications: Lottery combinations, team selection, choosing items from menu, subset of fixed size, card hands, committee formation.
 ================================================================
 """
@@ -374,6 +376,15 @@ class CombinationsPattern:
         Explanation: Choose 2 numbers from [1,2,3,4]
             [1,2] and [2,1] are the SAME combination (order doesn't matter)
             So we only generate [1,2] by always moving forward
+
+    Steps:
+    1. Initialize result list and backtrack helper with start=1 and empty path
+    2. Base case: when path length equals k, append a copy to result and return
+    3. Loop from start to n (inclusive)
+       a. Make choice: append i to path
+       b. Recurse: call backtrack with start=i+1 to move forward only
+       c. Undo choice: pop from path
+    4. Return result
     """
     def combine(self, n: int, k: int) -> List[List[int]]: # LC 77
         """
@@ -451,16 +462,7 @@ print(sol.combine(4, 2)) # [[1,2],[1,3],[1,4],[2,3],[2,4],[3,4]]
 PATTERN 3: SUBSETS (POWER SET)
 ================================================================
 PATTERN EXPLANATION: Generate all possible subsets of a set, including empty set and the set itself. Unlike combinations which saves only when size=k, subsets saves at EVERY level of recursion. Each element has binary choice: include or exclude, creating 2^n total subsets.
-
-TYPICAL STEPS:
-1. Initialize result list and helper function with start index and path
-2. Save current path to result (at EVERY level, not just base case!)
-3. Loop from start to end of array
-4. Make choice: Add element to path
-5. Recursively explore with start=i+1
-6. Undo choice: Remove element from path
-7. Return all collected subsets
-
+#
 Applications: Power set generation, finding all subsequences, feature selection, generating test cases, exploring possibilities, configuration options.
 ================================================================
 """
@@ -483,6 +485,15 @@ class SubsetsPattern: # LC 78: Subsets
     - Combinations: save only when len(path) == k
     - Subsets: save immediately on entering function
     - Empty subset [] is valid, as are all partial builds [1], [1,2], etc.
+
+    Steps:
+    1. Initialize result list and backtrack helper with start=0 and empty path
+    2. On every entry to backtrack, append a copy of path to result (saves [], [1], [1,2], etc.)
+    3. Loop from start to end of nums
+       a. Make choice: append nums[i] to path
+       b. Recurse: call backtrack with start=i+1
+       c. Undo choice: pop from path
+    4. Return result
     """
     def subsets(self, nums: List[int]) -> List[List[int]]:
         """
@@ -567,20 +578,8 @@ print(sol.subsets([1,2,3]))
 ================================================================
 PATTERN 4: COMBINATION SUM (TARGET WITH REUSE)
 ================================================================
-PATTERN EXPLANATION: Find all combinations of numbers that sum to a target value, where each number can be reused unlimited times. Uses backtracking with pruning to efficiently explore solution space. Key difference from combinations: recurse with same index (i, not i+1) to allow element reuse.
-
-TYPICAL STEPS:
-1. Sort candidates array (enables early termination pruning)
-2. Initialize result and helper with start, path, and current sum
-3. Base case: If sum equals target, save combination
-4. Pruning: If sum exceeds target, return early
-5. Loop from start to end, trying each candidate
-6. Pruning: Break if adding candidate would exceed target
-7. Make choice: Add candidate, update sum
-8. Recurse with SAME index (allows reuse)
-9. Undo choice: Remove candidate
-10. Return all valid combinations
-
+PATTERN EXPLANATION: Find all combinations of numbers that sum to a target value, where each number can be reused unlimited times. Uses backtracking with base case pruning to explore solution space. Key difference from combinations: recurse with same index (i, not i+1) to allow element reuse.
+#
 Applications: Coin change variations, resource allocation, making change, filling capacity, decomposing numbers, knapsack variants.
 ================================================================
 """
@@ -605,7 +604,17 @@ class CombinationSumPattern:
     - Allow element reuse: pass 'i' not 'i+1' to backtrack
     - Prevent duplicates: still use start index (no backwards)
     - [2,2,3] generated, but [2,3,2] not generated (would need to go backwards)
-    - Pruning: sort array and break early when sum would exceed target
+    - Pruning: sum > target base case returns early
+
+    Steps:
+    1. Initialize result list and backtrack helper with start=0, empty path, and current_sum=0
+    2. Base case 1: if current_sum equals target, append a copy of path to result and return
+    3. Base case 2: if current_sum exceeds target, return immediately (prune)
+    4. Loop from start to end of candidates
+       a. Make choice: append candidates[i] to path
+       b. Recurse: call backtrack with start=i (same index to allow reuse) and updated sum
+       c. Undo choice: pop from path
+    5. Return result
     """
     def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]: # 39
         """
@@ -618,7 +627,6 @@ class CombinationSumPattern:
             - O(d) path array (reused via backtracking)
         """
         result = []
-        candidates.sort()  # Enable pruning optimization
         
         def backtrack(start, path, current_sum):
             """
@@ -626,26 +634,24 @@ class CombinationSumPattern:
             
             Args:
                 start: Index to start considering candidates from
-                path: Current combination being built (e.g., [2,2,3])
-                current_sum: Sum of elements in path so far
+                path: Current combination being built
+                current_sum: Sum of elements in path
             """
-            # BASE CASE: Found valid combination!
+            # BASE CASE 1: Found valid combination
             if current_sum == target:
                 result.append(path[:])  # Save copy
                 return
             
-            # RECURSIVE CASE: Try adding each candidate
+            # BASE CASE 2: Exceeded target, prune
+            if current_sum > target:
+                return
+            
+            # RECURSIVE CASE: Try each candidate
             for i in range(start, len(candidates)):
-                # PRUNING OPTIMIZATION: Since array is sorted,
-                # if adding candidates[i] exceeds target, all remaining will too
-                # So we can break early instead of continuing loop
-                if current_sum + candidates[i] > target:
-                    break  # Not 'continue' - everything after is also too big!
-                
-                # STEP 1: MAKE CHOICE - add candidate if sum smaller than target
+                # STEP 1: MAKE CHOICE
                 path.append(candidates[i])
                 
-                # STEP 2: EXPLORE - recurse with SAME index i (not i+1!) & update curr sum
+                # STEP 2: EXPLORE - pass 'i' (not 'i+1') to allow reuse
                 # This allows reusing same element multiple times
                 # [2,2,3] is built by: add 2 at i=0, recurse with i=0, add 2 again
                 backtrack(i, path, current_sum + candidates[i])
@@ -653,7 +659,6 @@ class CombinationSumPattern:
                 # STEP 3: UNDO CHOICE (BACKTRACK)
                 path.pop()
         
-        # Start at index 0, empty path, sum=0
         backtrack(0, [], 0)
         return result
 
@@ -673,14 +678,21 @@ class CombinationSumPattern:
 #                    /     \                |
 #               +2 /        \ +3            | +3
 #                 /          \              |
-#             [2,2]         [2,3]           ✗
-#             sum=4         sum=5         3+3=6>5
-#            start=0       start=1        PRUNED
-#              |              |
-#              |              ▼
-#         +2   ✗           ✓ SAVE
-#        4+2=6>5         result=[[2,3]]
-#        PRUNED
+#             [2,2]         [2,3]         [3,3]
+#             sum=4         sum=5         sum=6
+#            start=0       start=1       start=1
+#            /    \           |             |
+#       +2 /       \ +3       ▼             ▼
+#         /         \      ✓ SAVE        BASE 2
+#     [2,2,2]    [2,2,3]   result=     sum>target
+#     sum=6       sum=7    [[2,3]]       RETURN
+#    start=0     start=1
+#       |          |
+#       ▼          ▼
+#    BASE 2     BASE 2
+#  sum>target  sum>target
+#    RETURN     RETURN
+#
 
 sol = CombinationSumPattern()
 print("Combination Sum [2,3,6,7], target=7:")
@@ -693,17 +705,7 @@ print(sol.combinationSum([2,3,6,7], 7))
 PATTERN 5: PARTITIONING (SPLIT INTO VALID GROUPS)
 ================================================================
 PATTERN EXPLANATION: Partition a string or array into groups where each group satisfies certain constraints (e.g., palindrome, valid word). At each position, try all possible partition points and validate each partition before proceeding. Uses backtracking to explore all valid partition combinations.
-
-TYPICAL STEPS:
-1. Initialize result and helper function with start position and path
-2. Base case: If start reaches end, entire string partitioned - save result
-3. Loop through possible end positions from start+1 to len+1
-4. Extract substring/subarray from start to end
-5. Validate: Check if partition satisfies constraint (palindrome, etc.)
-6. If valid: Make choice - add to path, recurse from end position
-7. Undo choice: Remove partition from path
-8. Return all valid partitionings
-
+#
 Applications: Palindrome partitioning, word break, splitting into valid chunks, sentence segmentation, domain splitting.
 ================================================================
 """
@@ -726,6 +728,17 @@ class PartitioningPattern:
     - Only proceed if substring before cut is valid (palindrome)
     - Unlike previous patterns (try elements), here we try partition endpoints
     - Start index tracks "what part of string is unpartitioned"
+
+    Steps:
+    1. Initialize result list and backtrack helper with i=0 and empty path
+    2. Base case: if i equals len(s), the entire string is partitioned — append a copy of path to result and return
+    3. Loop j from i+1 to len(s)+1 (trying every possible cut point)
+       a. Extract substring s[i:j]
+       b. Skip if substring is not a palindrome
+       c. Make choice: append substring to path
+       d. Recurse: call backtrack with start=j (continue from where cut ended)
+       e. Undo choice: pop from path
+    4. Return result
     """
     def partition(self, s: str) -> List[List[str]]: # LC 131
         """
@@ -812,18 +825,7 @@ print(sol.partition("aab")) # [["a","a","b"],["aa","b"]]
 PATTERN 6: GRID BACKTRACKING (2D EXPLORATION)
 ================================================================
 PATTERN EXPLANATION: Explore 2D grid to find paths or patterns by trying all four directions (up, down, left, right) at each cell. Mark cells as visited during exploration to prevent reuse in same path, then unmark when backtracking. Different paths can reuse same cell, just not within single path.
-
-TYPICAL STEPS:
-1. Iterate through grid to find all possible starting positions
-2. For each start, call backtrack helper with position and match index
-3. Base case: If matched entire pattern, return success
-4. Boundary/validity checks: out of bounds, already visited, or mismatch
-5. Mark current cell as visited (temporarily modify grid or use visited set)
-6. Try all 4 directions: up, down, left, right recursively
-7. If any direction succeeds, propagate success
-8. Unmark current cell (backtrack) to allow use in other paths
-9. Return success/failure status
-
+#
 Applications: Word search, pathfinding, maze solving, island problems, connected components, pattern matching in grids.
 ================================================================
 """
@@ -852,6 +854,16 @@ class GridBacktrackingPattern:
     - Mark cell with special character during exploration (e.g., '#')
     - Unmark when backtracking so other paths can use it
     - Try all 4 directions: if ANY succeeds, entire search succeeds
+
+    Steps:
+    1. Iterate through every cell (r, c) in the board as a potential starting position
+    2. For each cell, call backtrack(r, c, index=0)
+    3. Base case: if index equals len(word), the full word is matched — return True
+    4. Boundary/validity checks: return False if r or c is out of bounds, board[r][c] != word[index], or board[r][c] == '#'
+    5. Mark current cell: save board[r][c] to temp, set board[r][c] = '#'
+    6. Recurse in all 4 directions (down, up, right, left) with index+1; combine results with or
+    7. Unmark current cell: restore board[r][c] = temp
+    8. Return the combined result; if any starting cell returns True, return True overall
     """
     def exist(self, board: List[List[str]], word: str) -> bool: # 79
         """

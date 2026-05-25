@@ -90,6 +90,8 @@ class Solution:
                 root = root.left # Iterate left
             else:
                 root = root.right # Iterate right
+        
+        return None
 
 sol = Solution()
 t1 = TreeNode(4)

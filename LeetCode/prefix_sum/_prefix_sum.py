@@ -308,12 +308,6 @@ PREFIX SUM PATTERNS
 # left to right equals prefix[right+1] - prefix[left]. Use extra space at index 0 to avoid
 # edge cases. Essential for problems with multiple queries on static array.
 #
-# TYPICAL STEPS:
-# 1. Create prefix array with size n+1 (index 0 = 0 for convenience)
-# 2. Build prefix: prefix[i] = prefix[i-1] + nums[i-1]
-# 3. Query range [left, right]: return prefix[right+1] - prefix[left]
-# 4. Handle multiple queries in O(1) each after O(n) preprocessing
-#
 # Applications: Range sum queries, immutable array range sum, sparse matrix queries.
 # ================================================================
 
@@ -332,11 +326,11 @@ class RangeSumQuery:
     TC: O(n) preprocessing, O(1) per query
     SC: O(n) for prefix array
     
-    How it works:
-    1. Build prefix sum: prefix[i] = sum of first i elements
-    2. Range sum formula: prefix[right+1] - prefix[left]
-    3. Example: sum(1 to 4) = prefix[5] - prefix[1] = 14 - 1 = 13
-    
+    Steps:
+    1. Create prefix array of size n+1, with prefix[0] = 0
+    2. Build prefix: for each i, set prefix[i+1] = prefix[i] + nums[i]
+    3. Answer each range query [left, right]: return prefix[right+1] - prefix[left]
+
     Why it works:
     prefix[right+1] = sum(0 to right)
     prefix[left] = sum(0 to left-1)
@@ -385,13 +379,6 @@ print("Range Sum Query (1,4):", rsq.sumRange(1, 4))  # 14
 # for queries: add bottom-right, subtract top strip and left strip, add back top-left corner
 # (which was subtracted twice). Essential for multiple rectangle sum queries.
 #
-# TYPICAL STEPS:
-# 1. Create prefix matrix with size (m+1) x (n+1)
-# 2. Build: prefix[i][j] = matrix[i-1][j-1] + prefix[i-1][j] + prefix[i][j-1] - prefix[i-1][j-1]
-# 3. Query rectangle (r1,c1) to (r2,c2):
-#    sum = prefix[r2+1][c2+1] - prefix[r1][c2+1] - prefix[r2+1][c1] + prefix[r1][c1]
-# 4. Each query is O(1) after O(m*n) preprocessing
-#
 # Applications: 2D range sum, image processing, submatrix sum problems.
 # ================================================================
 
@@ -413,11 +400,13 @@ class RangeSumQuery2D:
     TC: O(m * n) preprocessing, O(1) per query
     SC: O(m * n) for prefix matrix
     
-    How it works:
-    1. prefix[i][j] = sum of rectangle from (0,0) to (i-1,j-1)
-    2. To build: add current cell + sum from top + sum from left - diagonal (counted twice)
-    3. To query: use inclusion-exclusion to get exact rectangle
-    
+    Steps:
+    1. Create prefix matrix of size (m+1) x (n+1), all zeros
+    2. Build: for each cell (i,j), set prefix[i][j] = matrix[i-1][j-1] + prefix[i-1][j]
+          + prefix[i][j-1] - prefix[i-1][j-1]
+    3. Answer each rectangle query (r1,c1) to (r2,c2):
+          return prefix[r2+1][c2+1] - prefix[r1][c2+1] - prefix[r2+1][c1] + prefix[r1][c1]
+
     Inclusion-Exclusion formula:
     Sum = Bottom-right - Top strip - Left strip + Top-left corner
     (Top-left added back because it was subtracted in both strips)
@@ -488,13 +477,6 @@ print("2D Range Sum Query (1,1,2,2):", rsq2d.sumRegion(1, 1, 2, 2))  # 11
 # i+1 to j has sum k. Store prefix sums in hashmap to check if (current_sum - target) exists.
 # This converts O(n²) brute force to O(n) with hashmap lookups.
 #
-# TYPICAL STEPS:
-# 1. Initialize hashmap with {0: 1} for empty subarray case
-# 2. Iterate through array, maintaining running prefix sum
-# 3. Check if (prefix_sum - target) exists in hashmap
-# 4. If yes, found subarrays ending at current index
-# 5. Update hashmap with current prefix_sum
-#
 # Applications: Subarray sum equals k, continuous subarray sum, subarray sum divisible by k.
 # ================================================================
 
@@ -515,13 +497,11 @@ class SubarraySumProblems:
     TC: O(n) - single pass through array
     SC: O(n) - hashmap stores prefix sums
     
-    How it works:
-    1. Track cumulative sum (prefix sum) as we go
-    2. If (current_sum - k) exists in map, found subarrays
-    3. Why? If prefix[j] - prefix[i] = k, then sum(i+1 to j) = k
-    4. Example: prefix_sum = 8, k = 5
-       - Need prefix_sum = 3 to exist before current position
-       - If prefix[i] = 3 and prefix[j] = 8, then sum(i+1 to j) = 5
+    Steps:
+    1. Initialize sum_freq = {0: 1} to handle subarrays starting at index 0
+    2. Iterate through nums, adding each element to running prefix_sum
+    3. Check if (prefix_sum - k) exists in sum_freq; if so, add its count to result
+    4. Update sum_freq with the current prefix_sum before moving to next element
     """
     def subarraySum(self, nums: List[int], k: int) -> int:  # LC 560
         count = 0
@@ -636,14 +616,6 @@ print("Subarrays Divisible by K:", sol.subarraysDivByK([4,5,0,-2,-3,1], 5))  # 7
 # end+1. After all updates, compute prefix sum of difference array to get final values.
 # Converts O(k*n) for k updates to O(n+k). Essential for batch range modifications.
 #
-# TYPICAL STEPS:
-# 1. Create difference array initialized to 0
-# 2. For each update [left, right, val]:
-#    - diff[left] += val
-#    - diff[right+1] -= val
-# 3. Compute prefix sum of difference array to get final result
-# 4. result[i] = result[i-1] + diff[i]
-#
 # Applications: Range addition, car pooling, corporate flight bookings, meeting rooms.
 # ================================================================
 
@@ -665,13 +637,12 @@ class RangeUpdateQueries:
     TC: O(n + k) where k = number of updates
     SC: O(n) for difference array
     
-    How it works:
-    1. Use difference array: diff[i] = result[i] - result[i-1]
-    2. Range update [l, r, val] becomes:
-       - diff[l] += val (start of range)
-       - diff[r+1] -= val (end of range)
-    3. Final array = prefix sum of difference array
-    
+    Steps:
+    1. Create diff array of size n+1, initialized to 0
+    2. For each update [left, right, val]: set diff[left] += val and diff[right+1] -= val
+    3. Compute prefix sum of diff into result: result[0] = diff[0],
+          then result[i] = result[i-1] + diff[i] for i in 1..n-1
+
     Why it works:
     - Incrementing diff[l] propagates +val to all elements from l onward
     - Decrementing diff[r+1] stops the propagation after r
@@ -782,12 +753,6 @@ print("Car Pooling:", sol.carPooling([[2,1,5],[3,3,7]], 4))  # False
 # compute something for each position based on previous positions. Prefix sum eliminates
 # the inner loop by providing instant access to range sums.
 #
-# TYPICAL STEPS:
-# 1. Identify O(n²) brute force that recalculates sums
-# 2. Build prefix sum array in O(n)
-# 3. Replace inner sum loop with O(1) prefix lookup
-# 4. Overall complexity reduces from O(n²) to O(n)
-#
 # Applications: Contiguous array, max subarray average, ways to split array, running sums.
 # ================================================================
 
@@ -807,12 +772,13 @@ class PrefixSumOptimization:
     TC: O(n) - single pass with hashmap
     SC: O(n) - hashmap for prefix sums
     
-    How it works:
-    1. Convert 0s to -1s: equal 0s and 1s ⟺ sum = 0
-    2. Use prefix sum with hashmap
-    3. If prefix_sum seen before, subarray between has sum 0
-    4. Track earliest occurrence of each prefix_sum for max length
-    
+    Steps:
+    1. Convert each 0 to -1 so that equal 0s and 1s produce a subarray sum of 0
+    2. Initialize sum_index = {0: -1} to handle subarrays starting at index 0
+    3. Iterate through nums, updating running prefix_sum (+1 for 1, -1 for 0)
+    4. If prefix_sum already in sum_index, compute length = i - sum_index[prefix_sum]
+          and update max_length; otherwise store sum_index[prefix_sum] = i
+
     Key insight: If prefix[i] = prefix[j], then sum(i+1 to j) = 0
     """
     def findMaxLength(self, nums: List[int]) -> int:  # LC 525
@@ -956,24 +922,23 @@ print("Product Except Self:", sol.productExceptSelf([1,2,3,4]))  # [24,12,8,6]
 # computed incrementally. Often combined with additional data structures or conditions.
 # Use when you need cumulative information while traversing array.
 #
-# TYPICAL STEPS:
-# 1. Initialize accumulator (sum, product, xor, max, etc.)
-# 2. Iterate through array updating accumulator
-# 3. Use accumulator for current decision or calculation
-# 4. May combine with hashmap, sliding window, or other techniques
-#
 # Applications: Running sum, maximum subarray (Kadane's), XOR queries, cumulative max/min.
 # ================================================================
 
 class RunningSumVariations:
     """
     Problem 1: Given array, return running sum where runningSum[i] = sum(nums[0]...nums[i]).
-    
+
     Example:
         nums = [1, 2, 3, 4]
         Output: [1, 3, 6, 10]
-    
+
     TC: O(n), SC: O(1) excluding output
+
+    Steps:
+    1. Initialize accumulator to 0 (or to the first element for in-place update)
+    2. Iterate through the array, adding each element to the accumulator
+    3. Write the accumulated value back to the current position (in-place prefix sum)
     """
     def runningSum(self, nums: List[int]) -> List[int]:  # LC 1480
         """Basic running sum (in-place prefix sum)"""
@@ -991,12 +956,13 @@ class RunningSumVariations:
         
         TC: O(n), SC: O(1)
         
-        How it works (Kadane's Algorithm):
-        1. Track current sum and max sum
-        2. At each position, decide: extend current or start new
-        3. If current_sum < 0, starting fresh is better
-        4. Update max_sum with current_sum
-        
+        Steps:
+        1. Initialize max_sum and current_sum to nums[0]
+        2. Iterate from index 1 onward, updating current_sum = max(nums[i], current_sum + nums[i])
+           a. If current_sum + nums[i] > nums[i], extend the current subarray
+           b. Otherwise, start a new subarray from nums[i]
+        3. Update max_sum = max(max_sum, current_sum) at each step
+
         This is running sum with reset condition.
         """
         max_sum = nums[0]
@@ -1108,12 +1074,6 @@ print("XOR Queries:", sol.xorQueries([1,3,4,8], [[0,1],[1,2],[0,3],[3,3]]))  # [
 # - "Multiply all elements except self"
 # - Need O(n) time, O(1) space solution
 #
-# TYPICAL STEPS:
-# 1. First pass: compute prefix products (left to right)
-# 2. Store prefix products in result array
-# 3. Second pass: compute suffix products (right to left) on-the-fly
-# 4. Multiply with existing prefix to get final answer
-#
 # Applications: Product of array except self, construct product matrix,
 # range product queries.
 # ================================================================
@@ -1129,13 +1089,14 @@ def productExceptSelf(nums: List[int]) -> List[int]:
     TC: O(n) - two passes through array
     SC: O(1) - output array doesn't count, only use constant extra space
     
-    How it works:
-    1. First pass (left to right): build prefix products in result array
-       result[i] = product of all elements before index i
-    2. Second pass (right to left): multiply by suffix products
-       suffix = product of all elements after index i
-    3. result[i] = prefix[i] × suffix[i] = product except self
-    
+    Steps:
+    1. First pass (left to right): store prefix products in result array
+       a. result[i] = running product of all elements before index i
+       b. Update prefix multiplier after each assignment
+    2. Second pass (right to left): multiply each result[i] by suffix product
+       a. suffix = running product of all elements after index i
+       b. Update suffix multiplier after each multiplication
+
     Why this problem: The definitive product pattern problem. Teaches the
     prefix-suffix technique without division, a common interview follow-up.
     """

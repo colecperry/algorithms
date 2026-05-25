@@ -25,26 +25,28 @@ class ListNode(object):
 class Solution(object):
     def mergeTwoLists(self, list1, list2):
         """
-        :type list1: Optional[ListNode]
-        :type list2: Optional[ListNode]
-        :rtype: Optional[ListNode]
+        - TC: O(n + m) -> iterate through both lists once
+        - SC: O(1) -> no new nodes created, just relinking existing ones
         """
-        dummy = ListNode(-1) # Create a dummy node with the value of -1
-        current = dummy # Assign to a variable called current for the pointer to iterate through out list
+        dummy = ListNode(-1) # dummy head so we don't have to handle first node as special case
+        curr = dummy # pointer to build the merged list
 
-        while list1 and list2: # While there is still another "next" value in both lists
-            if list1.val <= list2.val: # Compare the value of the current loop on each linked list
-                current.next = list1 # Connect the dummy variables to the node in list1 if it is smaller
-                list1 = list1.next # Take the node from the old list 1, delete it, and reassign the node to the new list
-            else:
-                current.next = list2 # If the value of the second list is greater, assign the dummy variable ".next" to the first node in list2
-                list2 = list2.next # Take the node from the old list 2, delete it, and reassign the node to the new list
-            current = current.next # Stepping current along through the new list of nodes 
-        if list1: # If list1 still exists, assign the .next 
-            current.next = list1
-        elif list2:
-            current.next = list2
-        return dummy.next
+        while list1 and list2:
+            if list1.val < list2.val: # list1 has smaller value
+                curr.next = list1 # attach list1 node
+                list1 = list1.next # advance list1
+            else: # list2 has smaller or equal value
+                curr.next = list2 # attach list2 node
+                list2 = list2.next # advance list2
+            curr = curr.next # advance merged list pointer
+
+        # attach remaining nodes from whichever list isn't exhausted
+        if list1: # if nodes left in list 1
+            curr.next = list1 # attach rest of nodes
+        elif list2: # if nodes left in list 2
+            curr.next = list2
+
+        return dummy.next # dummy.next is the real head
     
 list1 = ListNode(1)
 list1.next = ListNode(2)

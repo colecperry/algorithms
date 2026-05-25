@@ -341,22 +341,6 @@ TRIE PATTERNS
 # complete words by verifying is_end flag. StartsWith checks for prefix by traversing
 # without requiring is_end. Foundation for all other trie patterns.
 #
-# TYPICAL STEPS:
-# Insert:
-# 1. Start at root, iterate through characters
-# 2. If character not in children, create new node
-# 3. Move to child node
-# 4. Mark last node as end of word
-#
-# Search:
-# 1. Traverse trie following characters
-# 2. If character missing, return False
-# 3. At end, check if node is marked as word end
-#
-# Prefix:
-# 1. Traverse trie following characters
-# 2. If reach end of prefix successfully, return True
-#
 # Applications: Dictionary, spell checker, word validator, prefix search.
 # ================================================================
 
@@ -376,11 +360,22 @@ class Trie:
     TC: O(m) for all operations where m = word length
     SC: O(n * m) where n = number of words
     
-    How it works:
-    1. Each node has children map and is_end flag
-    2. Insert: create path of nodes for each character
-    3. Search: follow path, check is_end at end
-    4. StartsWith: follow path for prefix, don't check is_end
+    Steps:
+    Insert:
+    1. Start at root, iterate through each character in the word
+    2. If the character is not in the current node's children, create a new TrieNode
+    3. Move to the child node for that character
+    4. After all characters, mark the final node as end of word (is_end = True)
+
+    Search:
+    1. Start at root, traverse trie following each character in the word
+    2. If a character is missing from children, return False
+    3. After all characters, check if the current node is marked as end of word
+
+    StartsWith:
+    1. Start at root, traverse trie following each character in the prefix
+    2. If a character is missing from children, return False
+    3. After reaching the end of the prefix successfully, return True
     """
     def __init__(self):  # LC 208 - Implement Trie
         self.root = TrieNode()
@@ -528,16 +523,6 @@ print("Longest Common Prefix:", trie.longestCommonPrefix(["flower","flow","fligh
 # early. Significantly faster than searching for each word individually. Classic application
 # for word games like Boggle.
 #
-# TYPICAL STEPS:
-# 1. Build trie from all words
-# 2. For each cell in grid:
-#    a. Start DFS with root of trie
-#    b. Check if current character in trie children
-#    c. If yes, continue DFS to neighbors
-#    d. If current node is end of word, add to result
-#    e. Mark cell visited, recurse, unmark (backtrack)
-# 3. Prune: stop DFS if character not in trie
-#
 # Applications: Boggle, word search in grid, finding multiple patterns in text.
 # ================================================================
 
@@ -563,11 +548,13 @@ class WordSearchTrie:
         Without trie: O(m*n*4^L * k*L) where k = number of words
     SC: O(k*L) for trie where k = number of words
     
-    How it works:
-    1. Build trie from word list (prune invalid paths early)
-    2. DFS from each cell, following valid trie paths
-    3. When reach end of word in trie, add to result
-    4. Mark cells visited during path, unmark when backtrack
+    Steps:
+    1. Build trie from all words in the word list, storing the word string at each end node
+    2. For each cell in the grid, start DFS with the trie root:
+       a. If the cell's character is not in the current trie node's children, return immediately
+       b. If the next trie node is marked as end of word, add that word to results and clear the flag
+       c. Mark the cell as visited ('#'), recurse into all 4 valid neighbors, then restore the cell
+    3. After recursion, remove leaf trie nodes to prune exhausted branches
     """
     def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:  # LC 212
         # Build trie from words
@@ -670,15 +657,6 @@ print("Word Search II:", sol.findWords(board, ["oath","pea","eat","rain"]))  # [
 # node, then DFS to collect all complete words in that subtree. Efficient for typeahead,
 # search suggestions, and autocomplete systems. Can limit results or rank by frequency.
 #
-# TYPICAL STEPS:
-# 1. Navigate to prefix node in trie
-# 2. If prefix not found, return empty
-# 3. DFS from prefix node collecting words:
-#    a. If current node is end of word, add to results
-#    b. Recursively visit all children
-#    c. Build word as you traverse
-# 4. Optional: sort by frequency/rank, limit results
-#
 # Applications: Autocomplete, search suggestions, typeahead, prefix matching.
 # ================================================================
 
@@ -701,11 +679,13 @@ class AutocompleteTrie:
     TC: O(p + k*m) where p = prefix length, k = results, m = avg word length
     SC: O(n*m) for trie
     
-    How it works:
-    1. Build trie with frequency counts
-    2. For each character, navigate to prefix node
-    3. DFS from prefix node to collect all words
-    4. Sort by frequency and return top k
+    Steps:
+    1. Build trie from all sentences, storing a frequency map at each prefix node
+    2. For each typed character, append it to the current prefix and navigate to its trie node:
+       a. If the character is missing from the trie, return empty list
+       b. Retrieve the sentences dictionary stored at that prefix node
+    3. Sort the matching sentences by descending frequency then lexicographically
+    4. Return the top 3 sentences from the sorted list
     """
     def __init__(self, sentences: List[str], times: List[int]):  # LC 642
         self.root = TrieNode()
@@ -879,14 +859,6 @@ print("Suggested Products:", sol2.suggestedProducts(["mobile","mouse","moneypot"
 # character. Requires recursive DFS to explore all branches. More complex than basic trie
 # search due to branching factor of wildcards.
 #
-# TYPICAL STEPS:
-# 1. Insert: Same as basic trie
-# 2. Search with wildcards:
-#    a. If regular character: follow that child
-#    b. If wildcard: try all children recursively
-#    c. If at end of word: check is_end flag
-# 3. Use DFS/recursion for wildcard handling
-#
 # Applications: Pattern matching, regex-like search, flexible word lookup.
 # ================================================================
 
@@ -907,10 +879,12 @@ class WordDictionary:
     TC: O(m) for add, O(m * 26^w) for search where w = wildcards
     SC: O(n * m) for trie
     
-    How it works:
-    1. Add: Standard trie insertion
-    2. Search: When hit '.', try all 26 possible children
-    3. Use DFS to explore all branches for wildcards
+    Steps:
+    1. Add: insert the word using standard trie traversal, creating nodes as needed, then mark is_end
+    2. Search: recursively traverse the word character by character:
+       a. If the current character is '.', try every child of the current node recursively
+       b. If the current character is a letter, follow that specific child or return False if missing
+       c. When the index reaches the end of the word, return the is_end flag of the current node
     """
     def __init__(self):  # LC 211
         self.root = TrieNode()
@@ -995,10 +969,11 @@ class WordDictionary:
         TC: O(n * m) where n = words, m = length
         SC: O(n * m) for trie
         
-        How it works:
-        1. Build trie from all words
-        2. DFS from root, only follow paths where all prefixes are words
-        3. Track longest valid word found
+        Steps:
+        1. Build trie from all words in the input array, storing each word string at its end node
+        2. DFS from root, visiting only children whose node is marked is_end (all prefixes are valid words)
+        3. At each valid node, update the longest result if the current word is longer (or same length but lexicographically smaller)
+        4. Continue DFS deeper along valid prefix paths; return the longest word found
         """
         # Build trie
         root = TrieNode()
@@ -1049,17 +1024,6 @@ print("Longest Word:", wd.longestWord(["w","wo","wor","worl","world"]))  # "worl
 # requires careful handling to avoid breaking other words sharing prefixes. Replace words
 # with shortest prefix match (like autocorrect). Track word counts for proper deletion.
 #
-# TYPICAL STEPS:
-# Delete:
-# 1. Search for word, mark is_end = False
-# 2. Remove leaf nodes if no other words use them
-# 3. Stop removal when hit node with other children or is_end
-#
-# Replace (Shortest Prefix):
-# 1. For each word, search trie for shortest prefix
-# 2. If find complete word before reaching end, use that
-# 3. Replace word with shortest matching prefix
-#
 # Applications: Dictionary with updates, autocorrect, word replacement.
 # ================================================================
 
@@ -1070,14 +1034,15 @@ class TrieWithModification:
     TC: O(m) for delete
     SC: O(n * m)
     
-    How it works:
-    1. Mark word as not complete (is_end = False)
-    2. Remove unused leaf nodes recursively
-    3. Stop at nodes with other children or words
+    Steps:
+    1. Recursively traverse the trie to the end of the target word
+    2. At the final node, set is_end = False to unmark the word
+    3. On the way back up, delete each child node if it has no remaining children and is not an end of another word
+    4. Stop deletion as soon as a node still has children or marks another word end
     """
     def __init__(self):
         self.root = TrieNode()
-    
+
     def insert(self, word: str) -> None:
         node = self.root
         for char in word:
@@ -1170,12 +1135,13 @@ class TrieWithModification:
         TC: O(d + s) where d = dictionary size, s = sentence length
         SC: O(d) for trie
         
-        How it works:
-        1. Build trie from dictionary roots
-        2. For each word in sentence:
-           - Search trie character by character
-           - Stop at first complete word (shortest prefix)
-           - If no match, keep original word
+        Steps:
+        1. Build trie by inserting every root from the dictionary, marking each root's end node
+        2. Split the sentence into individual words
+        3. For each word, traverse the trie character by character:
+           a. If a character is not found in the current node's children, stop and keep the original word
+           b. If the current node is marked is_end, stop immediately and use the prefix collected so far
+        4. Join all replaced (or unchanged) words back into a sentence string
         """
         # Build trie from dictionary
         root = TrieNode()
@@ -1257,18 +1223,6 @@ print("Replace Words:", triem.replaceWords(["cat","bat","rat"], "the cattle was 
 # maximum XOR, greedily choose opposite bits when possible. Achieves O(log MAX_VAL) per
 # operation instead of O(n²) brute force.
 #
-# TYPICAL STEPS:
-# Insert:
-# 1. Convert number to binary (32 bits)
-# 2. Traverse/create path from MSB to LSB
-# 3. Create nodes for 0 and 1 as needed
-#
-# Find Max XOR:
-# 1. For given number, traverse trie
-# 2. At each bit: try opposite bit (for max XOR)
-# 3. If opposite exists, take it; else take same
-# 4. Build result XOR value bit by bit
-#
 # Applications: Maximum XOR pair, XOR queries with range, bit manipulation problems.
 # ================================================================
 
@@ -1288,12 +1242,14 @@ class MaximumXORTrie:
     TC: O(n * 32) = O(n) where n = number of elements
     SC: O(n * 32) = O(n) for trie
     
-    How it works:
-    1. Insert all numbers as binary paths in trie
-    2. For each number, find maximum XOR:
-       - Try opposite bit at each position
-       - Opposite bit gives 1 in XOR result
-       - Track maximum XOR found
+    Steps:
+    1. Insert every number into the binary trie as a 32-bit path from MSB to LSB, creating 0/1 child nodes as needed
+    2. For each number in nums, traverse the trie to find its maximum XOR partner:
+       a. At each bit position, compute the toggled (opposite) bit
+       b. If the toggled bit child exists, follow it and set that bit in current_xor
+       c. Otherwise follow the same bit child (XOR contributes 0 at this position)
+    3. After processing all 32 bits, update max_xor if current_xor is larger
+    4. Return max_xor after iterating all numbers
     """
     def findMaximumXOR(self, nums: List[int]) -> int:  # LC 421
         root = BinaryTrieNode()
@@ -1373,11 +1329,13 @@ class MaximumXORTrie:
         TC: O(n log n + q * 32) where q = queries
         SC: O(n * 32) for trie
         
-        How it works:
-        1. Sort nums and queries by value
-        2. Process queries in order
-        3. Insert nums <= m into trie before each query
-        4. Find max XOR using trie
+        Steps:
+        1. Sort nums ascending; sort queries by their constraint m (keeping original indices)
+        2. Process queries in ascending order of m:
+           a. Insert all nums values <= m into the binary trie before answering this query
+           b. If no valid nums have been inserted yet, leave result as -1 and skip
+        3. For the query value x, traverse the trie greedily choosing the toggled bit when available to maximize XOR
+        4. Store the resulting XOR in the answer array at the query's original index
         """
         # Sort nums
         nums.sort()

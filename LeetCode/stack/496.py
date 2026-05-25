@@ -26,18 +26,24 @@
 from typing import List
 
 class Solution:
+    """
+    - TC: O(N + M) -> loop through nums2 once to build the map, loop through nums1 once to build the result
+    - SC: O(N + M)
+        - Dict maps each ele in nums2 to its next greater -> O(M)
+        - Stack holds at most O(M) elements if nums2 is fully decreasing
+    """
     def nextGreaterElement(self, nums1: List[int], nums2: List[int]) -> List[int]:
         next_greater = {} # Map each number to its next greater element
         stack = []  # Monotonic decreasing stack
         
-        # Build the next greater mapping for nums2 -> Monotonic decreasing stack
+        # Step 1: Build the "next greater" mapping for nums2 -> Mono decreasing stack
         for num in nums2:
             # Pop all smaller elements - current num is their next greater
-            while stack and num > stack[-1]:
-                smaller_num = stack.pop()
-                next_greater[smaller_num] = num
+            while stack and num > stack[-1]:  # current num is greater than top of stack
+                smaller_num = stack.pop()       # pop the smaller element
+                next_greater[smaller_num] = num # current num is its next greater
             
-            stack.append(num)
+            stack.append(num)  # push current num, maintaining decreasing order
         
         # Any remaining elements in stack have no next greater element
         # (no need to explicitly handle, they just won't be in the map)
@@ -52,3 +58,4 @@ class Solution:
 sol = Solution()
 print(sol.nextGreaterElement([4,1,2], [1,3,4,2])) # [-1, 3, -1]
 print(sol.nextGreaterElement([2,4], [1,2,3,4])) # [3, -1]
+print(sol.nextGreaterElement([1,3], [3,2,1,4])) # [4, 4] -> while loop runs more than once

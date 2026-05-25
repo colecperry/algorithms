@@ -129,15 +129,6 @@ class ListNode:
 # PATTERN 1: OPPOSITE DIRECTION (CONVERGING)
 # PATTERN EXPLANATION: Start with pointers at both ends of array and move them toward the center. Make decisions at each step about which pointer to move based on the problem's goal - either finding a match, optimizing a value, or validating a property. Continue until pointers meet. Common in sorted arrays where you can eliminate half the search space at each step.
 #
-# TYPICAL STEPS:
-# 1. Initialize left=0, right=len(arr)-1
-# 2. While left < right:
-#    - Calculate/compare values at both pointers
-#    - If condition met, return result
-#    - Decide which pointer to move (or both)
-#    - Move pointer(s) inward
-# 3. Return result after pointers meet
-#
 # Applications: Two sum in sorted array, pair finding, palindrome validation, container optimization.
 # ================================================================
 """
@@ -149,17 +140,14 @@ class OppositeDirectionPattern:
 
     Return the indices (1-indexed) of the two numbers.
     
-    How it works:
-    1. Start with pointers at both ends
-    2. Calculate sum of values at both pointers
-    3. If sum too small, move left right (increase sum)
-    4. If sum too large, move right left (decrease sum)
-    5. If sum equals target, found the pair
-    
-    Why it works:
-    - Array is sorted, so left has smaller values, right has larger
-    - Moving left increases sum, moving right decreases sum
-    - This allows us to "navigate" to the target sum efficiently
+    Steps:
+    1. Initialize left=0, right=len(numbers)-1
+    2. While left < right:
+       a. Calculate current_sum = numbers[left] + numbers[right]
+       b. If current_sum == target, return [left+1, right+1]
+       c. If current_sum < target, move left right (need larger sum)
+       d. If current_sum > target, move right left (need smaller sum)
+    3. Return [] if no pair found
     """
     def twoSum(self, numbers: List[int], target: int) -> List[int]: # LC 167
         """
@@ -206,14 +194,6 @@ print("Two sum:", sol.twoSum([2,3,4], 6))  # [1,3]
 PATTERN 2: SAME DIRECTION (PARTITION/WRITE)
 PATTERN EXPLANATION: Both pointers move in the same direction, with one (slow) tracking the write/boundary position and the other (fast) exploring to find valid elements. Slow pointer marks where the next valid element should be written, while fast pointer scans ahead. This pattern enables in-place modifications without extra space.
 
-TYPICAL STEPS:
-1. Initialize slow=0 (or 1), fast=0 (or 1)
-2. While fast < len(arr):
-   - Check if arr[fast] is valid
-   - If valid, write to arr[slow] and increment slow
-   - Always increment fast
-3. Return slow (new length) or modified array
-
 Applications: Remove duplicates, remove elements, move zeros, partition array.
 ================================================================
 """
@@ -222,16 +202,13 @@ class SameDirectionPattern:
     """
     Problem: Given an integer array nums sorted in non-decreasing order, remove duplicates in-place such that each unique element appears only once. Return the number of unique elements k. First k elements of nums should contain unique elements in order.
     
-    How it works:
-    1. Slow pointer tracks where to write next unique element
-    2. Fast pointer explores array looking for unique elements
-    3. When fast finds unique element (different from previous), write to slow position
-    4. Slow advances only when we write a unique element
-    
-    Why it works:
-    - Array is sorted, so duplicates are adjacent
-    - Slow maintains boundary between processed and unprocessed
-    - Fast finds next unique, slow marks where to place it
+    Steps:
+    1. Initialize slow=1 (first element always unique)
+    2. Iterate fast from index 1 to end of nums:
+       a. If nums[fast] != nums[fast-1], it's a unique element
+       b. Write nums[fast] to nums[slow]
+       c. Increment slow
+    3. Return slow (number of unique elements)
     """
     def removeDuplicates(self, nums: List[int]) -> int: # LC 26
         """
@@ -285,14 +262,6 @@ print("Modified array:", test_nums[:5])  # [0,1,2,3,4]
 PATTERN 3: FAST/SLOW (DIFFERENT SPEEDS)
 PATTERN EXPLANATION: Two pointers start at same position but move at different speeds. Slow moves 1 step at a time, fast moves 2 steps. If there's a cycle, fast will eventually catch up to slow (they'll meet). If no cycle, fast reaches end first. Also used to find middle element (when fast reaches end, slow is at middle) or maintain fixed gap.
 
-TYPICAL STEPS (Cycle Detection):
-1. Initialize slow=head, fast=head
-2. While fast and fast.next exist:
-   - Move slow one step: slow = slow.next
-   - Move fast two steps: fast = fast.next.next
-   - If slow == fast, cycle detected
-3. If fast reaches null, no cycle
-
 Applications: Cycle detection, find middle, find nth from end, happy number.
 ================================================================
 """
@@ -301,15 +270,13 @@ class FastSlowPattern:
     """
     Problem: Given head of linked list, determine if it has a cycle. A cycle exists if a node can be reached again by following next pointers.
     
-    How it works (Floyd's Cycle Detection):
-    1. Slow pointer moves 1 step, fast moves 2 steps
-    2. If cycle exists, fast will eventually catch slow (meet in cycle)
-    3. If no cycle, fast reaches end (null) first
-    
-    Why it works:
-    - In cycle, fast gains 1 step on slow per iteration
-    - Eventually fast catches up (like runners on circular track)
-    - If no cycle, fast reaches end in n/2 steps
+    Steps:
+    1. Initialize slow=head, fast=head
+    2. While fast and fast.next exist:
+       a. Move slow one step: slow = slow.next
+       b. Move fast two steps: fast = fast.next.next
+       c. If slow == fast, cycle detected — return True
+    3. If fast reaches null, return False (no cycle)
     """
     def hasCycle(self, head: Optional[ListNode]) -> bool: # LC 141
         """
@@ -381,19 +348,6 @@ PATTERN 4: K-SUM (FIX + CONVERGE)
 PATTERN EXPLANATION: Reduce k-sum problem to 2-sum by fixing the first k-2 elements with nested loops, then using two pointers on remaining elements. For 3-sum, fix one element and use two pointers. For 4-sum, fix two elements and use two pointers. This
 reduces time complexity from O(n^k) to O(n^(k-1)).
 
-TYPICAL STEPS (for 3-sum):
-1. Sort array (required for two pointer optimization)
-2. For each index i (fixing first element):
-   - Skip duplicates of fixed element
-   - Set left=i+1, right=len-1
-   - While left < right:
-     * Calculate sum with fixed element
-     * If sum == target, save result, move both pointers
-     * If sum < target, move left right
-     * If sum > target, move right left
-     * Skip duplicates while moving
-3. Return all unique triplets/quadruplets
-
 Applications: 3sum, 4sum, 3sum closest, triplet problems in sorted arrays.
 ================================================================
 """
@@ -405,12 +359,17 @@ class KSumPattern:
     
     The solution set must not contain duplicate triplets. (Cannot have the same triplet using different indicies)
     
-    How it works:
-    1. Sort array (enables two pointer optimization)
-    2. Fix first element with loop
-    3. Use two pointers to find pairs that complete triplet to target sum
-    4. Skip duplicates to avoid duplicate triplets
-    5. Reduces 3-sum to 2-sum problem for each fixed element
+    Steps:
+    1. Sort nums
+    2. For each index i from 0 to len(nums)-2 (fixing first element):
+       a. Skip i if nums[i] == nums[i-1] (duplicate fixed element)
+       b. Set left=i+1, right=len(nums)-1
+       c. While left < right:
+          - Calculate current_sum = nums[i] + nums[left] + nums[right]
+          - If sum == 0, append triplet, skip duplicate left/right values, move both pointers
+          - If sum < 0, move left right (need larger sum)
+          - If sum > 0, move right left (need smaller sum)
+    3. Return result
     """
     def threeSum(self, nums: List[int]) -> List[List[int]]: # LC 15
         """
@@ -487,16 +446,6 @@ print("3Sum:", sol.threeSum([0,1,1]))  # []
 PATTERN 5: MULTI-ARRAY MERGE (ONE POINTER PER ARRAY)
 PATTERN EXPLANATION: Maintain one pointer for each input array. Compare elements at current pointers, select smallest/largest based on problem, and advance that pointer. Continue until all arrays exhausted. Common in merging sorted structures or finding common/union elements across multiple sorted arrays.
 
-TYPICAL STEPS:
-1. Initialize pointer for each array (i=0, j=0, etc.)
-2. While pointers within bounds:
-   - Compare elements at current pointers
-   - Select element based on criteria (min for merge, equal for intersection)
-   - Add to result if applicable
-   - Advance pointer of selected element
-3. Handle remaining elements from arrays
-4. Return merged result
-
 Applications: Merge sorted arrays, array intersection, merge intervals.
 ================================================================
 """
@@ -513,17 +462,13 @@ class MultiArrayPattern:
     Explanation: The arrays we are merging are [1,2,3] and [2,5,6].
     The result of the merge is [1,2,2,3,5,6] with the underlined elements coming from nums1.
     
-    How it works:
-    1. Use three pointers: p1 for nums1 values, p2 for nums2 values, p3 for merge position
-    2. Start from END of arrays (merge backwards to avoid overwriting)
-    3. Compare nums1[p1] and nums2[p2], place larger at nums1[p3]
-    4. Move pointer of selected element and merge position pointer
-    5. Copy remaining nums2 elements if any (nums1 elements already in place)
-    
-    Why backwards:
-    - nums1 has space at end for merged result
-    - Merging forward would overwrite nums1 values
-    - Merging backward fills empty space without overwriting
+    Steps:
+    1. Initialize p1=m-1 (last real element in nums1), p2=n-1 (last element in nums2), p3=m+n-1 (last position in nums1)
+    2. While p1 >= 0 and p2 >= 0:
+       a. If nums1[p1] > nums2[p2], write nums1[p1] to nums1[p3], decrement p1
+       b. Else write nums2[p2] to nums1[p3], decrement p2
+       c. Decrement p3
+    3. Copy any remaining nums2 elements into nums1 from p3 downward
     """
     def merge(self, nums1: List[int], m: int, nums2: List[int], n: int) -> None: # LC 88
         """

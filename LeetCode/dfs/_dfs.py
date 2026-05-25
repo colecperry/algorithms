@@ -275,13 +275,7 @@ PATTERN 1: TREE DFS - BUILD UP (POST-ORDER)
 
 PATTERN EXPLANATION: Recursively process children nodes before processing the current node, then combine information from children to compute the parent's result. This bottom-up approach allows each node to make decisions based on complete information from its subtrees. Values flow upward through the tree as the recursion unwinds.
 
-TYPICAL STEPS:
-1. Base case: handle null nodes (usually return 0, None, or default value)
-2. Recursively call on left child and get result
-3. Recursively call on right child and get result
-4. Process current node using children's results
-5. Return computed value to parent
-
+#
 Applications: Height calculation, diameter, balanced tree check, LCA, subtree properties.
 ================================================================
 """
@@ -305,11 +299,11 @@ class TreeDFSBuildUp:
     
     # Depth = 3 (path: 3 -> 20 -> 15)
     
-    How it works:
-    1. Get depth from left subtree
-    2. Get depth from right subtree
-    3. Current depth = 1 + max of children depths
-    4. Return to parent (who uses it in their calculation)
+    Steps:
+    1. Base case: if node is None, return 0 (empty subtree has depth 0)
+    2. Recurse left: call maxDepth on left child to get left subtree depth
+    3. Recurse right: call maxDepth on right child to get right subtree depth
+    4. Combine: return 1 + max(left_depth, right_depth) for the current node
     """
     def maxDepth(self, root):  # LC 104
         """
@@ -379,14 +373,7 @@ print("Max Depth:", sol.maxDepth(root))  # Output: 3
 PATTERN 2: TREE DFS - PASS DOWN (PRE-ORDER)
 PATTERN EXPLANATION: Pass information downward from parent to children during traversal. Each node receives accumulated context from its ancestors (such as path sum, depth, or constraints) and uses this information to make decisions or check conditions. State is updated as you descend and passed to recursive calls.
 
-TYPICAL STEPS:
-1. Base case: handle null nodes or leaf nodes
-2. Process/check current node with accumulated state
-3. Update state based on current node's value
-4. Recursively call on left child with updated state
-5. Recursively call on right child with updated state
-6. Combine results from both subtrees if needed
-
+#
 Applications: Path sum validation, path finding, ancestor-dependent counting, level tracking.
 ===============================================================
 """
@@ -406,11 +393,13 @@ class TreeDFSPassDown:
     # Path: 5 -> 4 -> 11 -> 2 = 22 ✓
     # Output: True
     
-    How it works:
-    1. At each node, subtract current value from targetSum
-    2. Pass the REMAINING sum down to children
-    3. At leaf nodes, check if remaining sum equals node value
-    4. Return True if any path works
+    Steps:
+    1. Base case (empty): if root is None, return False (no path exists)
+    2. Base case (leaf): if node has no children, return root.val == targetSum
+    3. Update state: compute remaining = targetSum - root.val
+    4. Recurse left: call hasPathSum on left child with remaining
+    5. Recurse right: call hasPathSum on right child with remaining
+    6. Combine: return left_has_path or right_has_path
     """
     def hasPathSum(self, root, targetSum):  # LC 112 - Path Sum
         """
@@ -462,16 +451,7 @@ print("Has Path Sum (100):", sol.hasPathSum(root, 100))  # False
 PATTERN 3: GRAPH DFS WITH VISITED
 PATTERN EXPLANATION: Traverse a graph represented as an adjacency list while maintaining a visited set to track already-explored nodes. This prevents infinite loops in cyclic graphs and avoids redundant processing. Can be implemented recursively (using call stack) or iteratively (using explicit stack).
 
-TYPICAL STEPS:
-1. Initialize visited set/map
-2. Start DFS from source node (or try all nodes for disconnected graphs)
-3. Mark current node as visited
-4. Process current node
-5. For each unvisited neighbor:
-   - Mark as visited
-   - Recursively explore neighbor (or add to stack)
-6. Return or aggregate results
-
+#
 Applications: Graph traversal, reachability, connected components, cycle detection.
 ================================================================
 """                  
@@ -491,12 +471,13 @@ class GraphDFS:
         
         Output: True (visited all 4 rooms)
     
-    How it works:
-    1. Use visited set to track which rooms we've entered
-    2. Start DFS from room 0 (only unlocked room)
-    3. When visiting a room, mark it as visited
-    4. For each key in the room, visit that room if not already visited
-    5. After DFS completes, check if visited all rooms
+    Steps:
+    1. Initialize visited set and start DFS from room 0 (the only unlocked room)
+    2. Mark current room as visited
+    3. For each key in the current room:
+       a. Skip if that room is already in visited
+       b. Recursively call dfs on the room that key unlocks
+    4. After DFS completes, check if len(visited) == len(rooms)
     """
     def canVisitAllRooms(self, rooms):  # LC 841
         """
@@ -564,13 +545,7 @@ print("Can visit all rooms:", sol.canVisitAllRooms(rooms3))  # True
 PATTERN 4: MATRIX DFS - FLOOD FILL
 PATTERN EXPLANATION: Explore connected regions in a 2D grid by recursively visiting adjacent cells. The grid represents an implicit graph where each cell's neighbors are the adjacent cells (4 or 8 directions). Track visited cells to avoid infinite recursion, either using a separate set or by modifying the grid in-place.
 
-TYPICAL STEPS:
-1. Start DFS from a cell
-2. Check boundary conditions and visited status
-3. Mark current cell as visited (or change its value)
-4. Recursively explore adjacent cells in 4 directions
-5. Return modified grid
-
+#
 Applications: Fill regions, change colors, connected components in grid, islands.
 ================================================================
 """
@@ -592,12 +567,15 @@ class MatrixDFS:
                  [2,2,0],
                  [2,0,1]]
     
-    How it works:
-    1. Save the original color of starting pixel
-    2. DFS from starting position
-    3. For each cell, check if it matches original color
-    4. Change color and recursively fill neighbors
-    5. Cells are "marked visited" by changing their color
+    Steps:
+    1. Save original_color = image[sr][sc]; if it already equals color, return early
+    2. Call dfs(sr, sc) to start the fill from the starting pixel
+    3. In dfs(r, c): change image[r][c] to color (marks cell as visited)
+    4. For each of the 4 directions (up, down, left, right):
+       a. Compute neighbor coordinates (nr, nc)
+       b. Skip if out of bounds or image[nr][nc] != original_color
+       c. Recurse: call dfs(nr, nc)
+    5. Return the modified image
     """
     def floodFill(self, image, sr, sc, color):  # LC 733
         """

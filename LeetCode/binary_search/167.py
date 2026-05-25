@@ -23,14 +23,6 @@
 # Output: [1,2]
 # Explanation: The sum of -1 and 0 is -1. Therefore index1 = 1, index2 = 2. We return [1, 2].
 
-nums1 = [2, 7, 11, 15]
-target1 = 9
-nums2 = [2, 3, 4]
-target2 = 6
-nums3 = [-1, 0]
-target3 = -1
-nums4 = [1, 3, 4, 5, 7, 11]
-target4 = 9
 
 class Solution(object):
     def twoSum2(self, numbers, target):
@@ -48,7 +40,7 @@ class Solution(object):
 
 
 my_solution = Solution()
-print(my_solution.twoSum2(nums1, target1))
-print(my_solution.twoSum2(nums2, target2))
-print(my_solution.twoSum2(nums3, target3))
-print(my_solution.twoSum2(nums4, target4))
+print(my_solution.twoSum2([2,7,11,15], 9))
+print(my_solution.twoSum2([2,3,4], 6))
+print(my_solution.twoSum2([-1, 0], -1))
+print(my_solution.twoSum2([1,3,4,5,7,11], 9))

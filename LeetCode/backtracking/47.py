@@ -17,6 +17,19 @@ from typing import List
 
 class Solution:
     def permuteUnique(self, nums: List[int]) -> List[List[int]]:
+        """
+        - TC: O(n! * n): 
+            - For n distinct elements, there are n choices for 1st position, (n-1) for 2nd, 
+            (n-2) for 3rd, etc. → n * (n-1) * (n-2) * ... * 1 = n! total permutations
+            - Each permutation is a leaf node in the recursion tree, requiring a unique 
+            path (call stack) from root to leaf → n! complete call stacks
+            - Each permutation takes O(n) to copy into result
+            - Total: n! * n
+        - SC: O(n! * n): 
+            - Recursion depth: O(n) levels deep max at any level
+            - Used array: O(n)
+            - Result list: O(n!) permutations * O(n) size each = O(n! * n)
+        """
         result = []
         nums.sort()  # Sort to group duplicates together for easy skip logic
         
@@ -31,8 +44,8 @@ class Solution:
                 if used[i]:
                     continue
                 
-                # Skip duplicate: if current num equals previous AND previous wasn't used,
-                # we should've picked the previous one first — skip to avoid duplicates
+                # Skip duplicate: if current num equals previous AND previous num wasn't used,
+                # which means the previous number is still available, skip to avoid duplicates
                 if i > 0 and nums[i] == nums[i - 1] and not used[i - 1]:
                     continue
                 
@@ -43,6 +56,7 @@ class Solution:
                 used[i] = False
         
         backtrack([], [False] * len(nums))
+
         return result
 
 sol = Solution()

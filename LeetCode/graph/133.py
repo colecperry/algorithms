@@ -85,21 +85,33 @@ class Node:
 
 class Solution:
     def cloneGraph(self, node: Optional['Node']) -> Optional['Node']:
-        if not node: # Edge case if the graph is empty
-            return None 
-        
-        visited = {node : Node(node.val)} # dictionary to keep track of node's we've already cloned (origional node : cloned node), add the first node in
-        queue = deque([node]) # Initialize the deque with iterable object (original node)
+        if not node:
+            return None
 
-        while queue: # BFS traversal for exploring the existing graph (existing graph)
-            v = queue.popleft() # pop node from existing graph/queue
-            for u in v.neighbors: # Iterate through each neighbor of the original node
-                if u not in visited: # If not yet visited
-                    visited[u] = Node(u.val) # Create a new cloned node and map it to the original node in the visited dictionary
-                    queue.append(u) # Add the neighbor (original node) to explore later
-                clone_v, clone_u = visited[v], visited[u] # get cloned version of the node objects (curr node and neighbor)
-                clone_v.neighbors.append(clone_u) # Add cloned neighbor to cloned node's neighbors list
-        return visited[node] # return cloned version of the original input node in visited dict
+        # Map from original node -> its clone.
+        # Pre-seed with the starting node so we have an anchor for BFS.
+        visited = {node: Node(node.val)}
+
+        # BFS traversal — process nodes level by level -> init with real node
+        queue = deque([node])
+
+        while queue:
+            curr_node = queue.popleft()
+
+            for neighbor in curr_node.neighbors:
+                if neighbor not in visited:
+                    # First time seeing this neighbor — create its clone
+                    # and enqueue it so we later process its own neighbors
+                    visited[neighbor] = Node(neighbor.val)
+                    queue.append(neighbor)
+
+                # Retrieve clones of the current node and its neighbor we are looping on
+                cloned_curr, cloned_neighbor = visited[curr_node], visited[neighbor]
+                # Link the cloned neighbor into the cloned current node's adjacency list
+                cloned_curr.neighbors.append(cloned_neighbor)
+
+        # The clone of the original entry node is our new graph's root
+        return visited[node]
     
 sol = Solution()
 

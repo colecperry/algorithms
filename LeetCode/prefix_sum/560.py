@@ -34,7 +34,7 @@ class Solution:
             
             # Check if (curSum - k) exists in map
             # If yes: there's a previous prefix where removing it gives us sum k
-            # Example: curSum=5, k=3 → diff=2 → if sum=2 seen before, the subarray from (right after that point to now) = 3
+            # Example: curSum=5, k=3 → diff=2 → if sum=2 seen before -> 
             diff = curSum - k
             
             # Add count of how many times diff appeared (found that many subarrays), + 0 if none
