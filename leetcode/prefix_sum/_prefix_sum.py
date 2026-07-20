@@ -7,6 +7,10 @@ WHAT IS PREFIX SUM?
 -------------------
 Prefix sum is a preprocessing technique that builds an array where each element stores the cumulative sum of all elements up to that index. It enables O(1) range sum queries after O(n) preprocessing — trading space for repeated query speed.
 
+
+HOLA HOLA HOLA
+
+
 Key characteristics:
 - Preprocessing: build prefix sum array in O(n) time
 - Query: answer any range sum in O(1) time
