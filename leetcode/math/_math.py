@@ -35,6 +35,56 @@ Common math problem types (most → least common):
 from typing import List
 
 """
+MATH COMPLEXITY REFERENCE
+===========================
+
++------------------------------------+----------------------+--------------+
+| Pattern                            | Time                 | Space        |
++------------------------------------+----------------------+--------------+
+| Digit Manipulation                 | O(log n)             | O(1)         |
+| GCD / LCM                          | O(n + log(min(a,b))) | O(1)         |
+| Prime Sieve                        | O(n log log n)       | O(n)         |
+| Fast Exponentiation / Integer Sqrt | O(log n)             | O(1)         |
+| String-Based Big-Number Arithmetic | O(max(m, n))         | O(max(m, n)) |
++------------------------------------+----------------------+--------------+
+
+n = magnitude of the primary input for that pattern (digit count for Digit
+Manipulation, array length for GCD/LCM, upper bound for Prime Sieve, exponent for
+Fast Exponentiation), m = length of the second string for String-Based Big-Number
+Arithmetic, a/b = the two values a GCD is being computed over
+
+WHAT EACH PATTERN IS:
+- Digit Manipulation: peel a number apart one digit at a time using remainder and
+  division, then rebuild a new number the same way in reverse.
+- GCD / LCM: repeatedly replace a pair of numbers with a smaller pair (the second
+  number and the remainder of dividing them) until one hits zero — the last nonzero
+  number is the greatest common divisor, and the least common multiple falls out of
+  a one-line formula built from it.
+- Prime Sieve: start by assuming every number could be prime, then cross off every
+  multiple of each prime you find, so anything left unmarked at the end must be prime.
+- Fast Exponentiation / Integer Square Root: compute a big power by repeatedly
+  squaring the base and cutting the exponent in half, instead of multiplying one
+  factor at a time; integer square root applies the same halving idea via binary search.
+- String-Based Big-Number Arithmetic: treat numbers that are too big (or off-limits
+  to convert) as plain text, and add or multiply them the way you would by hand on
+  paper, one column or digit-pair at a time.
+
+NOTES:
+- Digit Manipulation: the digit count of x is O(log x), and each iteration strips one
+  digit -> O(log n) time; only a few scalar variables -> O(1) space
+- GCD/LCM: O(n) to scan the array for min/max, then the Euclidean algorithm shrinks
+  the pair by at least half every two steps -> O(log min(a,b)); no extra storage ->
+  O(1) space
+- Prime Sieve: each composite is marked exactly once by its smallest prime factor;
+  the classic sieve summation bounds total marking work at O(n log log n); the
+  is_prime array is O(n) space
+- Fast Exponentiation: the exponent is halved every iteration -> O(log n) iterations;
+  only the running result and base are kept -> O(1) space
+- String Arithmetic: single pass over the longer of the two strings -> O(max(m, n));
+  the result string grows to the same size -> O(max(m, n)) space
+"""
+
+"""
 ================================================================
 PATTERN 1: DIGIT MANIPULATION
 PATTERN EXPLANATION: Extract digits with % 10 and // 10, reconstruct numbers with * 10. Building a reversed number: accumulate into a result by multiplying the running result by 10 then adding the next digit each iteration. Overflow detection: check before multiplying if result will exceed INT_MAX // 10.
@@ -45,6 +95,11 @@ Applications: Reverse integer (LC 7), palindrome number (LC 9), happy number dig
 
 class DigitManipulationPattern:
     """
+    Giveaway: "return x with its digits reversed" plus an explicit overflow
+    check against a 32-bit range — needing to peel off and rebuild individual
+    digits (not the number as a whole) is what signals % 10 / // 10 digit
+    extraction instead of string-reversal tricks.
+
     Problem: Given a signed 32-bit integer x, return x with its digits reversed. If reversing causes overflow outside [-2^31, 2^31 - 1], return 0.
 
     Example:
@@ -105,6 +160,11 @@ divisibility, common periods, or repeating structure.
 
 class GCDPattern:
     """
+    Giveaway: the problem asks directly for the greatest common divisor of
+    specific numbers — that wording is the tell for the Euclidean algorithm
+    (repeatedly replacing (a,b) with (b, a%b)) rather than checking every
+    divisor up to min(a,b).
+
     Problem: Return the GCD of the smallest and largest element in nums.
 
     Example:
@@ -155,7 +215,12 @@ import math
 
 class PrimeSievePattern:
     """
-    Problem: Given an integer n, return the number of prime numbers strictly less than n. 
+    Giveaway: "return the number of primes strictly less than n" — needing prime
+    status for every number up to a bound, not just testing one specific number,
+    is what signals sieving out multiples once instead of trial-dividing each
+    number individually.
+
+    Problem: Given an integer n, return the number of prime numbers strictly less than n.
     
     NOTE: A prime number is a number greater than 1 that has no positive divisors other than 1 and itself.
 
@@ -217,6 +282,11 @@ Super Pow (LC 372), any problem computing large powers efficiently.
 
 class FastExponentiationPattern:
     """
+    Giveaway: "implement pow(x, n)" where n can be large — computing a big power
+    efficiently, implying naive repeated multiplication is too slow, is the
+    signal for halving the exponent via repeated squaring instead of multiplying
+    x by itself n times.
+
     Problem: Implement pow(x, n), which computes x raised to the power n.
 
     Example:
@@ -272,6 +342,11 @@ any "big number" problem where int conversion is off-limits.
 
 class StringArithmeticPattern:
     """
+    Giveaway: numbers are given as strings with an explicit "must not convert
+    inputs to integers directly" — that ban, combined with needing an exact
+    digit-by-digit sum, is what signals simulating grade-school column
+    arithmetic instead of using built-in int conversion.
+
     Problem: Given two non-negative integers as strings, return their sum as a string. Must not convert inputs to integers directly.
 
     Example:

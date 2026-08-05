@@ -58,6 +58,20 @@ SLIDING WINDOW COMPLEXITY REFERENCE
 
 n = array/string length, k = window size or char set size, m = pattern length
 
+WHAT EACH PATTERN IS:
+- Fixed Window Numeric: a window of a set size k that slides one step at a time,
+  updating a running total by dropping the element that just left and adding the one
+  that just entered.
+- Fixed Window Frequency: the same sliding idea, but instead of a running sum you keep
+  a running character/element count so you can check "does this window match a target
+  pattern" cheaply at every step.
+- Variable Window Maximize: grow the window until it breaks a rule, then shrink it just
+  enough to make it valid again — used to find the longest stretch that still satisfies
+  a constraint.
+- Variable Window Minimize: grow the window until it first satisfies a constraint, then
+  shrink it as much as possible while it's still valid — used to find the shortest
+  stretch that works.
+
 NOTES:
 - Fixed numeric: one add + one subtract per slide -> O(1) per step
 - Fixed frequency: Counter comparison is O(26) = O(1) for lowercase letters
@@ -85,6 +99,11 @@ Applications: Max/min sum of k elements, average of k elements, max product suba
 
 class FixedWindowNumeric:
     """
+    Giveaway: "the contiguous subarray of length k" with a fixed, given k and an
+    aggregate (average/sum) to optimize — a constant window size stated up
+    front is the signal for a fixed sliding window that adds one element and
+    drops one element per step, instead of resumming each window from scratch.
+
     Problem: Given an integer array nums and integer k, find the contiguous subarray
     of length k with the maximum average value. Return this maximum average.
 
@@ -139,6 +158,11 @@ Applications: Find all anagrams, permutation in string, repeated DNA sequences.
 
 class FixedWindowFrequency:
     """
+    Giveaway: "return all start indices of p's anagrams in s" — anagram means
+    same character COUNTS in some order, and the window size is pinned to
+    len(p), which is the tell for a fixed-size sliding window compared via
+    character-frequency maps rather than checking permutations directly.
+
     Problem: Given strings s and p, return all start indices of p's anagrams in s.
     An anagram of p is any permutation of p's characters.
 
@@ -207,6 +231,12 @@ longest substring with at most k distinct characters.
 
 class VariableMaximize:
     """
+    Giveaway: "the length of the longest substring without any repeating
+    characters" — asking for the LONGEST contiguous run that keeps a validity
+    property (no dupes) true, with no fixed size given, is the signal to expand
+    the window until it breaks the rule, then shrink just enough to fix it,
+    rather than checking every substring.
+
     Problem: Find the length of the longest substring without any repeating characters.
 
     Example:
@@ -268,6 +298,12 @@ Applications: Minimum window substring, smallest subarray with sum >= k.
 
 class VariableMinimize:
     """
+    Giveaway: "return the minimum window substring of s such that every
+    character in t is included" — asking for the SHORTEST window that satisfies
+    a coverage constraint (as opposed to the longest that avoids violating one)
+    is the tell to expand until valid, then shrink from the left while it stays
+    valid, the mirror image of the longest-window variant.
+
     Problem: Given strings s and t, return the minimum window substring of s such that
     every character in t (including duplicates) is included. Return "" if none exists.
 

@@ -246,6 +246,29 @@ WHERE:
 - E = number of edges
 - α(n) = inverse Ackermann function (practically constant, < 5 for any realistic n)
 
+WHAT EACH PATTERN IS:
+- DFS (recursive): starting at a node and diving as deep as possible down one path
+  before backtracking, using function calls to remember where to return to.
+- DFS (iterative): the same deep-dive-then-backtrack exploration as recursive DFS,
+  but using your own explicit stack instead of relying on function call stacking.
+- BFS: starting at a node and exploring all of its neighbors first, then their
+  neighbors, spreading outward one layer at a time — because it moves in layers, it's
+  what guarantees the shortest path in an unweighted graph.
+- Union Find: keeps track of separate groups of connected nodes so you can quickly
+  ask "are these two in the same group?" or merge two groups — like tracking islands
+  and the bridges that join them.
+- Topological Sort: puts tasks in a valid order when some tasks must happen before
+  others, like course prerequisites — only possible when there are no circular
+  dependencies.
+- Dijkstra (min-heap): finds the shortest distance from one starting node to every
+  other node in a weighted graph, always expanding next from whichever unvisited node
+  is currently closest.
+- Bellman-Ford: also finds shortest paths from one node to all others, but slower
+  than Dijkstra in exchange for being able to handle negative edge weights (and detect
+  negative cycles).
+- Floyd-Warshall: finds the shortest path between every pair of nodes at once, by
+  repeatedly checking whether it's shorter to go through some other node as a detour.
+
 COMPLEXITY NOTES:
 ----------------
 1. DFS/BFS: O(V + E) - Linear time
@@ -355,6 +378,12 @@ Applications: Friend circles, network connectivity, island counting, clustering.
 
 class ConnectedComponents:
     """
+    Giveaway: "a province is a group of directly or indirectly connected
+    cities... return the total number of provinces" — needing to count how many
+    separate connected groups exist overall (not whether two specific nodes
+    connect) is what signals running DFS/BFS from every unvisited node and
+    counting how many times you had to start.
+
     Problem: There are n cities. Some are connected, some are not. If city a connects to city b, and city b connects to city c, then a indirectly connects to c.
     
     A province is a group of directly or indirectly connected cities. Given an n x n matrix isConnected where isConnected[i][j] = 1 if cities i and j are connected, return the total number of provinces.
@@ -455,7 +484,13 @@ Applications: Minimum steps/transformations, shortest path in graphs, word ladde
 
 class BFSShortestPath:
     """
-    Problem: A gene string is represented by an 8-character string of 'A', 'C', 'G', 'T'. 
+    Giveaway: "find the minimum number of mutations" needed to turn a start
+    state into an end state, where each step is a single valid transformation —
+    needing the fewest steps through an unweighted state-transition space is
+    what signals BFS layer-by-layer exploration rather than DFS or brute-force
+    path search.
+
+    Problem: A gene string is represented by an 8-character string of 'A', 'C', 'G', 'T'.
     A mutation is changing one character. Given a start gene, end gene, and a gene bank, 
     find the minimum number of mutations needed to mutate from start to end. 
     Each mutation must result in a gene from the bank. If no mutation sequence exists, return -1.
@@ -549,6 +584,11 @@ Applications: Matching problems, scheduling conflicts, team assignments.
 
 class BipartiteCheck:
     """
+    Giveaway: the graph must be partitioned into two independent sets where
+    every edge connects across the sets and never within one — that specific
+    "split into two groups with no same-group edges" requirement is what
+    signals 2-coloring via BFS/DFS rather than plain reachability traversal.
+
     Problem: Given an undirected graph, return true if the graph is bipartite.
     A graph is bipartite if nodes can be partitioned into two independent sets A and B such that every edge connects a node in A to a node in B (no edges within a set).
     
@@ -650,6 +690,12 @@ Applications: Course scheduling, task ordering, build systems, dependency resolu
 
 class TopologicalSort:
     """
+    Giveaway: "you must take course b before a" — a dependency/prerequisite
+    ordering where some tasks must finish before others, combined with needing
+    to detect whether finishing everything is even possible (i.e. no cycle), is
+    what signals in-degree tracking with Kahn's algorithm rather than plain
+    DFS/BFS reachability.
+
     Problem: There are numCourses courses labeled 0 to numCourses-1.
     Given prerequisites where prerequisites[i] = [ai, bi], you must take course bi before ai.
     
@@ -774,6 +820,12 @@ Applications: Network connectivity, cycle detection, grouping elements, Kruskal'
 
 class UnionFindCycle: # LC 684
     """
+    Giveaway: a graph that "started as a tree" had one extra edge added, and you
+    must find which single edge to remove to restore the tree — needing to spot
+    the exact edge that first connects two nodes already in the same component,
+    while edges are added one at a time, is the classic tell for union-find
+    cycle detection instead of full graph traversal.
+
     In a graph that started as a tree with n nodes, one extra edge was added. Return the edge that can be removed to restore the tree structure. If multiple answers exist, return the last occurring edge.
     
     Example 1:
@@ -904,6 +956,12 @@ Applications: GPS routing, network packet routing, shortest path in weighted gra
 
 class DijkstraShortestPath: # LC 743
     """
+    Giveaway: edges carry explicit travel times/weights and the question asks
+    for the minimum time for a signal to reach every node from one source —
+    needing shortest distance from one source to all nodes in a weighted graph
+    with non-negative weights is what signals Dijkstra's greedy min-heap
+    approach instead of plain BFS.
+
     You are given a network of n nodes, labeled from 1 to n. You are also given times, a list of travel times as directed edges times[i] = (ui, vi, wi), where ui is the source node, vi is the target node, and wi is the time it takes for a signal to travel from source to target.
     
     We will send a signal from a given node k. Return the minimum time it takes for all the n nodes to receive the signal. If it is impossible for all the n nodes to receive the signal, return -1.

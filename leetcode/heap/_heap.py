@@ -164,6 +164,47 @@ import heapq
 from collections import Counter
 
 """
+HEAP COMPLEXITY REFERENCE
+==========================
+
++--------------------------+------------+-------+
+| Pattern                  | Time       | Space |
++--------------------------+------------+-------+
+| Top K Elements           | O(n log k) | O(n)  |
+| K-Way Merge              | O(n log k) | O(k)  |
+| Greedy + Heap            | O(n log n) | O(n)  |
+| Active Interval Tracking | O(n log n) | O(n)  |
++--------------------------+------------+-------+
+
+n = total number of elements/nodes processed, k = heap size cap (Top K Elements) or
+number of sources being merged (K-Way Merge)
+
+WHAT EACH PATTERN IS:
+- Top K Elements: keep a small heap of just the k best candidates seen so far, tossing
+  out the weakest one whenever there are too many, so you never have to sort everything.
+- K-Way Merge: repeatedly grab the smallest item across several already-sorted sources
+  by keeping one candidate per source in a heap, pulling in that source's next item
+  each time you take one out.
+- Greedy + Heap: repeatedly pull out the best (biggest or smallest) item, do something
+  with it, and put the result back in, so you're always acting on the most extreme
+  item first.
+- Active Interval Tracking: track how many intervals are open at the same time by
+  keeping the end times of currently running intervals in a heap, dropping any that
+  have already finished before adding a new one.
+
+NOTES:
+- Top K Elements: n elements each pushed/popped on a heap capped at size k -> O(log k)
+  per op, O(n log k) total; frequency map is O(n), heap is O(k) (bounded by n overall)
+- K-Way Merge: heap never holds more than one node per source (k sources) -> O(log k)
+  per push/pop; n total nodes each enter/exit the heap once -> O(n log k); SC O(k)
+- Greedy + Heap: heapify is O(n), then up to n pop+push operations each O(log n) ->
+  O(n log n); heap stores up to n elements -> O(n) space
+- Active Interval Tracking: sorting is O(n log n); each interval is pushed/popped from
+  the heap at most once at O(log n) per op -> O(n log n) total; heap holds up to n
+  end times -> O(n) space
+"""
+
+"""
 ================================================================
 PATTERN 1: TOP K ELEMENTS
 PATTERN EXPLANATION: Maintain a heap of size k to track the k "best" elements without
@@ -187,6 +228,11 @@ Applications: Kth largest/smallest, k most frequent elements, k closest points t
 
 class TopKPattern:
     """
+    Giveaway: "return the k most frequent elements" — needing just the top k by
+    frequency (not a full ranking) out of a large unsorted collection is the
+    classic signal for a size-capped heap that evicts its weakest member,
+    instead of sorting all n frequencies.
+
     Problem: Given an integer array nums and integer k, return the k most frequent elements.
 
     Example:
@@ -250,6 +296,11 @@ class ListNode:
 
 class KWayMergePattern: # LC 23
     """
+    Giveaway: "merge k sorted linked lists... return as one sorted list" — you
+    already have k independently-sorted streams and need the global minimum
+    across all of them repeatedly, which is the tell for keeping one candidate
+    per list in a min heap rather than concatenating and re-sorting everything.
+
     Problem: Merge k sorted linked lists and return as one sorted list.
 
     Example:
@@ -324,6 +375,12 @@ Applications: Last stone weight, task scheduler, pick gifts, IPO, reorganize str
 
 class GreedyHeapPattern:
     """
+    Giveaway: "each turn smash the two heaviest stones together" — the problem
+    itself defines the operation as repeatedly acting on the current two
+    largest values and feeding a new value back in, which is exactly what a max
+    heap (extract-extract-reinsert) is built for, as opposed to sorting once
+    up front.
+
     Problem: Given array 'stones', each turn smash the two heaviest stones together.
     If weights x <= y: both destroyed if equal, else stone of weight y-x remains.
     Return weight of last remaining stone, or 0 if none remain.
@@ -385,6 +442,12 @@ Applications: Meeting rooms, car pooling, minimum platforms, CPU scheduling.
 
 class IntervalPattern:
     """
+    Giveaway: "return minimum conference rooms required" for a list of meeting
+    intervals — needing the maximum number of intervals overlapping AT THE SAME
+    TIME (not just whether any overlap) is the tell for tracking active end
+    times in a heap so you can cheaply evict any meeting that's already
+    finished before adding a new one.
+
     Problem: Given meeting intervals [start, end], return minimum conference rooms required.
 
     Example:

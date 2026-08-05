@@ -25,6 +25,37 @@ ARRAY CORE OPERATIONS
 
 from typing import List
 
+"""
+ARRAY COMPLEXITY REFERENCE
+===========================
+
++----------------------------------+------------+-------+
+| Pattern                          | Time       | Space |
++----------------------------------+------------+-------+
+| Boyer-Moore Voting Algorithm     | O(n)       | O(1)  |
+| Merge Intervals                  | O(n log n) | O(n)  |
+| Array Rotation (Reversal Method) | O(n)       | O(1)  |
++----------------------------------+------------+-------+
+
+n = number of elements in the array
+
+WHAT EACH PATTERN IS:
+- Boyer-Moore Voting Algorithm: a running "vote count" that cancels a point for
+  every mismatched element and adds a point for every matching one, so the true
+  majority element is guaranteed to survive to the end.
+- Merge Intervals: sort ranges by their start, then walk through once, fusing any
+  range into the previous one if they overlap.
+- Array Rotation (Reversal Method): shift every element over by k positions
+  in-place by reversing the whole array, then reversing the two pieces that
+  landed on either side of the rotation point.
+
+NOTES:
+- Boyer-Moore: single pass with only a candidate and a counter -> O(n) time, O(1) space
+- Merge Intervals: sorting dominates the single merge pass -> O(n log n); output array is O(n)
+- Array Rotation: three reversals, each touching every element once -> O(n) total;
+  swaps happen in-place with no extra array -> O(1) space
+"""
+
 # ================================================================
 # BASIC ARRAY OPERATIONS
 # ================================================================
@@ -135,6 +166,12 @@ Applications: Majority element, majority element II (>n/3), finding elements wit
 
 class BooyerMoore:
     """
+    Giveaway: the problem guarantees a majority element that appears more than
+    ⌊n/2⌋ times — that guarantee (not just "find the most frequent element") is
+    what licenses a cancellation/voting scheme instead of a frequency-count hash
+    map, since a true majority is structurally certain to survive naive vote
+    cancelling in a way a merely-most-common element could not.
+
     Problem: Given array of size n, find the majority element. The majority element is the element that appears more than ⌊n/2⌋ times. You may assume the majority element always exists.
     
     Example 1:
@@ -191,6 +228,11 @@ non-overlapping intervals, interval list intersections.
 """
 class MergeIntervals:
     """
+    Giveaway: the input is a list of [start, end] ranges and the task is literally
+    "merge all overlapping intervals" — whenever ranges can overlap and need to be
+    fused into non-overlapping pieces, sorting by start and sweeping once is the
+    tell, rather than comparing every pair of intervals.
+
     Problem: Given array of intervals [start, end], merge all overlapping intervals and return array of non-overlapping intervals.
 
         Example 1:
@@ -247,6 +289,11 @@ shift operations.
 class RotateArray:
     def rotate(self, nums: List[int], k: int) -> None: # LC 189
         """
+        Giveaway: "rotate the array... in-place with O(1) extra space" — the
+        explicit ban on allocating a second array while every element still needs
+        to shift by k is what points to the three-reversal trick instead of
+        building a rotated copy.
+
         Problem: Given an integer array, rotate the array to the right by k steps where k is non-negative. Modify the array in-place with O(1) extra space.
 
         Example 1:

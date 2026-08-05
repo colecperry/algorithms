@@ -34,6 +34,58 @@ DYNAMIC PROGRAMMING CORE TEMPLATES
 
 from typing import List
 
+"""
+DYNAMIC PROGRAMMING COMPLEXITY REFERENCE
+==========================================
+
++-------------------------------------+---------------+-----------+
+| Pattern                             | Time          | Space     |
++-------------------------------------+---------------+-----------+
+| 1D Linear DP (Sequential Decisions) | O(n)          | O(n)      |
+| 2D Grid DP (Path Problems)          | O(m * n)      | O(m * n)  |
+| 0/1 Knapsack (Subset Selection)     | O(n * target) | O(target) |
+| Longest Increasing Subsequence      | O(n^2)        | O(n)      |
+| Longest Common Subsequence          | O(m * n)      | O(m * n)  |
+| State Machine DP (Multiple States)  | O(n)          | O(n)      |
++-------------------------------------+---------------+-----------+
+
+n = length of the array/string/number of days, m * n = grid dimensions or
+lengths of the two strings being compared, target = target sum for 0/1
+knapsack. Several of these can be space-optimized further (see NOTES).
+
+WHAT EACH PATTERN IS:
+- 1D Linear DP: walk through a list one item at a time, deciding the best move at each
+  step using only what was decided at the previous step or two — like deciding
+  house-by-house whether robbing it is worthwhile.
+- 2D Grid DP: fill in a grid one cell at a time, where each cell's answer is built from
+  the cell above it and/or to its left — like counting paths to each square starting
+  from the top-left corner.
+- 0/1 Knapsack: figure out which items from a group to pick, each only once, to hit
+  some target total, by tracking every total that's achievable so far.
+- Longest Increasing Subsequence: for every position in a list, look back at all
+  earlier positions to find the best increasing run that can be extended up to here.
+- Longest Common Subsequence: compare two sequences piece by piece, building a table
+  of "best match so far" that grows by extending a match or carrying forward the
+  better of two neighboring answers.
+- State Machine DP: track several possible "modes" you could be in at each step (like
+  holding stock vs. resting) and work out the best way to move between those modes.
+
+NOTES:
+- 1D Linear DP: each of n positions computed once with O(1) work -> O(n) time; dp
+  array can shrink to O(1) since each state only depends on the last 1-2 values
+- 2D Grid DP: each of m*n cells computed once with O(1) work -> O(m*n) time; space can
+  shrink to O(n) by keeping only the previous row
+- 0/1 Knapsack: n items x up to target capacities, O(1) work per cell, iterated
+  backwards so an item is never reused -> O(n * target) time; dp array sized target
+- LIS: n positions, each checking up to n earlier positions -> O(n^2) time; dp array
+  itself is only O(n)
+- LCS: fills an (m+1) x (n+1) table with O(1) work per cell -> O(m*n) time and space
+  (space reducible to O(min(m,n)) by keeping only the previous row)
+- State Machine DP: n steps, a constant number of states with O(1) transitions per
+  step -> O(n) time; space is O(n) for the full table but reducible to O(1) by keeping
+  only the previous step's states
+"""
+
 # ========================================================================
 # 1D DP TEMPLATE (LINEAR)
 # ========================================================================
@@ -272,6 +324,12 @@ Applications: House robber, climbing stairs, min cost climbing, decode ways.
 
 class LinearDP:
     """
+    Giveaway: "adjacent houses... alerting the police" — a linear sequence where
+    each decision (rob or skip) is constrained only by your immediate previous
+    choice, and you want the max total, is the tell for 1D DP where dp[i]
+    depends on just dp[i-1] and dp[i-2], rather than needing to look arbitrarily
+    far back.
+
     Problem: You are a robber planning to rob houses along a street. Each house has a certain amount of money. Adjacent houses have security systems connected - if two adjacent houses are robbed on the same night, the police are automatically called.
     
     Given an integer array nums representing the amount of money of each house, return the maximum amount of money you can rob without alerting the police. 
@@ -340,6 +398,12 @@ square.
 
 class GridDP:
     """
+    Giveaway: "robot... can only move either down or right" on a grid, asking
+    how many paths exist to a fixed destination — movement restricted to two
+    directions on a 2D grid, where each cell's count is just the sum of the
+    cell above and the cell to the left, is the tell for filling a 2D table
+    top-left to bottom-right.
+
     Problem: A robot is located at the top-left corner of an m x n grid. The robot can only move either down or right at any point in time. The robot is trying to reach the bottom-right corner.
     
     How many possible unique paths are there?
@@ -437,7 +501,13 @@ Applications: Partition equal subset, target sum, subset sum, coin change (count
 
 class KnapsackDP:
     """
-    Problem: Given an integer array nums, return true if you can partition 
+    Giveaway: "partition the array into two subsets such that the sum... is
+    equal" — needing to know, for a fixed target total, which sums are
+    reachable by picking a subset of numbers where EACH number is used at most
+    once, is the tell for 0/1 knapsack (a boolean array over achievable sums,
+    updated backwards per item) instead of trying every subset.
+
+    Problem: Given an integer array nums, return true if you can partition
     the array into two subsets such that the sum of elements in both subsets 
     is equal.
 
@@ -529,7 +599,13 @@ Applications: LIS, Russian doll envelopes, maximum length of pair chain.
 
 class LISDP:
     """
-    Problem: Given an integer array nums, return the length of the 
+    Giveaway: "longest strictly increasing subsequence" — elements may be
+    skipped (subsequence, not subarray) but must stay in relative order and
+    increase, which forces you to compare each position against every earlier
+    position to see what it can extend, the tell for the O(n^2) "look back at
+    all previous indices" DP rather than a single linear scan.
+
+    Problem: Given an integer array nums, return the length of the
     longest strictly increasing subsequence.
     
     A subsequence is an array derived from another array by deleting some 
@@ -613,6 +689,13 @@ Applications: LCS, edit distance, shortest common supersequence, diff tools.
 
 class LCSDP:
     """
+    Giveaway: "given two strings... return the length of their longest common
+    subsequence" — comparing TWO independent sequences (not one) for a shared
+    subsequence, where characters can be skipped in either string, is the tell
+    for a 2D dp[i][j] table built off matching current characters or carrying
+    forward the better of the two neighbors, rather than the single-sequence
+    LIS recurrence.
+
     Problem: Given two strings text1 and text2, return the length of their longest common subsequence. If there is no common subsequence, return 0.
     
     A subsequence is a string generated from the original string by deleting some (or no) characters without changing the relative order of the remaining characters.
@@ -742,6 +825,12 @@ decisions.
 
 class StateMachineDP:
     """
+    Giveaway: "after you sell... you cannot buy on the next day (cooldown)" — an
+    extra rule that makes the profit on a given day depend on which of several
+    distinct MODES you were in the day before (holding, just sold, resting),
+    rather than just yesterday's best profit, is the tell for tracking parallel
+    dp values per state with explicit transitions between them.
+
     Problem: You are given an array prices where prices[i] is the price of a stock on day i. You can complete as many transactions as you like with the following restrictions: After you sell your stock, you cannot buy stock on the next day (cooldown 1 day)
     
     Return the maximum profit you can achieve.

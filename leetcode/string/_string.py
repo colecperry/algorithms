@@ -59,6 +59,18 @@ STRING COMPLEXITY REFERENCE
 For Character Frequency: n = number of strings, k = average string length
 For all others: n = single string length
 
+WHAT EACH PATTERN IS:
+- Character Frequency: count how many times each letter appears in a string and use
+  that count as a fingerprint — two strings with the same fingerprint are anagrams
+  of each other.
+- Palindrome Check: walk inward from both ends of the string at once, comparing
+  characters as you go, to see if it reads the same forwards and backwards.
+- String Parsing: split the string into words, rearrange or filter them, then glue
+  them back together — the basic toolkit for sentence-level manipulation.
+- String Compression: scan through the characters in place, counting how many times
+  each one repeats in a row, and overwrite the array with "character + count" — a
+  way to shrink runs of repeats.
+
 NOTES:
 - Character frequency: sort each string O(k log k) or build freq tuple O(k); n strings -> O(n*k)
 - Palindrome: two pointers meet in the middle -> single O(n) pass, no extra space
@@ -86,6 +98,11 @@ Applications: Group anagrams, valid anagram, find all anagrams, ransom note.
 
 class CharFrequency:
     """
+    Giveaway: "group all anagrams together" means the grouping key isn't the string
+    itself but its multiset of letters — converting each word into a fixed-size
+    letter-count signature (so order stops mattering) is what lets you bucket
+    strings into groups with a single hashmap pass.
+
     Problem: Given an array of strings, group all anagrams together.
 
     Example:
@@ -140,6 +157,11 @@ Applications: Valid palindrome, palindrome number, longest palindromic substring
 
 class PalindromeCheck:
     """
+    Giveaway: "return True if it is a palindrome" — reads the same forwards and
+    backwards — is directly a statement about the first and last characters
+    matching, then the next-inward pair, and so on, which is exactly what
+    converging two pointers from both ends checks in one O(n) pass.
+
     Problem: Given a string s, return True if it is a palindrome after converting to
     lowercase and removing all non-alphanumeric characters.
 
@@ -204,6 +226,11 @@ Applications: Reverse words in a string, reorder sentence, capitalize words.
 
 class StringParsing:
     """
+    Giveaway: "reverse the order of words" (as opposed to reversing characters) with
+    messy spacing ("no leading/trailing spaces and exactly one space between words")
+    is what points you to split-into-tokens, reorder the tokens, then rejoin, rather
+    than any in-place character-level pointer trick.
+
     Problem: Given an input string s, reverse the order of words. A word is a sequence
     of non-space characters. The output should have no leading/trailing spaces and
     exactly one space between words.
@@ -252,6 +279,11 @@ Applications: String compression, run-length encoding, remove duplicates in-plac
 
 class StringCompression:
     """
+    Giveaway: "compress it in-place using run-length encoding" — replacing each run
+    of consecutive identical characters with the character plus its count — is what
+    calls for a read pointer that scans a run's length and a separate write pointer
+    that never overtakes it, keeping the whole transform to O(1) extra space.
+
     Problem: Given an array of characters chars, compress it in-place using run-length
     encoding. Groups of consecutive identical characters are replaced by the character
     followed by the group length (omit length if group size is 1). Return new length.

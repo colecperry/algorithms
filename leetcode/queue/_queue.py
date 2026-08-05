@@ -12,8 +12,8 @@ line of people waiting — the first person in line is the first to be served.
 Key characteristics:
 - FIFO ordering: First element added is first to be removed
 - O(1) enqueue (append) and dequeue (popleft) with collections.deque
-- Foundation of BFS: queue processes nodes level by level
 - Monotonic variant (deque) enables O(n) sliding window extremes
+- Fixed-capacity variant (circular buffer) enables true O(1) worst-case operations
 
 Python implementation:
     from collections import deque
@@ -22,48 +22,71 @@ Python implementation:
     queue.popleft()      # dequeue — O(1)
     queue[0]             # peek front — O(1)
 
+NOTE ON SCOPE: A queue is also the engine behind BFS (tree level-order, grid shortest
+path, multi-source spread, topological sort). Those patterns live in the dedicated
+leetcode/bfs/_bfs.py and leetcode/graph/_graph.py guides — there, the queue is just
+the mechanism and graph/tree exploration is the actual technique. This guide covers
+problems where the queue's FIFO behavior IS the technique: eviction, turn-order
+simulation, and design.
+
 When to use Queue:
-- Level-order traversal (BFS on trees)
-- Shortest path in unweighted graphs or grids
-- Multi-source BFS (multiple starting points simultaneously)
 - Sliding window maximum/minimum (monotonic deque)
-- Design problems (implement queue using other structures)
+- Tracking "recent" events that expire after a time/count window
+- Simulating a literal line/turn order where entities cycle to the back
+- Implementing FIFO behavior on top of other structures (design problems)
+- Building a fixed-capacity buffer with explicit front/rear bookkeeping
 
 Common Queue problem types:
-- BFS tree level-order traversal
-- BFS grid: shortest path, infection spread
-- Multi-source BFS: distance from multiple origins
 - Sliding window max/min with monotonic deque
-- Queue implementation and design
+- Expiring window: recent calls, moving average, hit counter
+- Round-robin simulation: ticket lines, senate voting, circular games
+- Queue-from-stacks / stack-from-queue design
+- Circular queue / deque / bounded buffer design
 
 QUEUE CORE PATTERNS
 ===================
 """
 
-from typing import List, Optional
+from typing import List
 from collections import deque
 
 """
 QUEUE COMPLEXITY REFERENCE
 ===========================
 
-+---------------------------+------------------+------------------+
-| Pattern                   | Time             | Space            |
-+---------------------------+------------------+------------------+
-| BFS Tree Level-Order      | O(n)             | O(w)             |
-| BFS Grid / Multi-source   | O(m * n)         | O(m * n)         |
-| Monotonic Deque           | O(n)             | O(k)             |
-| Queue with Two Stacks     | O(1) amortized   | O(n)             |
-+---------------------------+------------------+------------------+
++---------------------------------+------------------+------------------+
+| Pattern                         | Time             | Space            |
++---------------------------------+------------------+------------------+
+| Monotonic Deque                 | O(n)             | O(k)             |
+| Sliding Window Eviction         | O(n) amortized   | O(w)             |
+| Queue Simulation / Round-Robin  | O(sum of turns)  | O(n)             |
+| Queue via Two Stacks            | O(1) amortized   | O(n)             |
+| Circular Queue (Fixed Buffer)   | O(1) per op      | O(k)             |
++---------------------------------+------------------+------------------+
 
-n = number of nodes/elements, w = max tree width,
-m/n = grid dimensions, k = window size
+n = number of elements/calls, k = window size or buffer capacity,
+w = max entries live in the window at once, sum of turns = total steps
+across all entities before the simulation ends (e.g. total tickets bought)
+
+WHAT EACH PATTERN IS:
+- Monotonic Deque: a deque kept in sorted order so the front is always the current
+  window's max (or min) — used for sliding window max/min.
+- Sliding Window Eviction: a queue of recent events where you just drop stale entries
+  off the front — used for "how many things happened in the last X" problems.
+- Queue Simulation / Round-Robin: a queue that models a literal line of people/turns,
+  where an entry goes to the back if it still has work left.
+- Queue via Two Stacks: two stacks used together to fake FIFO behavior, since a
+  standard stack is LIFO — used in "implement a queue" design problems.
+- Circular Queue (Fixed Buffer): a fixed-size array with wraparound indexing, so old
+  slots get reused instead of the array growing — used for ring buffers.
 
 NOTES:
-- BFS tree: queue holds at most one full level (max width w) at a time
-- BFS grid: each cell visited once; queue can hold up to m*n cells
-- Monotonic deque: each element enters and exits at most once -> O(n) total
-- Queue with stacks: each element crosses between stacks at most once -> amortized O(1) pop
+- Monotonic deque: each index enters and exits at most once -> O(n) total
+- Sliding window eviction: each entry enqueued once, evicted once -> amortized O(1) per call
+- Queue simulation: an entity re-enters the queue each "turn" it still has work left;
+  total work is bounded by the sum of turns needed across all entities, not just n
+- Two stacks: each element crosses input -> output at most once -> amortized O(1) pop
+- Circular buffer: fixed array + modulo arithmetic -> true O(1) worst case, no amortization needed
 """
 
 """
@@ -74,191 +97,24 @@ QUEUE PATTERNS
 
 """
 ================================================================
-PATTERN 1: BFS TREE LEVEL-ORDER TRAVERSAL
-PATTERN EXPLANATION: Use a queue to visit tree nodes level by level. Record the queue's
-current size before each level to know exactly how many nodes to process at that level —
-children enqueued during processing belong to the NEXT level. The level_size snapshot
-is the key mechanism that separates levels cleanly.
+PATTERN 1: MONOTONIC DEQUE (SLIDING WINDOW EXTREMES)
+PATTERN EXPLANATION: Maintain a deque of indices whose values are in monotonically decreasing order. When the window slides, remove indices that fell outside the window from the front. Remove values from the back that can never be the window's maximum — any value smaller than the current element, added earlier, will always exit first. The front of the deque is always the index of the current window's maximum.
 
-Applications: Level-order traversal, right side view, zigzag traversal, level averages.
-================================================================
-"""
-
-class TreeNode:
-    def __init__(self, val=0, left=None, right=None):
-        self.val = val
-        self.left = left
-        self.right = right
-
-class BFSTree:
-    """
-    Problem: Given the root of a binary tree, return the level order traversal
-    of its nodes' values (left to right, level by level).
-
-    Example:
-        Tree:    3
-                / \\
-               9  20
-                 /  \\
-                15   7
-
-        Output: [[3], [9, 20], [15, 7]]
-
-    Steps:
-    1. Initialize queue with root
-    2. While queue not empty:
-       a. Snapshot level_size = len(queue) — all nodes at current level
-       b. Process exactly level_size nodes, collecting their values
-       c. Enqueue their children (they form the next level)
-    3. Append each level's values to result
-    """
-    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:  # LC 102
-        """
-        TC: O(n) - visit each node exactly once
-        SC: O(w) - queue holds at most one level at a time (w = max width)
-        """
-        if not root:
-            return []
-
-        result = []
-        queue = deque([root])
-
-        while queue:
-            level_size = len(queue)
-            level = []
-
-            for _ in range(level_size):
-                node = queue.popleft()
-                level.append(node.val)
-                if node.left:
-                    queue.append(node.left)
-                if node.right:
-                    queue.append(node.right)
-
-            result.append(level)
-
-        return result
-
-    # Trace: tree = [3, 9, 20, null, null, 15, 7]
-    # queue=[3], level_size=1 -> level=[3], enqueue 9,20
-    # queue=[9,20], level_size=2 -> level=[9,20], enqueue 15,7
-    # queue=[15,7], level_size=2 -> level=[15,7]
-    # Output: [[3],[9,20],[15,7]] ✓
-
-sol = BFSTree()
-tree = TreeNode(3, TreeNode(9), TreeNode(20, TreeNode(15), TreeNode(7)))
-print("Level Order:", sol.levelOrder(tree))  # [[3], [9, 20], [15, 7]]
-
-
-"""
-================================================================
-PATTERN 2: BFS GRID / MULTI-SOURCE BFS
-PATTERN EXPLANATION: BFS on a 2D grid explores cells layer by layer, guaranteeing
-shortest path in unweighted graphs. Multi-source BFS initializes the queue with ALL
-starting cells at once — they all process simultaneously, spreading outward in sync.
-Mark cells as visited (or modify grid in-place) before enqueuing to prevent reprocessing.
-
-Applications: Rotting oranges, walls and gates, shortest path in maze, flood fill.
-================================================================
-"""
-
-class BFSGrid:
-    """
-    Problem: Given an m x n grid where 0 = empty, 1 = fresh orange, 2 = rotten orange.
-    Every minute, rotten oranges spread to adjacent fresh oranges (4 directions).
-    Return the minimum minutes until no fresh oranges remain, or -1 if impossible.
-
-    Example:
-        grid = [[2, 1, 1],
-                [1, 1, 0],
-                [0, 1, 1]]
-        Output: 4
-
-    Steps:
-    1. Find all rotten oranges (sources) and count fresh oranges
-    2. Multi-source BFS: enqueue all rotten oranges at time=0
-    3. Each BFS level = 1 minute; spread rot to adjacent fresh oranges
-    4. Return minutes elapsed if fresh_count == 0, else -1
-    """
-    def orangesRotting(self, grid: List[List[int]]) -> int:  # LC 994
-        """
-        TC: O(m * n) - each cell visited at most once
-        SC: O(m * n) - queue can hold all cells in worst case
-        """
-        rows, cols = len(grid), len(grid[0])
-        queue = deque()
-        fresh = 0
-
-        for r in range(rows):
-            for c in range(cols):
-                if grid[r][c] == 2:
-                    queue.append((r, c, 0))
-                elif grid[r][c] == 1:
-                    fresh += 1
-
-        if fresh == 0:
-            return 0
-
-        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-        max_time = 0
-
-        while queue:
-            r, c, time = queue.popleft()
-            max_time = max(max_time, time)
-
-            for dr, dc in directions:
-                nr, nc = r + dr, c + dc
-                if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc] == 1:
-                    grid[nr][nc] = 2
-                    fresh -= 1
-                    queue.append((nr, nc, time + 1))
-
-        return max_time if fresh == 0 else -1
-
-    # Trace: grid=[[2,1,1],[1,1,0],[0,1,1]], fresh=6
-    # queue=[(0,0,0)]
-    # t=0: pop (0,0) -> rot (0,1),(1,0) -> queue=[(0,1,1),(1,0,1)], fresh=4
-    # t=1: pop (0,1) -> rot (0,2),(1,1) -> fresh=2
-    #      pop (1,0) -> (1,1) already rotten
-    # t=2: pop (0,2)->nothing; pop (1,1)->rot (2,1) -> fresh=1
-    # t=3: pop (2,1)->rot (2,2) -> fresh=0
-    # t=4: pop (2,2)->nothing; fresh=0 -> return 4 ✓
-
-sol = BFSGrid()
-print("Rotting Oranges:", sol.orangesRotting([[2,1,1],[1,1,0],[0,1,1]]))  # 4
-print("Rotting Oranges:", sol.orangesRotting([[2,1,1],[0,1,1],[1,0,1]]))  # -1
-
-
-"""
-================================================================
-PATTERN 3: MONOTONIC DEQUE (SLIDING WINDOW EXTREMES)
-PATTERN EXPLANATION: Maintain a deque of indices whose values are in monotonically
-decreasing order. When the window slides, remove indices that fell outside the window
-from the front. Remove values from the back that can never be the window's maximum —
-any value smaller than the current element, added earlier, will always exit first.
-The front of the deque is always the index of the current window's maximum.
-
-Applications: Sliding window maximum/minimum, jump game, constrained subsequences.
+Applications: Sliding window maximum/minimum, shortest subarray with sum at least K, constrained subsequence sum, jump game VI.
 ================================================================
 """
 
 class MonotonicDeque:
     """
-    Problem: Given an integer array nums and integer k, return the maximum value
-    in each sliding window of size k as the window moves left to right.
+    Given an array nums and window size k, return the max of each window
+    as it slides from left to right.
 
-    Example:
-        nums = [1, 3, -1, -3, 5, 3, 6, 7], k = 3
-        Windows: [1,3,-1]=3, [3,-1,-3]=3, [-1,-3,5]=5, [-3,5,3]=5, [5,3,6]=6, [3,6,7]=7
-        Output: [3, 3, 5, 5, 6, 7]
+    Example 1: nums=[1,3,-1,-3,5,3,6,7], k=3 -> [3,3,5,5,6,7]
+    Example 2: nums=[1], k=1 -> [1]
 
-    Steps:
-    1. Maintain a deque of indices in decreasing order of their values
-    2. For each index i:
-       a. Remove front if it is outside the current window (i - deq[0] >= k)
-       b. Remove all indices from back whose values < nums[i] (they can never be max)
-       c. Append i to deque
-       d. Once window is full (i >= k-1), record nums[deq[0]] as the window max
+    Giveaway: "max/min of every window of size k" (or "next greater/smaller
+    element while scanning") is the signal for a monotonic deque — you need the
+    extreme value at every position without rescanning the whole window each time.
     """
     def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:  # LC 239
         """
@@ -269,14 +125,20 @@ class MonotonicDeque:
         deq = deque()  # Stores indices, values in decreasing order
 
         for i in range(len(nums)):
-            if deq and deq[0] < i - k + 1:
+            window_start = i - k + 1 # calc start of sliding window
+
+            # front index fell out of the window (window too big) -> drop it
+            if deq and deq[0] < window_start:
                 deq.popleft()
 
+            # anything smaller than nums[i] can never be a future max -> drop it
             while deq and nums[deq[-1]] < nums[i]:
                 deq.pop()
 
+            # nums[i] is now a candidate max -> add its index
             deq.append(i)
 
+            # window has reached size k -> front of deque is this window's max, record it
             if i >= k - 1:
                 result.append(nums[deq[0]])
 
@@ -299,19 +161,165 @@ print("Sliding Window Max:", sol.maxSlidingWindow([1], 1))  # [1]
 
 """
 ================================================================
-PATTERN 4: QUEUE DESIGN (USING TWO STACKS)
+PATTERN 2: SLIDING WINDOW EVICTION (EXPIRING QUEUE)
+PATTERN EXPLANATION: Maintain a queue of recent events (timestamps or values). Before answering each new query, evict entries from the FRONT that have fallen outside the valid window — no ordering or comparison is needed, just "is this entry still within range." This differs from the monotonic deque: nothing is ever removed from the back, because every entry is equally "in" or "out" of the window based purely on age.
+
+Applications: Number of recent calls, moving average from data stream, design hit
+counter, logger rate limiter.
+================================================================
+"""
+
+class RecentCounter:
+    """
+    Giveaway: "count events/requests in the past X ms/seconds" with calls arriving
+    in increasing time order — you only ever need to drop stale entries off one
+    end, never compare values, which is the tell for a plain expiring queue
+    rather than a monotonic deque.
+
+    Problem: Count the number of requests that have happened in the past 3000ms
+    (inclusive), given that ping() is always called with a strictly increasing t.
+
+    Example:
+        ping(1)    -> 1   (requests in [-2999, 1] = [1])
+        ping(100)  -> 2   (requests in [-2900, 100] = [1, 100])
+        ping(3001) -> 3   (requests in [1, 3001] = [1, 100, 3001])
+        ping(3002) -> 3   (requests in [2, 3002] = [100, 3001, 3002], 1 expired)
+
+    Steps:
+    1. Maintain a deque of timestamps seen so far
+    2. On each ping(t): append t (new pings are always the current max, so the
+       deque is naturally sorted — no need to search for insertion point)
+    3. While the front timestamp is older than t - 3000, popleft it (expired)
+    4. Return the deque's length — every remaining entry is within the window
+    """
+    def __init__(self):  # LC 933 - Number of Recent Calls
+        self.window = deque()
+
+    def ping(self, t: int) -> int:
+        """
+        TC: O(1)
+            - Appending and returning the length is O(1).
+            - Removing outdated pings is amortized O(1) since each ping is only removed once in total, but worst-case O(N) since we could keep remove many pings if we have a back log
+        
+        SC: O(1)
+            - The deque stores at most N (3000) timestamps, leading to O(N) space.
+            - However, in practice, it holds only pings within 3000ms, so it does not grow proportional to N -> O(1).
+        """
+        # step 1). append the current call to the deque
+        self.window.append(t)
+
+        # step 2). invalidate the outdated pings
+        while self.window[0] < t - 3000:
+            self.window.popleft() # Pop the oldest ele if outside window
+
+        return len(self.window) # Each ele = 1 second
+
+    # Trace: ping(1), ping(100), ping(3001), ping(3002)
+    # ping(1):    window=[1],              front=1 >= 1-3000=-2999    -> return 1
+    # ping(100):  window=[1,100],          front=1 >= 100-3000=-2900  -> return 2
+    # ping(3001): window=[1,100,3001],     front=1 >= 3001-3000=1     -> return 3
+    # ping(3002): window=[1,100,3001,3002],front=1 < 3002-3000=2 -> evict 1
+    #             window=[100,3001,3002],  front=100 >= 2             -> return 3 ✓
+
+rc = RecentCounter()
+print("Recent Calls:", [rc.ping(1), rc.ping(100), rc.ping(3001), rc.ping(3002)])  # [1, 2, 3, 3]
+
+
+"""
+================================================================
+PATTERN 3: QUEUE SIMULATION / ROUND-ROBIN PROCESSING
+PATTERN EXPLANATION: Model a literal turn-order process with a queue. Dequeue the
+entity at the front, process one "turn" of work for it, and requeue it at the back
+if it still has work left; entities that finish leave for good. There is no graph or
+distance being explored — the queue purely encodes "who goes next," and the same
+entity can cycle through the queue many times.
+
+Applications: Time needed to buy tickets, number of students unable to eat lunch,
+Dota2 senate, reveal cards in increasing order, find the winner of the circular game.
+================================================================
+"""
+
+class QueueSimulation:
+    """
+    Giveaway: the problem literally describes people/entities taking turns in a
+    line and going to the back if they still have work left — no distances or
+    graph edges involved, just "who goes next," which is the signal to simulate
+    with a plain queue instead of BFS.
+
+    Problem: n people stand in line to buy tickets; tickets[i] is how many tickets
+    person i wants. Each purchase takes 1 second, and a person who still has
+    tickets left to buy goes to the back of the line instead of leaving. Return the
+    time for the person initially at position k to finish buying all their tickets.
+
+    Example:
+        tickets = [2, 3, 2], k = 2
+        [2,3,2] -> [3,2,1] -> [2,1,2] -> [1,2,1] -> [2,1] -> [1,1] -> [1]
+        Output: 6
+
+    Steps:
+    1. Enqueue every person's INDEX (not their ticket count) so k stays trackable
+       as people cycle through the line
+    2. While queue not empty:
+       a. Increment time by 1 (one ticket purchase)
+       b. Dequeue the front index, decrement its ticket count
+       c. If this was person k and their tickets hit 0, return time
+       d. Otherwise, if tickets remain, requeue this index at the back
+    """
+    def timeRequiredToBuy(self, tickets: List[int], k: int) -> int:  # LC 2073
+        """
+        TC: O(sum(tickets)) - one iteration per ticket purchased across everyone
+        SC: O(n) - queue holds at most n indices
+        """
+        queue = deque(range(len(tickets)))
+        time = 0
+
+        while queue:
+            time += 1
+            i = queue.popleft()
+            tickets[i] -= 1
+
+            if i == k and tickets[i] == 0:
+                return time
+
+            if tickets[i] > 0:
+                queue.append(i)
+
+        return time
+
+    # Trace: tickets=[2,3,2], k=2
+    # queue=[0,1,2]
+    # t=1: pop 0, tickets=[1,3,2], not k, requeue -> queue=[1,2,0]
+    # t=2: pop 1, tickets=[1,2,2], not k, requeue -> queue=[2,0,1]
+    # t=3: pop 2, tickets=[1,2,1], i==k but tickets[2]=1 != 0, requeue -> queue=[0,1,2]
+    # t=4: pop 0, tickets=[0,2,1], not k, tickets[0]==0 so don't requeue -> queue=[1,2]
+    # t=5: pop 1, tickets=[0,1,1], not k, requeue -> queue=[2,1]
+    # t=6: pop 2, tickets=[0,1,0], i==k and tickets[2]==0 -> return 6 ✓
+
+sol = QueueSimulation()
+print("Time to Buy Tickets:", sol.timeRequiredToBuy([2,3,2], 2))  # 6
+print("Time to Buy Tickets:", sol.timeRequiredToBuy([5,1,1,1], 0))  # 8
+
+
+"""
+================================================================
+PATTERN 4: QUEUE VIA TWO STACKS (AMORTIZED DESIGN)
 PATTERN EXPLANATION: Simulate FIFO queue behavior using two LIFO stacks. The input
 stack receives all pushes. On pop/peek, if the output stack is empty, transfer all
 elements from input to output (reversing their order once). Because each element is
 transferred at most once total, pop is O(1) amortized even though a single transfer
-can cost O(n).
+can cost O(n). The mirror version (stack from two queues) uses the same idea in
+reverse to simulate LIFO behavior on top of FIFO primitives.
 
-Applications: LC 232 (Queue with Stacks), design problems requiring FIFO from LIFO.
+Applications: Implement queue using stacks, implement stack using queues.
 ================================================================
 """
 
 class QueueWithStacks:
     """
+    Giveaway: the problem explicitly says "implement a queue using stacks" (or
+    vice versa) — it names the two ADTs directly, so the task is translating one
+    access order into the other rather than discovering a hidden pattern.
+
     Problem: Implement a FIFO queue using only two stacks. Support push, pop, peek,
     and empty in O(1) amortized time.
 
@@ -366,3 +374,107 @@ q.push(2)
 print("Peek:", q.peek())    # 1
 print("Pop:", q.pop())      # 1
 print("Empty:", q.empty())  # False
+
+
+"""
+================================================================
+PATTERN 5: CIRCULAR QUEUE (FIXED-CAPACITY BUFFER)
+PATTERN EXPLANATION: Implement a queue over a fixed-size array using modulo
+arithmetic to wrap front/rear pointers around, instead of shifting elements or
+letting the array grow unbounded. This is the raw ADT mechanic that a deque hides
+behind O(1) append/popleft — made explicit here for design problems that require a
+bounded buffer with true O(1) worst-case operations (no amortization).
+
+Applications: Design circular queue, design circular deque, design front middle
+back queue, any fixed-size ring buffer.
+================================================================
+"""
+
+class MyCircularQueue:
+    """
+    Giveaway: the problem says "design a circular queue/deque" with a fixed
+    capacity k — a bounded size plus required O(1) worst-case (not amortized)
+    ops signals a fixed array with wraparound indices, not a growable deque.
+
+    Problem: Design a circular queue with fixed capacity k supporting enQueue,
+    deQueue, Front, Rear, isEmpty, and isFull, all in O(1).
+
+    Example:
+        q = MyCircularQueue(3)
+        q.enQueue(1) -> True     q.enQueue(2) -> True     q.enQueue(3) -> True
+        q.enQueue(4) -> False    (full)
+        q.Rear()     -> 3
+        q.deQueue()  -> True     (frees a slot)
+        q.enQueue(4) -> True     (reuses the freed slot via wraparound)
+        q.Rear()     -> 4
+
+    Steps:
+    1. Track capacity, a fixed array of size k, front_idx, and a running count
+       (count replaces the need for a "rear" pointer and disambiguates full vs empty)
+    2. enQueue: if full, fail; else write to (front_idx + count) % capacity, count += 1
+    3. deQueue: if empty, fail; else front_idx = (front_idx + 1) % capacity, count -= 1
+    4. Front/Rear: read at front_idx / (front_idx + count - 1) % capacity
+    """
+    def __init__(self, k: int):  # LC 622 - Design Circular Queue
+        self.capacity = k
+        self.queue = [0] * k
+        self.front_idx = 0
+        self.count = 0
+
+    def enQueue(self, value: int) -> bool:
+        """TC: O(1)"""
+        if self.isFull():
+            return False
+        rear_idx = (self.front_idx + self.count) % self.capacity
+        self.queue[rear_idx] = value
+        self.count += 1
+        return True
+
+    def deQueue(self) -> bool:
+        """TC: O(1)"""
+        if self.isEmpty():
+            return False
+        self.front_idx = (self.front_idx + 1) % self.capacity
+        self.count -= 1
+        return True
+
+    def Front(self) -> int:
+        """TC: O(1)"""
+        if self.isEmpty():
+            return -1
+        return self.queue[self.front_idx]
+
+    def Rear(self) -> int:
+        """TC: O(1)"""
+        if self.isEmpty():
+            return -1
+        rear_idx = (self.front_idx + self.count - 1) % self.capacity
+        return self.queue[rear_idx]
+
+    def isEmpty(self) -> bool:
+        """TC: O(1)"""
+        return self.count == 0
+
+    def isFull(self) -> bool:
+        """TC: O(1)"""
+        return self.count == self.capacity
+
+    # Trace: capacity=3
+    # enQueue(1): rear=(0+0)%3=0 -> queue=[1,_,_], count=1
+    # enQueue(2): rear=(0+1)%3=1 -> queue=[1,2,_], count=2
+    # enQueue(3): rear=(0+2)%3=2 -> queue=[1,2,3], count=3
+    # enQueue(4): isFull (count==capacity) -> False
+    # Rear(): rear_idx=(0+3-1)%3=2 -> queue[2]=3
+    # deQueue(): front_idx=(0+1)%3=1, count=2
+    # enQueue(4): rear=(1+2)%3=0 -> queue=[4,2,3], count=3 (wrapped around)
+    # Rear(): rear_idx=(1+3-1)%3=0 -> queue[0]=4 ✓
+
+cq = MyCircularQueue(3)
+print("enQueue(1):", cq.enQueue(1))  # True
+print("enQueue(2):", cq.enQueue(2))  # True
+print("enQueue(3):", cq.enQueue(3))  # True
+print("enQueue(4):", cq.enQueue(4))  # False (full)
+print("Rear:", cq.Rear())            # 3
+print("deQueue:", cq.deQueue())      # True
+print("enQueue(4):", cq.enQueue(4))  # True
+print("Rear:", cq.Rear())            # 4

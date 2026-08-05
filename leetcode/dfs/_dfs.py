@@ -36,6 +36,50 @@ DFS CORE TEMPLATES
 ==================
 """
 
+"""
+DFS COMPLEXITY REFERENCE
+=========================
+
++----------------------------------+---------------+-----------+
+| Pattern                          | Time          | Space     |
++----------------------------------+---------------+-----------+
+| Tree DFS - Build Up (Post-Order) | O(n)          | O(h)      |
+| Tree DFS - Pass Down (Pre-Order) | O(n)          | O(h)      |
+| Graph DFS with Visited           | O(n + e)      | O(n)      |
+| Matrix DFS - Flood Fill          | O(m * n)      | O(m * n)  |
+| DFS + Memoization (Top-Down DP)  | O(amount * k) | O(amount) |
++----------------------------------+---------------+-----------+
+
+n = number of nodes/rooms, h = height of tree (worst case O(n) if skewed),
+e = edges (keys found in rooms), m * n = grid dimensions, amount = target
+value being built up to, k = number of choices tried per subproblem (coins)
+
+WHAT EACH PATTERN IS:
+- Tree DFS - Build Up (Post-Order): process a node's children first, then combine their
+  answers into the current node's answer — like asking each subordinate for a number
+  before adding them up into your own total.
+- Tree DFS - Pass Down (Pre-Order): carry information from a parent down to its
+  children as you descend, so each node already knows things like "how much is left"
+  before it decides what to do.
+- Graph DFS with Visited: explore a network of connected nodes by following one path
+  as far as it goes, keeping a "seen" list so cycles don't cause infinite loops.
+- Matrix DFS - Flood Fill: spread outward from a starting cell into every connected
+  neighboring cell that matches, like a paint-bucket tool filling a region in an image.
+- DFS + Memoization (Top-Down DP): explore a tree of recursive choices, but remember
+  the answer to any sub-choice you've already solved so it's never redone.
+
+NOTES:
+- Tree DFS (build-up / pass-down): each node visited exactly once -> O(n); recursion
+  depth is bounded by tree height h, which is O(n) worst case if the tree is skewed
+- Graph DFS with visited: each vertex visited once, each edge/key checked once ->
+  O(n + e); visited set holds up to n entries
+- Matrix DFS flood fill: each cell visited at most once thanks to the visited/color
+  check -> O(m*n); recursion stack can reach O(m*n) in the worst case
+- DFS + memoization: each distinct subproblem from 0..amount is solved once and
+  cached, with k choices tried per subproblem -> O(amount * k) time; memo dict plus
+  recursion stack -> O(amount) space
+"""
+
 # ================================================================
 # RECURSIVE DFS TEMPLATE - TREES
 # ================================================================
@@ -288,6 +332,11 @@ class TreeNode:
 
 class TreeDFSBuildUp:
     """
+    Giveaway: "find the maximum depth/height" of a tree means every node's answer
+    depends on the answer of BOTH its children combined (1 + max of the two) — you
+    can't know a node's depth until its subtrees are fully solved, which is the
+    signal for post-order build-up instead of passing state downward.
+
     Find the maximum depth (height) of a binary tree.
     Depth = number of nodes from root to furthest leaf.
     
@@ -379,6 +428,11 @@ Applications: Path sum validation, path finding, ancestor-dependent counting, le
 """
 class TreeDFSPassDown:
     """
+    Giveaway: the check is specifically "root-to-leaf" path sum — the answer at a
+    leaf depends on a running total accumulated from the root down (targetSum minus
+    everything spent so far), so each node needs its ancestors' contribution passed
+    down to it rather than needing anything back from its children.
+
     Determine if tree has root-to-leaf path that sums to targetSum.
     
     #        5
@@ -457,6 +511,11 @@ Applications: Graph traversal, reachability, connected components, cycle detecti
 """                  
 class GraphDFS:
     """
+    Giveaway: rooms are only reachable by keys found in other rooms — "visit all
+    rooms" is really a reachability question over an implicit graph (room = node,
+    key = edge), and the natural cycle risk (keys can point back to visited rooms)
+    is what calls for a visited set during traversal instead of plain recursion.
+
     There are n rooms labeled 0 to n-1. All rooms are locked except room 0. Your goal is to visit all rooms. When you visit a room, you get all keys in that room. Can you visit all rooms?
     
     Example 1:
@@ -551,6 +610,11 @@ Applications: Fill regions, change colors, connected components in grid, islands
 """
 class MatrixDFS:
     """
+    Giveaway: "change the color of the starting pixel and all connected pixels of
+    the same color" is literally describing a paint-bucket fill — the region to
+    change is defined by connectivity through matching neighbor values, which is
+    the exact shape of a flood-fill DFS on a grid.
+
     Perform flood fill starting from pixel (sr, sc). Change the color of the starting pixel and all connected pixels of the same color to the new color.
     
     Connected = 4-directionally adjacent (up, down, left, right).
@@ -657,6 +721,12 @@ partition problems, subsequence problems, house robber
 
 class CoinChange:  # LC 322
     """
+    Giveaway: "minimum number of coins" to hit a target, where you try every
+    denomination at every remaining amount, produces the same sub-amount over and
+    over from different coin orderings (e.g. 5 then 2 or 2 then 5) — that repeated,
+    overlapping subproblem is the tell for caching DFS results instead of plain
+    recursion.
+
     Given coin denominations and target amount, return minimum coins needed.
     Return -1 if impossible.
     

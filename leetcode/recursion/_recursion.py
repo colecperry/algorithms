@@ -56,6 +56,18 @@ RECURSION COMPLEXITY REFERENCE
 
 n = input size, h = tree height (O(log n) balanced, O(n) skewed)
 
+WHAT EACH PATTERN IS:
+- Linear Recursion: a function that calls itself once on a smaller version of the
+  problem, then combines its own piece with the answer handed back from below.
+- Tree DFS Recursion: a function that calls itself twice (once per child), so it walks
+  down every branch of a tree and combines the two answers on the way back up.
+- Backtracking (subsets): try including an element, recurse, then "undo" and move on
+  without it — exploring every combination of keep/skip choices.
+- Backtracking (perms): try each remaining unused element next, recurse, then undo and
+  try a different one — exploring every possible ordering.
+- Memoization 1D: recursion with a notebook — before solving a subproblem, check if
+  you've already solved it and reuse that answer instead of redoing the work.
+
 NOTES:
 - Linear: one recursive call per invocation -> depth equals input size
 - Tree DFS: two calls per node but each node visited once -> O(n) total work
@@ -83,6 +95,11 @@ Applications: Factorial, power, sum array, reverse string, recursive search.
 
 class LinearRecursion:
     """
+    Giveaway: a definition like "n! = n x (n-1) x ... x 1" — where the answer is
+    explicitly the current value combined with the same computation on one smaller
+    input — is the tell for straightforward linear recursion instead of any
+    looping/multi-branch technique.
+
     Problem: Compute n! = n x (n-1) x ... x 2 x 1.
 
     Example:
@@ -136,6 +153,11 @@ class TreeNode:
 
 class TreeDFSRecursion:
     """
+    Giveaway: "maximum depth of a binary tree" (or any question phrased in terms of a
+    node's left and right subtrees) signals tree DFS recursion — the answer at each
+    node depends on combining results from both children, so you recurse into both
+    and combine on the way back up.
+
     Problem: Find the maximum depth of a binary tree (number of nodes along
     the longest path from root to a leaf node).
 
@@ -195,6 +217,11 @@ Applications: Subsets, permutations, combinations, N-Queens, word search, Sudoku
 
 class Backtracking:
     """
+    Giveaway: "return all possible subsets" (the power set) is the tell — needing
+    every combination of include/exclude choices, not just one valid answer, is what
+    calls for backtracking: choose an element, recurse, then undo it before trying
+    the next.
+
     Problem: Given an integer array nums of unique elements, return all possible subsets
     (the power set). The solution set must not contain duplicate subsets.
 
@@ -259,6 +286,11 @@ Applications: Fibonacci, climbing stairs, coin change, longest common subsequenc
 
 class MemoRecursion:
     """
+    Giveaway: "in how many distinct ways can you reach the top" with a recurrence
+    like ways(n) = ways(n-1) + ways(n-2) is the tell for memoization — the same
+    smaller subproblems (like ways(3)) get recomputed many times in plain recursion,
+    so caching turns O(2^n) into O(n).
+
     Problem: You are climbing a staircase with n steps. Each time you can climb
     1 or 2 steps. In how many distinct ways can you reach the top?
 

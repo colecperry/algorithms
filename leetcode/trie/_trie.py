@@ -63,6 +63,22 @@ m = word/pattern length, w = number of wildcards in pattern,
 r/c = grid rows/cols, L = max word length, n = number of words,
 d = total chars in dictionary, s = sentence length
 
+WHAT EACH PATTERN IS:
+- Insert word: walk the word letter by letter, creating a new tree node for any
+  letter not already there, and mark the last node as "this is a complete word."
+- Search word: walk the word letter by letter through the tree; if every letter
+  exists as a path and the final node is marked "complete word," the word is present.
+- Search prefix: the same walk as search, but you only care whether the path
+  exists — you don't require the final node to be marked as a complete word.
+- Wildcard search ('.'): like search, but when a '.' is hit you branch out and try
+  every possible child letter at that spot instead of following just one.
+- Grid DFS + Trie: explore a grid in every direction (DFS) while walking a trie built
+  from the target words at the same time, so you can stop exploring the moment no
+  word could possibly start with the letters seen so far.
+- Replace words: store dictionary "root" words in a trie, then walk each sentence
+  word through it and stop the instant you hit a node marked as a complete root,
+  swapping the word for that shortest matching root.
+
 NOTES:
 - Insert creates at most m new nodes (one per character)
 - Wildcard '.' tries all 26 children at each wildcard position
@@ -96,6 +112,11 @@ Applications: Spell checker, word validator, autocomplete prefix check.
 
 class Trie:
     """
+    Giveaway: being asked to "implement" insert/search/startsWith as three distinct
+    operations over a growing set of words is the tell for a trie — needing
+    prefix-aware lookup (startsWith) as a first-class operation is something a hash
+    set of whole words can't give you in O(word length).
+
     Problem: Implement a Trie with insert, search, and startsWith operations.
 
     Example:
@@ -180,6 +201,11 @@ Applications: Word dictionary with wildcards, regex-like prefix matching.
 
 class WordDictionary:
     """
+    Giveaway: "search can use '.' as a wildcard that matches any single letter" is
+    the tell — needing letter-exact trie search PLUS an escape hatch to branch over
+    every possible character at certain positions signals a trie with a
+    DFS-based search that fans out at '.' instead of following one fixed path.
+
     Problem: Design a data structure that supports addWord and search, where search
     can use '.' as a wildcard that matches any single letter.
 
@@ -252,6 +278,12 @@ Applications: Word Search II (Boggle), find multiple words in a grid.
 
 class WordSearchTrie:
     """
+    Giveaway: "find all words that can be formed by sequentially adjacent cells" for
+    a whole LIST of target words, not just one, is the signal to combine a trie
+    built from all the words with grid DFS — the trie lets every cell's DFS prune
+    the instant no word shares the prefix seen so far, instead of rerunning a
+    separate grid search per word.
+
     Problem: Given a 2D board of characters and a list of words, find all words
     that can be formed by sequentially adjacent cells (horizontal/vertical).
     Each cell may be used at most once per word.
@@ -343,6 +375,11 @@ Applications: Replace words with roots, abbreviation matching, shortest prefix q
 
 class ReplaceWords:
     """
+    Giveaway: "replace ... with the shortest root ... that is a prefix of the word"
+    is the tell — needing the SHORTEST matching prefix among many dictionary
+    entries is exactly what a trie gives for free: walk the word and stop at the
+    very first node marked as a complete root.
+
     Problem: Given a dictionary of roots and a sentence, replace each word in the sentence
     with the shortest root from the dictionary that is a prefix of the word.
     If no root is a prefix, keep the original word.

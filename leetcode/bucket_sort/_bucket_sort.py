@@ -35,6 +35,36 @@ BUCKET SORT TEMPLATES
 from typing import List
 from collections import Counter
 
+"""
+BUCKET SORT COMPLEXITY REFERENCE
+==================================
+
++-------------------------+------+-------+
+| Pattern                 | Time | Space |
++-------------------------+------+-------+
+| Frequency Bucket Sort   | O(n) | O(n)  |
+| Value Range Bucket Sort | O(n) | O(n)  |
++-------------------------+------+-------+
+
+n = number of elements in the input array
+
+WHAT EACH PATTERN IS:
+- Frequency Bucket Sort: count how often each value shows up, then drop each value
+  into a bucket labeled with its own frequency, so reading buckets from busiest to
+  least-busy gives you the most-frequent elements directly.
+- Value Range Bucket Sort: split the numbers into buckets that each cover a slice of
+  the overall value range, so you only need to compare boundary values between
+  neighboring buckets instead of comparing every pair of numbers.
+
+NOTES:
+- Frequency Bucket Sort: counting frequencies, filling buckets, and iterating buckets
+  are each a single O(n) pass -> O(n) total; frequency map and buckets together hold
+  at most n elements -> O(n) space
+- Value Range Bucket Sort: bucket size is chosen so the max gap must span two
+  buckets, so distributing elements and scanning bucket boundaries are both single
+  O(n) passes -> O(n) total; buckets store at most n elements -> O(n) space
+"""
+
 # ================================================================
 # FREQUENCY BUCKET TEMPLATE
 # ================================================================
@@ -138,6 +168,11 @@ Applications: Top K frequent, sort by frequency, frequency ranking.
 
 class FrequencyBucketPattern:
     """
+    Giveaway: "return the k most frequent elements" — needing to rank by how
+    often values occur rather than by the values themselves, combined with the fact
+    that frequency is naturally bounded between 0 and n, is what signals using
+    frequency as a bucket index instead of sorting by count with a comparison sort.
+
     Problem: Given an integer array nums and an integer k, return the k most frequent elements.
     
     How it works:
@@ -207,6 +242,12 @@ Applications: Maximum gap, range-based grouping.
 
 class MaxGapPattern:
     """
+    Giveaway: "find max difference between successive elements in sorted form ...
+    must run in O(n) time" — asking for a value that normally requires fully
+    sorting first, but under an explicit linear-time constraint, is what signals
+    distributing into range buckets sized so the answer must span a bucket
+    boundary, instead of actually sorting.
+
     Problem: Find max difference between successive elements in sorted form.
     Must run in O(n) time.
     

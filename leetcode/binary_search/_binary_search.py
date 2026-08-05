@@ -80,6 +80,52 @@ BINARY SEARCH CORE TEMPLATES
 
 from typing import List, Optional
 
+"""
+BINARY SEARCH COMPLEXITY REFERENCE
+===================================
+
++-------------------------------+-------------------+-------+
+| Pattern                       | Time              | Space |
++-------------------------------+-------------------+-------+
+| Find Insertion Position       | O(log n)          | O(1)  |
+| Search Rotated Sorted Array   | O(log n)          | O(1)  |
+| Binary Search on Answer Space | O(n log(max_val)) | O(1)  |
+| Search in 2D Matrix           | O(log(m * n))     | O(1)  |
+| Find Peak Element             | O(log n)          | O(1)  |
++-------------------------------+-------------------+-------+
+
+n = array length, m/n = matrix row/column dimensions,
+max_val = size of the answer search space (e.g. largest pile)
+
+WHAT EACH PATTERN IS:
+- Find Insertion Position: run a normal binary search; when the target isn't found,
+  the search naturally stops at the exact spot where it would need to be inserted to
+  keep the array sorted.
+- Search Rotated Sorted Array: search a sorted array that got rotated at some unknown
+  point, by figuring out which half of the current range is still in proper order and
+  checking whether the target could be hiding in it.
+- Binary Search on Answer Space: instead of searching for a value inside an array,
+  search over the range of possible answers themselves, using a check function to test
+  whether a candidate answer would work, then narrow toward the best one.
+- Search in 2D Matrix: treat a row-sorted grid as if it were one long sorted line,
+  converting back and forth between a single index and its row/column position.
+- Find Peak Element: find a value that's bigger than both of its neighbors by always
+  stepping toward the side that's still going uphill, without needing the whole array
+  to be sorted.
+
+NOTES:
+- Find Insertion Position: standard binary search halves the range each step -> O(log n);
+  no extra structures used -> O(1)
+- Search Rotated Sorted Array: exactly one half of the array is always properly
+  ordered, so comparing against it still eliminates half the range each iteration -> O(log n)
+- Binary Search on Answer Space: the outer binary search over the answer range costs
+  O(log(max_val)), and each candidate is validated with an O(n) feasibility check -> O(n log(max_val)) total
+- Search in 2D Matrix: index arithmetic (row = mid // cols, col = mid % cols) lets one
+  binary search run over all m*n cells -> O(log(m * n))
+- Find Peak Element: comparing a node to just one neighbor still discards half the
+  remaining search space each step, even without global sorting -> O(log n)
+"""
+
 # ================================================================
 #              STANDARD BINARY SEARCH TEMPLATE
 # ================================================================
@@ -148,6 +194,11 @@ Applications: Insert into sorted array, find lower/upper bound, first/last occur
 
 class InsertionPositionPattern:
     """
+    Giveaway: "return the index where target would be inserted" to keep an already
+    sorted array sorted is the signal for binary search — you don't need to find
+    the target, just the boundary it belongs at, which is exactly where a normal
+    binary search's left pointer lands when the loop ends without a match.
+
     Problem: Given sorted array and target, return index where target would be inserted
     to maintain sorted order. If target exists, return its current index.
 
@@ -208,6 +259,11 @@ Applications: Search rotated sorted array, find minimum in rotated array.
 
 class RotatedArrayPattern:
     """
+    Giveaway: "sorted array rotated at an unknown pivot" is the tell — the array
+    isn't fully sorted anymore, but splitting at mid still guarantees one side is
+    properly ordered, so you can still eliminate half the search space each step by
+    checking which half is sorted and whether the target falls in its range.
+
     Problem: Search for target in sorted array rotated at unknown pivot. Original: [0,1,2,4,5,6,7] rotated to [4,5,6,7,0,1,2]
 
     Example 1:
@@ -291,6 +347,12 @@ import math
 
 class AnswerSpacePattern:
     """
+    Giveaway: asking for the MINIMUM (or maximum) value of some parameter — here
+    Koko's eating speed k — that still satisfies a checkable condition ("finish
+    within h hours") is the signal to binary search over the range of POSSIBLE
+    ANSWERS themselves, testing each candidate speed with a feasibility function,
+    rather than searching for a value inside an array.
+
     Problem: Koko loves to eat bananas. There are n piles of bananas, the ith pile has piles[i] bananas. The guards have gone and will come back in h hours.
     
     Koko can decide her bananas-per-hour eating speed of k. Each hour, she chooses some pile of bananas and eats k bananas from that pile. If the pile has less than k bananas, she eats all of them instead and will not eat any more bananas during this hour.
@@ -378,6 +440,12 @@ Applications: 2D matrix search, grid search with sorted property.
 
 class MatrixSearchPattern:
     """
+    Giveaway: a matrix described as row-sorted where "the first integer of each row
+    is greater than the last integer of the previous row" is really one long sorted
+    list in disguise — that specific guarantee is what lets a single binary search
+    run over the whole grid via index-to-row/col conversion, instead of doing a
+    separate search per row.
+
     Problem: Search target in m*n matrix where:
     - Each row sorted in ascending order
     - First integer of each row > last integer of previous row
@@ -471,6 +539,11 @@ Applications: Find peak, find local maximum, bitonic array search.
 
 class PeakElementPattern:
     """
+    Giveaway: "find a peak element" (greater than both neighbors) in an array that
+    is NOT stated to be sorted is the tell for this binary search variant —
+    comparing mid to just its next neighbor still reveals which direction is
+    "uphill," letting you discard half the array each step with no global ordering.
+
     Problem: Find peak element where nums[i] > nums[i-1] and nums[i] > nums[i+1] and return it's index.
 
     Neighbors of out-of-bound indices are -infinity.

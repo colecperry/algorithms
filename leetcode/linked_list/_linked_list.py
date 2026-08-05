@@ -175,6 +175,44 @@ LINKED LIST PATTERNS
 """
 
 """
+LINKED LIST COMPLEXITY REFERENCE
+==================================
+
++------------------------------+----------+-------+
+| Pattern                      | Time     | Space |
++------------------------------+----------+-------+
+| Reversal                     | O(n)     | O(1)  |
+| Fast/Slow Pointers           | O(n)     | O(1)  |
+| Merge Sorted Lists           | O(n + m) | O(1)  |
+| Two-List Split and Reconnect | O(n)     | O(1)  |
++------------------------------+----------+-------+
+
+n = number of nodes in the (primary) list, m = number of nodes in a second list
+(Merge Sorted Lists only)
+
+WHAT EACH PATTERN IS:
+- Reversal: walk the list once and flip each node's arrow to point backward instead
+  of forward, rebuilding the chain in the opposite order.
+- Fast/Slow Pointers: move two pointers through the list at different speeds (or with
+  a head start), so their relationship at the end tells you something useful — the
+  middle node, whether there's a loop, or a node a fixed distance from the end.
+- Merge Sorted Lists: walk two already-sorted lists side by side, always attaching
+  whichever front node is smaller onto the result, weaving them into one sorted chain.
+- Two-List Split and Reconnect: walk the list once, sending each node into one of two
+  separate chains based on a condition, then glue the two chains back together at the end.
+
+NOTES:
+- Reversal: single pass, each node's pointer flipped once -> O(n) time; only a few
+  pointer variables in use -> O(1) space
+- Fast/Slow Pointers: fast pointer visits at most n nodes (or n+gap for a fixed
+  offset) -> O(n) time; constant extra pointers -> O(1) space
+- Merge Sorted Lists: each node from both lists is visited exactly once -> O(n + m);
+  existing nodes are relinked, not copied -> O(1) space
+- Two-List Split and Reconnect: single pass reclassifying each node into one of two
+  sublists -> O(n); only two dummy nodes added, no new nodes created -> O(1) space
+"""
+
+"""
 ================================================================
 PATTERN 1: REVERSAL
 PATTERN EXPLANATION: Reverse the direction of next pointers using three pointers: save next before breaking the link, point current backward, advance all three. For sublist reversal, walk to the node just before the start position, then repeatedly pull the next node to the front of the reversed section.
@@ -186,6 +224,11 @@ reverse in k-groups.
 
 class ReversalPattern:
     """
+    Giveaway: "reverse the list" (or "reverse nodes from position left to right")
+    stated directly — the ask is literally to flip pointer direction, which points
+    straight at the three-pointer prev/current/next technique rather than a
+    fast/slow or merge-style approach.
+
     Problem: Given head of singly linked list, reverse the list and return reversed head.
 
     Example:
@@ -297,6 +340,12 @@ Applications: Find middle, detect cycle, nth from end, palindrome check.
 
 class FastSlowPattern:
     """
+    Giveaway: "return the middle node," "detect if ... has a cycle," or "remove
+    nth node from end" — each needs a position defined relative to the list's total
+    length or its own tail, which is unknown in advance without a separate counting
+    pass. That's the tell for two pointers moving at different speeds or offset by
+    a fixed gap, instead of counting the length first.
+
     Problem: Given head of linked list, return the middle node. If two middles, return second.
 
     Example:
@@ -411,6 +460,11 @@ Applications: Merge two sorted lists, merge k sorted lists (extend with heap), s
 
 class MergePattern:
     """
+    Giveaway: two separate lists that are each already sorted, asked to be
+    combined into one sorted list — "already sorted" on both inputs is what signals
+    a two-pointer walk comparing front elements and splicing nodes across, rather
+    than collecting all the values and re-sorting them.
+
     Problem: Merge two sorted linked lists into one sorted list by splicing nodes together.
 
     Example:
@@ -477,6 +531,11 @@ Applications: Partition by value (LC 86), separate odd/even indices (LC 328), sp
 
 class SplitReconnectPattern:
     """
+    Giveaway: "partition list so all nodes < x come before nodes >= x" while
+    preserving relative order — needing to keep original order while bucketing every
+    node by a simple condition is what signals building two separate chains in a
+    single pass and reconnecting them, rather than swapping values in place.
+
     Problem: Partition list so all nodes < x come before nodes >= x. Preserve relative order.
 
     Example:

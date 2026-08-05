@@ -156,6 +156,23 @@ SPACE COMPLEXITY:
 +---------------------------+------------------+
 * k = number of unique elements
 
+WHAT EACH PATTERN IS:
+- Frequency Counting / Character Count: tally how many times each element shows up
+  by using the element as the key and a running count as the value — the basis for
+  anagrams, "most common element," and matching-frequency checks.
+- Hash Table for Lookup (Two Sum Pattern): remember every element you've already
+  seen so that, for any new element, you can instantly check whether its "missing
+  partner" (e.g. target - current) has already shown up.
+- Hash Table + Sliding Window: keep a hash table of what's currently inside a moving
+  window of a string/array, growing the window by adding elements and shrinking it
+  from the front when a rule gets violated.
+- Hash Table for Grouping / Categorization: compute some shared "signature" for each
+  element (like its sorted letters) and use that signature as a key so everything
+  with the same signature lands in the same bucket.
+- Hash Table for Caching / Memoization: save the answer to a computation the first
+  time you work it out, keyed by the inputs, so if you're ever asked the same
+  question again you can just look it up instead of redoing the work.
+
 """
 """
 ================================================================
@@ -168,6 +185,11 @@ Applications: Anagrams, most frequent elements, valid parentheses, character fre
 
 class FrequencyCounting:
     """
+    Giveaway: checking whether two strings are anagrams of each other — needing
+    to compare the exact count of every character between two strings (not just
+    membership) is the signal for building frequency maps and comparing them,
+    rather than sorting or a single hash set.
+
     Problem 1: Check if two strings are anagrams.
 
     Example:
@@ -217,6 +239,11 @@ Applications: Two sum, three sum, four sum, pair with target, subarray sum.
 
 class LookupPattern:
     """
+    Giveaway: "find two numbers that add up to target" — needing a complementary
+    value (target - current) for each element in one pass is what signals storing
+    seen elements in a hash map for O(1) complement lookup instead of nested
+    loops.
+
     Problem 1: Find two numbers that add up to target.
     
     Example:
@@ -283,6 +310,11 @@ Applications: Longest substring, minimum window, character replacement.
 
 class SlidingWindowHash:
     """
+    Giveaway: "longest substring without repeating characters" — needing the
+    longest contiguous run under a no-duplicates constraint means tracking what's
+    currently in a window and shrinking it from the left the moment a repeat
+    appears, which is the hash-set-plus-two-pointers tell.
+
     Problem 1: Longest substring without repeating characters.
 
     Example:
@@ -366,6 +398,11 @@ Applications: Group anagrams, group by pattern, categorize strings/numbers.
 
 class GroupingPattern:
     """
+    Giveaway: "group anagrams together" — needing to bucket many strings by a
+    shared property (same letters, different order) is what signals computing a
+    canonical key per element and using a hash map of key -> list to route each
+    element into its group.
+
     Problem 1: Group anagrams together.
     
     Example:
@@ -441,6 +478,12 @@ Applications: Fibonacci, climbing stairs, LRU cache, memoization.
 
 class CachingPattern:
     """
+    Giveaway: the recursion revisits the same starting index through multiple
+    different word-splitting paths (repeatedly asking "can the rest of the
+    string be segmented from here?") — those repeated overlapping subproblems,
+    not just any recursion, are what signal memoizing results in a hash map
+    instead of recomputing every branch.
+
     Check if string can be segmented into words from dictionary.
         
         Example 1:

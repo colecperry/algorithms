@@ -89,6 +89,16 @@ PREFIX SUM COMPLEXITY REFERENCE
 
 n = array length, m/n = matrix dimensions, k = number of updates
 
+WHAT EACH PATTERN IS:
+- 1D Prefix Sum: a running-total array so any range sum is one subtraction away,
+  instead of re-adding the range every time.
+- Prefix Sum + HashMap: track every running total you've seen so far so you can spot
+  subarrays with a target sum in one pass instead of checking every pair.
+- 2D Prefix Sum: the same running-total idea extended to a grid, so any rectangle's
+  sum is four lookups combined.
+- Difference Array: the mirror of prefix sum — instead of summing a range, you're
+  adding a value to a whole range cheaply, by marking just the start/end of the change.
+
 NOTES:
 - 1D and 2D queries are O(1) only after the O(n) or O(m*n) build — preprocessing pays off with multiple queries
 - HashMap: stores up to n distinct prefix sums; seed {0: 1} is required to handle subarrays starting at index 0
@@ -113,6 +123,11 @@ Applications: Range sum queries, immutable array sum, any repeated range calcula
 
 class RangeSumQuery:
     """
+    Giveaway: "handle multiple sumRange(left, right) queries" on a fixed/immutable
+    array is the signal — repeated range-sum requests on data that never changes is
+    exactly what prefix sums are built for, trading one O(n) preprocessing pass for
+    O(1) per query.
+
     Problem: Given an int array, handle multiple sumRange(left, right) queries.
 
     Example:
@@ -183,6 +198,11 @@ Applications: subarray sum = k, subarray sum divisible by k,
 
 class SubarraySumHashMap:
     """
+    Giveaway: "count subarrays whose sum equals k" (or is divisible by k, or has equal
+    counts of two values) is the tell — checking every subarray's sum is naturally
+    O(n^2), but tracking running totals in a hashmap turns it into a single O(n) pass
+    by looking up curSum - k instead of resumming.
+
     Problem: Count subarrays whose sum equals k.
 
     Example:
@@ -282,6 +302,11 @@ image area calculations.
 
 class RangeSumQuery2D:
     """
+    Giveaway: "handle multiple sumRegion(r1, c1, r2, c2) queries" on a static 2D
+    matrix is the 2D analogue of the range-sum tell — repeated rectangle-sum
+    requests on an unchanging grid mean it's worth precomputing a running-total
+    table so each query becomes four lookups instead of rescanning the rectangle.
+
     Problem: Given a 2D matrix, handle multiple sumRegion(r1, c1, r2, c2) queries.
 
     Example:
@@ -371,6 +396,12 @@ Applications: Range addition, car pooling, corporate flight bookings,
 
 class DifferenceArray:
     """
+    Giveaway: "k update operations, each adding a value to every element in a range" —
+    followed by wanting only the final array after all updates — is the tell for a
+    difference array: applying every update directly costs O(n) each, but marking
+    just the start/end of each range and summing once at the end reconstructs the
+    same result in O(n + k).
+
     Problem: Array of length n initialized with all 0's and k update operations [startIndex, endIndex, inc].
     Each operation increments every element of A[startIndex..endIndex] (inclusive) by inc.
     Return the modified array after all k operations were executed.

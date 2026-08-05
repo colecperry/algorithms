@@ -53,6 +53,23 @@ STACK COMPLEXITY REFERENCE
 
 n = input length (string length or number of tokens)
 
+WHAT EACH PATTERN IS:
+- Matching Pairs: push every opening bracket, and when a closing bracket shows up,
+  check that it matches the most recent unmatched opener — used to validate nested
+  structures like parentheses.
+- Monotonic Stack: a stack kept in increasing or decreasing order, so the moment the
+  order breaks you instantly know which earlier element just found its next
+  greater/smaller partner.
+- Expression Evaluation: a scratchpad of pending numbers where each operator pops the
+  last two values, combines them, and pushes the result back — used to evaluate
+  postfix/RPN expressions.
+- Nested Structure Decode: a stack of "saved progress" — every time you enter a deeper
+  bracket you park what you've built so far, then pop it back out and merge it when
+  the bracket closes.
+- String Construction: build the output one character at a time, using the stack as a
+  buffer that cancels a character with its neighbor when they match — used for
+  adjacent-duplicate removal.
+
 NOTES:
 - Matching Pairs: each char pushed once, popped at most once -> O(n)
 - Monotonic Stack: each element pushed and popped at most once -> O(n) amortized
@@ -81,6 +98,11 @@ Applications: Valid parentheses, HTML tag matching, balanced bracket expressions
 
 class MatchingPairs:
     """
+    Giveaway: "determine if the brackets are validly matched and nested" is the
+    tell for plain stack matching — every closing symbol must pair with the MOST
+    RECENTLY opened one, and LIFO order is exactly what guarantees that without
+    tracking positions or nesting levels explicitly.
+
     Problem: Given a string of brackets '(', ')', '{', '}', '[', ']', determine
     if the brackets are validly matched and nested.
 
@@ -144,6 +166,12 @@ Applications: Daily temperatures, next greater element, stock span, largest rect
 
 class MonotonicStack:
     """
+    Giveaway: "how many days until a warmer temperature" needed for EVERY index in
+    one pass is the tell for a monotonic stack — you need the answer at every
+    position, not just one, so instead of rescanning forward from each day you keep
+    a decreasing stack of unresolved days and resolve them the moment a bigger
+    value shows up.
+
     Problem: Given an array of daily temperatures, return an array where answer[i]
     is the number of days you have to wait after day i for a warmer temperature.
     If no warmer day exists, answer[i] = 0.
@@ -208,6 +236,11 @@ Applications: Evaluate RPN, basic calculator, expression parsing.
 
 class ExpressionEval:
     """
+    Giveaway: "Reverse Polish Notation" (or any postfix expression), where operators
+    trail their operands, is the signal for a stack — each number gets pushed, and
+    hitting an operator means the two most recently seen values are exactly the
+    ones it applies to, which a stack retrieves in the right order automatically.
+
     Problem: Evaluate the value of an arithmetic expression in Reverse Polish Notation.
     Valid operators: '+', '-', '*', '/'. Division truncates toward zero.
 
@@ -268,6 +301,12 @@ Applications: Decode string, parse nested expressions, directory paths.
 
 class NestedDecode:
     """
+    Giveaway: "k[s] means string s repeated k times" with encodings allowed to NEST
+    inside each other is the tell for save/restore-context stacking — entering a
+    bracket means you must park the in-progress string and count somewhere before
+    diving into the inner one, and a stack lets you resume exactly where you left
+    off when it closes.
+
     Problem: Given an encoded string where k[s] means string s repeated k times,
     decode and return the full string. Encodings can be nested.
 
@@ -337,6 +376,12 @@ Applications: Remove adjacent duplicates, backspace string compare, simplify pat
 
 class StringConstruction:
     """
+    Giveaway: "repeatedly remove adjacent duplicate letters until none remain" is
+    the tell for a stack buffer — removing one pair can expose a brand-new adjacent
+    pair further back (cascading), and checking only the stack's top against the
+    incoming character handles that cascade for free instead of rescanning the
+    string after each removal.
+
     Problem: Given a string s, repeatedly remove adjacent duplicate letters until
     no adjacent duplicates remain. Return the final string.
 

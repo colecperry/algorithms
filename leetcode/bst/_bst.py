@@ -49,6 +49,50 @@ BST CORE TEMPLATES
 
 from typing import Optional, List
 
+"""
+BST COMPLEXITY REFERENCE
+=========================
+
++--------------------------------+----------+----------+
+| Pattern                        | Time     | Space    |
++--------------------------------+----------+----------+
+| BST Search / Navigation        | O(h)     | O(h)     |
+| In-Order Traversal             | O(n)     | O(n)     |
+| Validation with Bounds         | O(n)     | O(h)     |
+| Range Queries (Bounds Pruning) | O(k + h) | O(h)     |
+| BST Construction / Conversion  | O(n)     | O(log n) |
++--------------------------------+----------+----------+
+
+n = number of nodes in the tree, h = height of the tree (log n balanced, n worst
+case skewed), k = number of nodes within the query range
+
+WHAT EACH PATTERN IS:
+- BST Search / Navigation: walk down the tree comparing the target to each node's
+  value, going left or right based on the comparison, the same way you'd narrow down
+  a guess in a sorted list.
+- In-Order Traversal: visit every node left-then-root-then-right so the values come
+  out in sorted order for free, without a separate sorting step.
+- Validation with Bounds: check that every node's value still falls inside an allowed
+  low/high range that gets tightened as you move down toward each child.
+- Range Queries (Bounds Pruning): walk the tree but skip entire branches that are
+  already known to be too small or too large to contain any values in the target range.
+- BST Construction / Conversion: build a balanced tree from a sorted list by always
+  picking the middle element as the current root and repeating the process on the two
+  halves.
+
+NOTES:
+- BST Search / Navigation: each comparison rules out one whole subtree -> O(h);
+  recursion stack costs O(h), iterative version costs O(1)
+- In-Order Traversal: every node is visited exactly once with no pruning possible ->
+  O(n); storing values costs O(n), recursion depth adds O(h)
+- Validation with Bounds: every node is visited once to check its inherited bounds ->
+  O(n); recursion stack depth is O(h)
+- Range Queries: nodes outside [low, high] are pruned entirely, so only the k
+  in-range nodes plus the O(h) path to reach them are visited -> O(k + h)
+- BST Construction / Conversion: one node created per array element -> O(n); picking
+  the middle each time keeps the tree balanced, so recursion depth is O(log n)
+"""
+
 class TreeNode:
     def __init__(self, val=0, left=None, right=None):
         self.val = val
@@ -258,6 +302,11 @@ Applications: Search, find insertion point, find successor/predecessor, navigate
 
 class BSTSearch:
     """
+    Giveaway: given a binary search tree (not just a "binary tree") and asked to
+    find the node equal to val — calling it out as a search tree instead of a plain
+    tree is the tell to compare val against root.val and go left/right, rather than
+    searching both subtrees like you would in an unordered tree.
+
     Problem: Given the root of a binary search tree and an integer "val", find the node
     in the BST that equals "val" and return the subtree rooted with that node. If such node doesn't exist, return null.
     
@@ -330,6 +379,12 @@ Applications: Get sorted array, kth smallest, validate ordering, find pairs, mod
 
 class InOrderPattern:
     """
+    Giveaway: "minimum difference between the values of any two different nodes"
+    in a BST — because in-order traversal of a BST yields sorted values, the true
+    minimum difference can only ever occur between two adjacent elements in that
+    sorted order, which is what points to an in-order walk instead of comparing
+    every pair of nodes.
+
     Problem: Given the root of a Binary Search Tree, return the minimum difference
     between the values of any two different nodes in the tree.
     
@@ -398,6 +453,11 @@ Applications: Validate BST, count valid nodes, enforce constraints, range valida
 
 class ValidationPattern:
     """
+    Giveaway: "determine if it is a valid binary search tree" — checking a global
+    ordering property across the whole tree, not just a node against its immediate
+    children, is what signals passing down a shrinking (min, max) bound through the
+    recursion instead of only comparing a node to its direct children.
+
     Problem: Given the root of a binary tree, determine if it is a valid binary search tree.
     
     A valid BST is defined as follows:
@@ -479,6 +539,11 @@ Applications: Range sum, range count, range search, delete in range, collect ran
 
 class RangeQueryPattern:
     """
+    Giveaway: "return the sum of ... all nodes with a value in the inclusive range
+    [low, high]" on a search tree — an explicit numeric range combined with the BST
+    ordering guarantee is the tell that whole subtrees can be skipped (go right only
+    if too small, left only if too large) instead of visiting every node.
+
     Problem: Given the root of a binary search tree and two integers low and high,
     return the sum of values of all nodes with a value in the inclusive range [low, high].
 
@@ -564,6 +629,12 @@ Applications: Convert sorted array to BST, flatten BST, serialize/deserialize, r
 
 class BSTConstructionPattern:
     """
+    Giveaway: "elements ... sorted in ascending order, convert it to a
+    height-balanced binary search tree" — being told the input is already sorted
+    and the output must be height-balanced is what signals recursively picking the
+    middle element as root, rather than inserting values one at a time, which can
+    skew the tree.
+
     Problem: Given an integer array nums where the elements are sorted in ascending order,
     convert it to a height-balanced binary search tree.
     

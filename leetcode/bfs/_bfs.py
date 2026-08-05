@@ -211,6 +211,53 @@ from collections import deque
 from typing import List, Optional
 
 """
+BFS COMPLEXITY REFERENCE
+=========================
+
++--------------------------+----------------+--------------------+
+| Pattern                  | Time           | Space              |
++--------------------------+----------------+--------------------+
+| Tree Level-Order BFS     | O(n)           | O(w)               |
+| Shortest Path BFS (Grid) | O(n^2)         | O(n)               |
+| Multi-Source BFS         | O(rows * cols) | O(min(rows, cols)) |
+| BFS with Extended State  | O(m * n * k)   | O(m * n * k)       |
+| Implicit Graph BFS       | O(N * M * 4)   | O(N)               |
++--------------------------+----------------+--------------------+
+
+n = number of nodes (tree) or side length of an n x n grid (Shortest Path BFS),
+w = widest level of a tree (max BFS frontier), rows/cols = grid dimensions,
+m/n = grid dimensions for Extended State BFS, k = max eliminations/resource
+allowed, N = size of the word/gene bank, M = length of each string in the bank
+
+WHAT EACH PATTERN IS:
+- Tree Level-Order BFS: walk a tree one whole row at a time, collecting every
+  node at the current depth before moving down to the next depth.
+- Shortest Path BFS (Grid): spread outward one step at a time from a starting
+  cell so the first time you reach the target, it's guaranteed to be the
+  shortest possible route.
+- Multi-Source BFS: start the spreading-outward search from several points at
+  once, all growing together at the same rate, instead of from a single origin.
+- BFS with Extended State: track more than just "where you are" — also carry
+  extra information (like keys collected or moves remaining) as part of what
+  makes a spot count as new versus already visited.
+- Implicit Graph BFS: treat each possible situation (a word, a gene string, a
+  puzzle configuration) as a node, and generate its neighboring situations on
+  the fly using the problem's rules instead of reading them from a prebuilt graph.
+
+NOTES:
+- Tree BFS: each node enqueued and dequeued exactly once -> O(n); queue never
+  holds more than the widest level w
+- Shortest Path BFS: each of the n^2 cells visited and marked at most once;
+  queue holds at most O(n) cells, bounded by the shrinking diagonal frontier
+- Multi-Source BFS: every cell enters the queue once total across all sources
+  combined, not once per source -> O(rows*cols); frontier still bounded by O(min(rows,cols))
+- Extended State BFS: visited set keys on (position, extra state), so a cell can
+  be revisited once per distinct extra-state value -> O(m*n*k) total states
+- Implicit Graph BFS: each of the N bank entries reached at most once; generating
+  neighbors costs O(M*4) per state (M positions, 4 substitutions each)
+"""
+
+"""
 ================================================================
 PATTERN 1: TREE LEVEL-ORDER BFS
 ================================================================
@@ -238,6 +285,11 @@ class TreeNode:
 
 class TreeLevelOrderBFS: # PART A: TREE BFS
     """
+    Giveaway: the problem literally asks for values grouped "level by level" /
+    "from left to right" as a list of lists — needing every node's depth split into
+    its own sublist (not a flat traversal or a single min/max depth) is what signals
+    capturing level_size per queue iteration rather than plain DFS.
+
     Problem: Given the root of a binary tree, return the level order traversal of its nodes' values (i.e., from left to right, level by level).
 
     # Ex. 1
@@ -329,6 +381,11 @@ Examples: LC 1091, 542, 1926, 934, 317, 909
 
 class ShortestPathBFS: # PART B: GRID BFS (SHORTEST PATH)
     """
+    Giveaway: "return the length of the shortest clear path" between a fixed start
+    and end cell with unweighted moves — asking for the minimum number of steps to
+    one specific destination is the classic BFS tell, since BFS's first arrival at
+    a cell is guaranteed to be via the shortest route.
+
     Problem: Given an n x n binary matrix grid, return the length of the shortest clear path from top-left (0,0) to bottom-right (n-1,n-1). A clear path has all cells = 0.
     
     You can move in 8 directions (horizontal, vertical, diagonal).
@@ -414,8 +471,14 @@ Examples: LC 994, 286, 542, 1162, 934
 ================================================================
 """
 
-class MultiSourceBFS: 
+class MultiSourceBFS:
     """
+    Giveaway: "every minute, fresh oranges adjacent to rotten oranges become
+    rotten" — many rotten cells all spread outward on the same clock at once, and
+    the answer is "minimum minutes until none are left." That "starts from many
+    places simultaneously, all growing in lockstep" phrasing signals seeding the
+    BFS queue with every source at time 0 instead of running BFS once per source.
+
     Problem: You are given an m x n grid where:
     - 0 = empty cell
     - 1 = fresh orange
@@ -502,7 +565,13 @@ Applications: Lock combinations, collecting keys, obstacle elimination, turn lim
 
 class ExtendedStateBFS:
     """
-    Problem: Given m x n grid (0 = empty, 1 = obstacle), find shortest path from 
+    Giveaway: "find shortest path ... you can eliminate AT MOST k obstacles" — path
+    length alone doesn't say whether a cell should be revisited, because reaching
+    the same cell with a different number of eliminations left is a genuinely
+    different situation. That extra budget riding along with position is the tell
+    that visited must key on (position, remaining) instead of position alone.
+
+    Problem: Given m x n grid (0 = empty, 1 = obstacle), find shortest path from
     top-left to bottom-right. You can eliminate AT MOST k obstacles.
 
     Ex. 
@@ -607,6 +676,12 @@ Applications: Word transformation, sliding puzzles, DNA mutation, string transfo
 
 class GraphBFS:
     """
+    Giveaway: "change one character at a time ... return minimum mutations
+    needed" between a start and end string, where each intermediate step must
+    exist in a bank — minimum single-step transformations between two states, with
+    valid next-states generated by a rule instead of handed to you as a graph, is
+    what signals BFS over an implicit graph.
+
     Problem: A gene string is an 8-character string from 'A', 'C', 'G', 'T'.
     To mutate from startGene to endGene, change one character at a time.
     Each intermediate mutation must be in the bank. Return minimum mutations needed, or -1.

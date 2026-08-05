@@ -27,7 +27,7 @@
 # recentCounter.ping(3002);  // requests = [1, 100, 3001, 3002], range is [2,3002], return 3
 
 # How to solve:
-    # Initialize a deque that represents the ele's that act as a sliding window for any ele's in the range of 3000 milliseconds
+    # Initialize a deque that represents the elements that act as a sliding window for any ele's in the range of 3000 milliseconds
     # Ping() appends the next value to the deque, and uses a while loop to check if the the first ele is out of range, if so, it pops off the first ele and checks again since the next ele will now be at the 0th idx
     # Return the len of the sliding window since each ele represents 1 second
 
@@ -52,7 +52,7 @@ class RecentCounter(object):
 
         # step 2). invalidate the outdated pings
         while self.slide_window[0] < t - 3000:
-            self.slide_window.popleft() # Pop the oldest ele
+            self.slide_window.popleft() # Pop the oldest ele if outside window
 
         return len(self.slide_window) # Each ele = 1 second
 

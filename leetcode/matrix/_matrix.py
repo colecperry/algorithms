@@ -151,6 +151,27 @@ MATRIX COMPLEXITY REFERENCE
 m = number of rows
 n = number of columns
 
+WHAT EACH PATTERN IS:
+- Basic Traversal: walking through every cell in a fixed order (row by row, column by
+  column, or diagonally) — just a systematic way to visit each square once.
+- DFS Grid: starting at a cell and diving as deep as possible into a neighbor before
+  backtracking, marking cells visited so you don't loop — used to explore a connected
+  blob of cells, like an island.
+- BFS Grid: starting at a cell and exploring outward one ring of neighbors at a time
+  using a queue — used when you need the shortest number of steps to reach a cell.
+- Spiral Order: walking the outer edge of the grid, then peeling that ring away and
+  walking the next ring in, spiraling inward until every cell is visited.
+- Matrix Rotation (90°): turning the grid without building a new one, by mirroring it
+  across the diagonal (swap rows/columns) and then reversing rows or columns.
+- Matrix Search (sorted): starting at a corner where one direction is guaranteed
+  bigger and the other guaranteed smaller, then using that fact to rule out an entire
+  row or column with every step instead of checking cells one by one.
+- Binary Search in Matrix: treating the sorted grid as if it were one long sorted
+  list and binary searching over it, converting back and forth between a single index
+  and a (row, col) position.
+- Grid DP: filling in the grid cell by cell, where each cell's answer is built from
+  the answers already computed in the cells above and to the left of it.
+
 NOTES:
 - DFS/BFS are O(m * n) space due to recursion stack / queue
 - Spiral is O(m * n) space only because of the output list — extra space is O(1)
@@ -179,6 +200,11 @@ Applications: Number of islands, flood fill, surrounded regions, word search.
 
 class MatrixDFSBFS:
     """
+    Giveaway: "return the number of islands" formed by connecting adjacent '1's is
+    asking you to count separate connected blobs in a grid — needing to fully mark
+    off one blob before moving to the next unvisited land cell is what signals
+    DFS/BFS with a visited set rather than a simple per-cell scan.
+
     Problem: Given an m x n 2D binary grid which represents a map of '1's (land) and
     '0's (water), return the number of islands. An island is surrounded by water and
     formed by connecting adjacent lands horizontally or vertically.
@@ -346,6 +372,11 @@ flipping/mirroring images, any problem requiring in-place matrix rotation.
 
 class MatrixTransformation:
     """
+    Giveaway: "rotate the image by 90 degrees... in-place" rules out building a new
+    matrix, and a rotation being expressible as mirroring across the diagonal plus
+    reversing rows is the specific insight that turns "rotate" into the
+    transpose-then-reverse recipe rather than a from-scratch coordinate remap.
+
     Problem: You are given an n x n 2D matrix representing an image. Rotate the image
     by 90 degrees clockwise in-place.
 
@@ -425,6 +456,11 @@ Applications: Search a 2D Matrix II (LC 240), find k-th smallest in sorted matri
 
 class MatrixSearch:
     """
+    Giveaway: "each row is sorted left to right and each column is sorted top to
+    bottom" (rather than the whole matrix being one sorted sequence) is the specific
+    detail that rules out binary search and instead points to starting at a corner
+    where every step can confidently eliminate a whole row or column.
+
     Problem: Search for a target in an m x n matrix where each row is sorted
     left to right and each column is sorted top to bottom.
 
@@ -495,6 +531,11 @@ Applications: Unique paths, minimum path sum, dungeon game, triangle paths.
 
 class GridDP:
     """
+    Giveaway: "find a path... which minimizes the sum" with movement restricted to
+    only down or right means every cell's best value depends only on the cell above
+    and the cell to the left — that top-left-to-bottom-right dependency is what
+    signals filling a grid DP table instead of exploring every path with DFS.
+
     Problem: Given an m x n grid filled with non-negative numbers, find a path from
     top-left to bottom-right which minimizes the sum of numbers along the path.
     You can only move down or right at each step.

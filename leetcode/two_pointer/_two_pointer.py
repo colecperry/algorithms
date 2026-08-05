@@ -74,6 +74,18 @@ TWO POINTERS COMPLEXITY REFERENCE
 
 n = array/list length, m/n = lengths of two arrays being merged
 
+WHAT EACH PATTERN IS:
+- Opposite Direction: one pointer starts at each end and they move toward each other,
+  used on sorted data to find a pair without checking every combination.
+- Same Direction / Partition: a slow pointer marks where to write next and a fast
+  pointer scans ahead, used to compact/rearrange an array in place.
+- Fast / Slow: two pointers move at different speeds through the same structure
+  (often a linked list), used to detect cycles or find the middle.
+- K-Sum (3Sum): fix one element, then run the opposite-direction pattern on the rest
+  to find pairs that combine with it to hit the target.
+- Multi-Array Merge: one pointer per sorted array, always advancing whichever one
+  points at the smaller value, to merge them in order.
+
 NOTES:
 - Opposite direction: each pointer moves at most n steps total -> O(n)
 - Same direction: fast visits each element once, slow only writes -> O(n)
@@ -103,6 +115,11 @@ Applications: Two sum in sorted array, pair finding, container with most water.
 
 class OppositeDirection:
     """
+    Giveaway: the array is explicitly stated as already sorted, and you need a pair
+    that adds up to a target — sortedness means a sum that's too small or too large
+    tells you exactly which pointer to move, letting one linear sweep from both ends
+    replace checking every pair.
+
     Problem: Given a 1-indexed sorted array numbers and a target, find two numbers
     that add up to target. Return their 1-indexed positions.
 
@@ -161,6 +178,12 @@ Applications: Remove duplicates, remove elements, move zeros, partition by condi
 
 class SameDirection:
     """
+    Giveaway: "remove duplicates in-place" from a sorted array means duplicates are
+    always adjacent, so you only ever need to compare an element to its immediate
+    predecessor while writing survivors to a compacting position — that in-place,
+    no-extra-space requirement is what points to a slow write / fast read pointer
+    pair instead of building a new list.
+
     Problem: Given a sorted array nums, remove duplicates in-place so each unique element
     appears only once. Return the number of unique elements k. The first k elements of
     nums should contain the unique elements in their original order.
@@ -226,6 +249,11 @@ class ListNode:
 
 class FastSlow:
     """
+    Giveaway: "determine if it contains a cycle" in a linked list, where you can
+    only follow next pointers one at a time (no random access, no set of visited
+    nodes required), is the classic tell for a fast/slow pointer pair — a cycle
+    means a faster pointer must eventually lap and collide with a slower one.
+
     Problem: Given the head of a linked list, determine if it contains a cycle.
     A cycle exists if some node can be reached again by following next pointers.
 
@@ -287,6 +315,12 @@ Applications: 3Sum, 4Sum, 3Sum closest, triplet problems.
 
 class KSum:
     """
+    Giveaway: needing "unique triplets" that sum to a target is one dimension more
+    than a pair-sum problem — fixing one element by looping over it and then running
+    the sorted two-pointer sweep on what's left is what turns a 3Sum into a
+    same-target 2Sum, which the "distinct indices" and duplicate-triplet wording
+    also demands sorting to skip cleanly.
+
     Problem: Given an integer array nums, return all unique triplets [a, b, c] such that
     a + b + c == 0 and they come from distinct indices.
 
@@ -364,6 +398,12 @@ Applications: Merge sorted arrays, array intersection, merge intervals.
 
 class MultiArrayMerge:
     """
+    Giveaway: merging two already-sorted arrays "in-place" into the one with extra
+    trailing zero slots means you can't safely write from the front (you'd overwrite
+    unread values) — that in-place constraint on pre-sorted inputs is what points to
+    a pointer per array filling backward from the end, rather than a fresh merged
+    list.
+
     Problem: You are given two sorted arrays nums1 (length m+n, last n slots are zeros)
     and nums2 (length n). Merge nums2 into nums1 in-place in sorted order.
 

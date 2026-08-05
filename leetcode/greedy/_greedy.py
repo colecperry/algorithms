@@ -47,6 +47,61 @@ import heapq
 from collections import Counter
 
 """
+GREEDY COMPLEXITY REFERENCE
+=============================
+
++----------------------------------------+----------------------+------------------+
+| Pattern                                | Time                 | Space            |
++----------------------------------------+----------------------+------------------+
+| Interval Selection                     | O(n log n)           | O(1) or O(log n) |
+| Jump Game (Maximize Reach)             | O(n)                 | O(1)             |
+| Two Pointer Greedy                     | O(n)                 | O(1)             |
+| Greedy with Heap (Priority Queue)      | O(n log(ladders))    | O(ladders)       |
+| Greedy Distribution/Assignment         | O(n log n + m log m) | O(n + m)         |
+| String Partitioning (Greedy Extension) | O(n)                 | O(1)             |
++----------------------------------------+----------------------+------------------+
+
+n = size of the primary input (array/string/number of intervals), m = size
+of a second input array (distribution problems), ladders = number of
+ladders available (bounds how large the heap can grow)
+
+WHAT EACH PATTERN IS:
+- Interval Selection: sort a list of ranges by when they end, then greedily grab the
+  next one that doesn't overlap what's already picked, leaving as much room as
+  possible for future picks.
+- Jump Game (Maximize Reach): walk through an array while keeping track of the
+  farthest point that could possibly be reached so far, without ever exploring every
+  path individually.
+- Two Pointer Greedy: start with a pointer at each end of the array and always move
+  whichever side is currently the bottleneck, since moving the better side could only
+  make the result worse.
+- Greedy with Heap (Priority Queue): make optimistic choices as you go, but keep the
+  "cheapest to undo" choices in a heap so you can go back and swap out the worst one
+  later if resources run out.
+- Greedy Distribution/Assignment: sort both the things you have and the things you
+  need to satisfy, then match them up from smallest to smallest so nothing is wasted
+  on a bigger need than necessary.
+- String Partitioning (Greedy Extension): once something is seen, commit to including
+  every other occurrence of it in the current group, and only close the group once
+  the last occurrence has been passed.
+
+NOTES:
+- Interval Selection: dominated by the O(n log n) sort; the scan afterward is O(n);
+  space is O(1) or O(log n) depending on the sort implementation's internal stack
+- Jump Game: single left-to-right pass tracking one running value -> O(n) time,
+  O(1) space
+- Two Pointer Greedy: each pointer moves inward at most n times total combined and
+  never backtracks -> O(n) time, O(1) space
+- Greedy with Heap: n-1 gaps processed, each heap push/pop costs O(log(ladders))
+  since the heap is capped at ladders+1 entries -> O(n log(ladders)) time,
+  O(ladders) space
+- Greedy Distribution/Assignment: dominated by sorting both arrays ->
+  O(n log n + m log m) time; auxiliary sort space -> O(n + m)
+- String Partitioning: one pass to record last occurrences, one pass to build
+  partitions -> O(n) time; fixed-size map (at most 26 letters) -> O(1) space
+"""
+
+"""
 ================================================================
 PATTERN 1: INTERVAL SELECTION
 ================================================================
@@ -71,6 +126,13 @@ Example: [[1,3], [2,6]] → MUST merge to [1,6] (deterministic, no choice)
 
 class IntervalSelection:
     """
+    Giveaway: the problem says a pair "follows" another only if it starts after
+    the previous one ends, and asks for the longest such chain you can build by
+    choosing freely among all pairs — that "select as many non-overlapping items
+    as possible" phrasing, with no requirement to use every interval, is the tell
+    for sorting by end time and greedily grabbing what doesn't overlap, rather
+    than a DP over all subsets.
+
     You are given an array of n pairs pairs where pairs[i] = [lefti, righti] and lefti < righti. A pair p2 = [c, d] follows a pair p1 = [a, b] if b < c. A chain of pairs can be formed in this fashion.
 
     Return the length longest chain which can be formed. You do not need to use up all the given intervals. You can select pairs in any order.
@@ -134,6 +196,12 @@ Applications: Jump game, minimum jumps, gas station variants.
 
 class JumpGame:
     """
+    Giveaway: "each element represents your maximum jump length" combined with a
+    yes/no reachability question (not the minimum number of jumps) signals you
+    only need to track the farthest index reachable so far — there's no cost to
+    overshoot, so there's no benefit to trying every possible jump length, which
+    is what makes this greedy instead of BFS/DP.
+
     You are given an integer array nums. You are initially positioned at the array's first index, and each element in the array represents your maximum jump length at that position.
     
     Return true if you can reach the last index, or false otherwise.
@@ -193,6 +261,13 @@ Applications: Container with most water, trapping rain water, two sum in sorted 
 
 class TwoPointerGreedy:
     """
+    Giveaway: "find two lines that... form a container that holds the most
+    water" — the area is capped by the SHORTER of the two chosen lines, so
+    moving the pointer at the taller line can only ever keep or reduce the
+    water, never increase it. That one-directional bottleneck (only the shorter
+    side can improve the answer) is what signals moving inward from both ends
+    instead of checking every pair.
+
     Problem: You are given an integer array height of length n. There are n vertical lines
     where the two endpoints of the ith line are (i, 0) and (i, height[i]).
     
@@ -266,6 +341,14 @@ Applications: Resource allocation, task scheduling, k-way merges, capital optimi
 
 class HeapGreedy:
     """
+    Giveaway: two interchangeable-but-different resources (unlimited-height
+    ladders that are LIMITED IN COUNT, vs. bricks that are limited in total
+    quantity) where you must decide in real time which climbs deserve the
+    scarcer resource — that "spend the best resource optimally, but you might
+    have committed wrong earlier" setup is the tell for making an optimistic
+    greedy choice and using a heap to swap out the worst past decision when
+    resources run out.
+
     Problem: You are climbing buildings. To go from building i to i+1:
     - If heights[i+1] <= heights[i]: free (going down or same)
     - If heights[i+1] > heights[i]: need bricks OR a ladder for the climb
@@ -377,6 +460,12 @@ Applications: Assign cookies, distribute candies, task assignment with constrain
 
 class DistributionGreedy:
     """
+    Giveaway: "each child i has a minimum greed factor... each cookie has a
+    size... give one cookie to each child" to maximize the count satisfied —
+    matching two independent lists against each other by a threshold condition,
+    where using a bigger resource than necessary wastes it, is the tell for
+    sorting both sides and greedily pairing smallest-to-smallest.
+
     Problem: Assume you are a parent trying to give cookies to children. Each child i has
     a greed factor g[i] (minimum cookie size they'll be content with). Each cookie j has
     size s[j]. You can only give one cookie to each child.
@@ -435,6 +524,13 @@ Applications: Partition labels, split array into consecutive subsequences, strin
 
 class StringPartitioning:
     """
+    Giveaway: "partition s... so that each letter appears in at most one part" —
+    since a letter's occurrences can be far apart, the problem forces every
+    partition to stretch out to cover the LAST occurrence of anything it
+    contains, which is what signals tracking a farthest-must-reach boundary and
+    closing a partition only when the current index catches up to it, rather
+    than any kind of window or DP.
+
     Problem: You are given a string s. Partition s into as many parts as possible so that
     each letter appears in at most one part. Return a list of integers representing the
     size of these parts.

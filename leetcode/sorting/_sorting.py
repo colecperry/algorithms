@@ -253,6 +253,28 @@ COMMON SORTING PATTERNS COMPLEXITY:
 | Partial Sort (Heap)       | O(n log k)       | O(k)             |
 +---------------------------+------------------+------------------+
 
+WHAT EACH PATTERN IS:
+- Custom Comparator: sort using a key function/lambda instead of plain values, so
+  elements are ordered by whatever rule you define (a field, a computed value, multiple
+  criteria) instead of their natural order.
+- Quick Select (Kth): like quick sort's partition step, but you only ever recurse into
+  the one side that contains the kth element you're looking for, skipping the other side
+  entirely.
+- Counting Sort: count how many times each value occurs, then rebuild the array in order
+  from those counts — works when values fall in a small known range.
+- Bucket Sort: drop elements into buckets based on value range, sort each small bucket,
+  then concatenate the buckets in order.
+- Sort + Two Pointers: sort the data first so that two pointers (from the ends or moving
+  together) can find pairs/triplets with a target relationship without checking every
+  combination.
+- Merge K Sorted Lists: repeatedly take the smallest "next" element among several
+  already-sorted sequences (using a heap or pointers) to weave them into one sorted
+  sequence.
+- Sort Intervals: sort intervals by start (or end) time so overlapping/adjacent ones sit
+  next to each other, making it easy to merge or scan them in one pass.
+- Partial Sort (Heap): keep a heap of only the k best elements seen so far instead of
+  sorting everything, so you get the top-k without fully sorting the whole collection.
+
 COMPLEXITY NOTES:
 -----------------
 1. Comparison-based Sorting Lower Bound: O(n log n)
@@ -385,6 +407,11 @@ SORTING PATTERNS
 
 class CustomComparator:
     """
+    Giveaway: wording like "sort by length, then alphabetically if tied" or "arrange
+    these numbers to form the largest number" signals a custom comparator — a plain
+    value sort won't respect the multi-part or non-numeric ordering rule, so you need
+    a key function (or pairwise concatenation compare) that encodes it directly.
+
     Problem 1: Sort array of strings by length, then lexicographically if same length.
     
     Example:
@@ -553,6 +580,11 @@ print("Sort Colors:", nums)
 
 class QuickSelect:
     """
+    Giveaway: the problem asks only for the kth largest/smallest value (or the top-k
+    most frequent elements) — not the fully sorted order — which is the tell that a
+    full O(n log n) sort is wasteful and you can partition down to just the one
+    target position instead.
+
     Problem 1: Find kth largest element in unsorted array.
     
     Example:
@@ -707,6 +739,12 @@ print("Top K Frequent (Heap):", sol.topKFrequent_heap([1,1,1,2,2,3], 2))  # [1, 
 
 class LinearTimeSorting:
     """
+    Giveaway: the values are explicitly bounded to a small range (e.g. "elements are
+    in range [0, k]") or the problem demands O(n) time for something that looks like
+    it needs sorting (e.g. maximum gap after sorting) — an explicit range or an O(n)
+    requirement beyond the O(n log n) comparison-sort limit is what points to
+    counting/bucket sort instead of a general sort.
+
     Problem 1: Sort array where elements are in range [0, k].
     
     Example:
@@ -884,6 +922,11 @@ print("Maximum Gap:", sol.maximumGap([3,6,9,1]))  # 3
 
 class SortAndGreedy:
     """
+    Giveaway: "minimum number of meeting rooms" (or any interval-overlap resource
+    question) tells you to sort intervals by start time and greedily track end times —
+    the moment a problem is about scheduling/allocating against overlapping ranges,
+    sorting-then-greedy is the play.
+
     Problem 1: Minimum number of meeting rooms needed.
     
     Example:
@@ -1081,7 +1124,12 @@ print("Merge Sorted Array:", nums1)  # [1,2,2,3,5,6]
 
 def findDuplicates(nums: List[int]) -> List[int]: # LC 442
     """
-    Problem: Given array of n integers where 1 ≤ nums[i] ≤ n, some elements 
+    Giveaway: n numbers whose values are constrained to exactly the range [1, n] (or
+    [0, n-1]), combined with an O(1)-extra-space requirement, is the signal for
+    cyclic sort — each value maps to exactly one "correct" index, so you can place
+    everything with swaps instead of hashing or sorting.
+
+    Problem: Given array of n integers where 1 ≤ nums[i] ≤ n, some elements
     appear twice and others once. Find all elements that appear twice.
     Do this in O(n) time and O(1) space (output array doesn't count).
 
@@ -1143,6 +1191,11 @@ class ListNode:
 
 class MergeSorted:
     """
+    Giveaway: "merge k sorted lists" (or find the kth smallest across several
+    rows/lists that are each already sorted, like a sorted matrix) is the tell —
+    with more than two sorted sequences to combine, a pairwise two-pointer merge no
+    longer scales, so you keep one pointer per sequence in a min-heap instead.
+
     Problem 1: Merge k sorted linked lists.
     
     Example:
@@ -1350,6 +1403,11 @@ print("Kth Smallest in Matrix:", sol.kthSmallest([[1,5,9],[10,11,13],[12,13,15]]
 
 class SortTwoPointers:
     """
+    Giveaway: "find all triplets/pairs that sum to a target" (or "container that
+    holds the most water") is the signal — sorting first turns the remaining search
+    into a two-pointer scan from both ends, instead of checking every pair/triplet
+    combination.
+
     Problem 1: Find all unique triplets that sum to zero.
     
     Example:

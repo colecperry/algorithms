@@ -232,6 +232,54 @@ BACKTRACKING PATTERNS
 from typing import List
 
 """
+BACKTRACKING COMPLEXITY REFERENCE
+===================================
+
++-------------------------------------+----------------+-------+
+| Pattern                             | Time           | Space |
++-------------------------------------+----------------+-------+
+| Permutations                        | O(n! * n)      | O(n)  |
+| Combinations                        | O(C(n,k) * k)  | O(k)  |
+| Subsets (Power Set)                 | O(2^n * n)     | O(n)  |
+| Combination Sum (Reuse Allowed)     | O(n^d)         | O(d)  |
+| Partitioning (Palindrome Partition) | O(2^n * n)     | O(n)  |
+| Grid Backtracking (2D Exploration)  | O(m * n * 4^L) | O(L)  |
++-------------------------------------+----------------+-------+
+
+n = number of input elements/candidates (or grid rows for Grid Backtracking),
+k = combination size, d = target / smallest candidate value (max recursion
+depth when reuse is allowed), m/n = grid dimensions (rows/cols), L = length
+of the target word
+
+WHAT EACH PATTERN IS:
+- Permutations: build every possible ordering of a set of elements, trying each
+  unused element at every position and undoing the choice to try the rest.
+- Combinations: choose a fixed-size group of elements where order doesn't matter,
+  only ever looking forward through the list so the same group is never built twice.
+- Subsets (Power Set): build every possible group of elements, from empty to the
+  full set, by deciding at each step whether to include or skip an element.
+- Combination Sum (Reuse Allowed): find every way a set of numbers can add up to a
+  target total, where the same number is allowed to be used more than once.
+- Partitioning (Palindrome Partition): split a string into every valid way its
+  pieces can be divided, keeping a cut only if the piece it creates passes some
+  rule (like being a palindrome).
+- Grid Backtracking (2D Exploration): search a grid one step at a time in every
+  direction, temporarily marking cells as visited so a single search path can't
+  reuse a cell, then unmarking them so other paths can still use that cell.
+
+NOTES:
+- Permutations: n choices at the first level, n-1 at the next, ... -> n! total
+  orderings, each copied to the result in O(n)
+- Combinations: exactly C(n,k) valid combinations exist; each takes O(k) to build/copy
+- Subsets: each of n elements has 2 choices (include/skip) -> 2^n subsets, each up to O(n) to copy
+- Combination Sum: branching factor n per level, depth bounded by d = target/min value -> O(n^d)
+- Partitioning: each of the n-1 gaps between characters is either a cut or not -> up
+  to 2^n partitions, O(n) per palindrome check/copy
+- Grid Backtracking: m*n possible starting cells, each explores up to 4 directions
+  per step for L steps -> O(m * n * 4^L)
+"""
+
+"""
 ================================================================
 PATTERN 1: PERMUTATIONS (ORDER MATTERS)
 ================================================================
@@ -243,6 +291,11 @@ Applications: Arranging elements, generating orderings, scheduling problems, TSP
 
 class PermutationsPattern: # LC 46: Permutations
     """
+    Giveaway: the problem asks for every distinct ORDERING of a full set of distinct
+    elements, where [1,2,3] and [3,2,1] count as different answers. That combination
+    of "use every element exactly once" plus "order matters" signals trying all
+    still-unused elements at every position, not just building forward-only groups.
+
     Problem: Given array nums of distinct integers, return all possible permutations.
     
     Example:
@@ -367,7 +420,12 @@ Applications: Lottery combinations, team selection, choosing items from menu, su
 
 class CombinationsPattern:
     """
-    Problem: Given two integers n and k, return all possible combinations of 
+    Giveaway: "choose k numbers" where the problem explicitly says order doesn't
+    matter (so [1,2] and [2,1] are the same combination, counted once) is the tell —
+    it forces a forward-only start index during backtracking instead of trying every
+    unused element at each step the way permutations does.
+
+    Problem: Given two integers n and k, return all possible combinations of
     k numbers chosen from range [1, n].
     
     Example:
@@ -469,7 +527,12 @@ Applications: Power set generation, finding all subsequences, feature selection,
 
 class SubsetsPattern: # LC 78: Subsets
     """
-    Problem: Given integer array nums of unique elements, return all possible 
+    Giveaway: "return all possible subsets (the power set)" of unique elements, where
+    the empty set and every partial grouping count as valid answers (not just
+    fixed-size ones), signals backtracking that saves the current path at EVERY node
+    of the recursion — unlike combinations, which only saves once len(path) == k.
+
+    Problem: Given integer array nums of unique elements, return all possible
     subsets (the power set).
     
     Example:
@@ -586,7 +649,12 @@ Applications: Coin change variations, resource allocation, making change, fillin
 
 class CombinationSumPattern:
     """
-    Problem: Given array of distinct integers candidates and target integer, 
+    Giveaway: "the same number may be chosen unlimited times" combined with needing
+    every way to hit an exact target sum is the tell for combination-sum-style
+    backtracking — recursing with the same index i (instead of i+1) is what allows
+    reuse, while still keeping a start index so duplicate orderings aren't generated.
+
+    Problem: Given array of distinct integers candidates and target integer,
     return all unique combinations where chosen numbers sum to target. 
     Same number may be chosen unlimited times.
     
@@ -712,7 +780,12 @@ Applications: Palindrome partitioning, word break, splitting into valid chunks, 
 
 class PartitioningPattern:
     """
-    Problem: Given string s, partition s such that every substring is a 
+    Giveaway: "partition s such that every substring is a palindrome" and return
+    every valid way to split it — not just one — is the signal for backtracking over
+    cut positions: try every possible substring starting at the current index,
+    validate it against the constraint, and only recurse past cuts that pass.
+
+    Problem: Given string s, partition s such that every substring is a
     palindrome. Return all possible palindrome partitionings.
     
     Example:
@@ -832,7 +905,13 @@ Applications: Word search, pathfinding, maze solving, island problems, connected
 
 class GridBacktrackingPattern:
     """
-    Problem: Given m*n board and word, return true if word exists in grid. 
+    Giveaway: "word exists in grid" built from SEQUENTIALLY ADJACENT cells, with
+    "same cell cannot be used twice in same path," is the tell for grid
+    backtracking — explore all 4 directions from a starting cell, temporarily mark
+    visited cells so a single path can't reuse one, then unmark on backtrack so
+    other paths (or other starting cells) can still use that cell.
+
+    Problem: Given m*n board and word, return true if word exists in grid.
     Word constructed from sequentially adjacent cells (horizontal or vertical).
     Same cell cannot be used twice in same path.
     
