@@ -224,16 +224,16 @@ reverse in k-groups.
 
 class ReversalPattern:
     """
-    Giveaway: "reverse the list" (or "reverse nodes from position left to right")
-    stated directly — the ask is literally to flip pointer direction, which points
-    straight at the three-pointer prev/current/next technique rather than a
-    fast/slow or merge-style approach.
-
     Problem: Given head of singly linked list, reverse the list and return reversed head.
 
     Example:
         Input:  [1,2,3,4,5]
         Output: [5,4,3,2,1]
+
+    Giveaway: "reverse the list" (or "reverse nodes from position left to right")
+    stated directly — the ask is literally to flip pointer direction, which points
+    straight at the three-pointer prev/current/next technique rather than a
+    fast/slow or merge-style approach.
 
     Steps (Full Reversal - LC 206):
     1. Initialize prev=None, current=head
@@ -340,17 +340,17 @@ Applications: Find middle, detect cycle, nth from end, palindrome check.
 
 class FastSlowPattern:
     """
-    Giveaway: "return the middle node," "detect if ... has a cycle," or "remove
-    nth node from end" — each needs a position defined relative to the list's total
-    length or its own tail, which is unknown in advance without a separate counting
-    pass. That's the tell for two pointers moving at different speeds or offset by
-    a fixed gap, instead of counting the length first.
-
     Problem: Given head of linked list, return the middle node. If two middles, return second.
 
     Example:
         Input: [1,2,3,4,5]  Output: node(3)
         Input: [1,2,3,4]    Output: node(3)  <- second middle
+
+    Giveaway: "return the middle node," "detect if ... has a cycle," or "remove
+    nth node from end" — each needs a position defined relative to the list's total
+    length or its own tail, which is unknown in advance without a separate counting
+    pass. That's the tell for two pointers moving at different speeds or offset by
+    a fixed gap, instead of counting the length first.
 
     Steps:
     1. slow = head, fast = head.next
@@ -460,16 +460,16 @@ Applications: Merge two sorted lists, merge k sorted lists (extend with heap), s
 
 class MergePattern:
     """
-    Giveaway: two separate lists that are each already sorted, asked to be
-    combined into one sorted list — "already sorted" on both inputs is what signals
-    a two-pointer walk comparing front elements and splicing nodes across, rather
-    than collecting all the values and re-sorting them.
-
     Problem: Merge two sorted linked lists into one sorted list by splicing nodes together.
 
     Example:
         Input: list1 = [1,2,4], list2 = [1,3,4]
         Output: [1,1,2,3,4,4]
+
+    Giveaway: two separate lists that are each already sorted, asked to be
+    combined into one sorted list — "already sorted" on both inputs is what signals
+    a two-pointer walk comparing front elements and splicing nodes across, rather
+    than collecting all the values and re-sorting them.
 
     Steps:
     1. Create dummy node, current = dummy for the merged list
@@ -531,16 +531,16 @@ Applications: Partition by value (LC 86), separate odd/even indices (LC 328), sp
 
 class SplitReconnectPattern:
     """
-    Giveaway: "partition list so all nodes < x come before nodes >= x" while
-    preserving relative order — needing to keep original order while bucketing every
-    node by a simple condition is what signals building two separate chains in a
-    single pass and reconnecting them, rather than swapping values in place.
-
     Problem: Partition list so all nodes < x come before nodes >= x. Preserve relative order.
 
     Example:
         Input: head = [1,4,3,2,5,2], x = 3
         Output: [1,2,2,4,3,5]
+
+    Giveaway: "partition list so all nodes < x come before nodes >= x" while
+    preserving relative order — needing to keep original order while bucketing every
+    node by a simple condition is what signals building two separate chains in a
+    single pass and reconnecting them, rather than swapping values in place.
 
     Steps:
     1. Create dummy heads: less_dummy (< x), greater_dummy (>= x)

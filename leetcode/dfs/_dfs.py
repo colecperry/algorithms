@@ -332,22 +332,22 @@ class TreeNode:
 
 class TreeDFSBuildUp:
     """
-    Giveaway: "find the maximum depth/height" of a tree means every node's answer
-    depends on the answer of BOTH its children combined (1 + max of the two) — you
-    can't know a node's depth until its subtrees are fully solved, which is the
-    signal for post-order build-up instead of passing state downward.
-
     Find the maximum depth (height) of a binary tree.
     Depth = number of nodes from root to furthest leaf.
-    
+
     #      3
     #     / \
     #    9  20
     #      /  \
     #     15   7
-    
+
     # Depth = 3 (path: 3 -> 20 -> 15)
-    
+
+    Giveaway: "find the maximum depth/height" of a tree means every node's answer
+    depends on the answer of BOTH its children combined (1 + max of the two) — you
+    can't know a node's depth until its subtrees are fully solved, which is the
+    signal for post-order build-up instead of passing state downward.
+
     Steps:
     1. Base case: if node is None, return 0 (empty subtree has depth 0)
     2. Recurse left: call maxDepth on left child to get left subtree depth
@@ -428,13 +428,8 @@ Applications: Path sum validation, path finding, ancestor-dependent counting, le
 """
 class TreeDFSPassDown:
     """
-    Giveaway: the check is specifically "root-to-leaf" path sum — the answer at a
-    leaf depends on a running total accumulated from the root down (targetSum minus
-    everything spent so far), so each node needs its ancestors' contribution passed
-    down to it rather than needing anything back from its children.
-
     Determine if tree has root-to-leaf path that sums to targetSum.
-    
+
     #        5
     #       / \
     #      4   8
@@ -446,7 +441,12 @@ class TreeDFSPassDown:
     # targetSum = 22
     # Path: 5 -> 4 -> 11 -> 2 = 22 ✓
     # Output: True
-    
+
+    Giveaway: the check is specifically "root-to-leaf" path sum — the answer at a
+    leaf depends on a running total accumulated from the root down (targetSum minus
+    everything spent so far), so each node needs its ancestors' contribution passed
+    down to it rather than needing anything back from its children.
+
     Steps:
     1. Base case (empty): if root is None, return False (no path exists)
     2. Base case (leaf): if node has no children, return root.val == targetSum
@@ -511,25 +511,25 @@ Applications: Graph traversal, reachability, connected components, cycle detecti
 """                  
 class GraphDFS:
     """
+    There are n rooms labeled 0 to n-1. All rooms are locked except room 0. Your goal is to visit all rooms. When you visit a room, you get all keys in that room. Can you visit all rooms?
+
+    Example 1:
+        rooms = [[1],[2],[3],[]]
+
+        Visual: 0 -> 1 -> 2 -> 3
+
+        Start in room 0, get key to room 1
+        Visit room 1, get key to room 2
+        Visit room 2, get key to room 3
+        Visit room 3
+
+        Output: True (visited all 4 rooms)
+
     Giveaway: rooms are only reachable by keys found in other rooms — "visit all
     rooms" is really a reachability question over an implicit graph (room = node,
     key = edge), and the natural cycle risk (keys can point back to visited rooms)
     is what calls for a visited set during traversal instead of plain recursion.
 
-    There are n rooms labeled 0 to n-1. All rooms are locked except room 0. Your goal is to visit all rooms. When you visit a room, you get all keys in that room. Can you visit all rooms?
-    
-    Example 1:
-        rooms = [[1],[2],[3],[]]
-        
-        Visual: 0 -> 1 -> 2 -> 3
-        
-        Start in room 0, get key to room 1
-        Visit room 1, get key to room 2
-        Visit room 2, get key to room 3
-        Visit room 3
-        
-        Output: True (visited all 4 rooms)
-    
     Steps:
     1. Initialize visited set and start DFS from room 0 (the only unlocked room)
     2. Mark current room as visited
@@ -610,27 +610,27 @@ Applications: Fill regions, change colors, connected components in grid, islands
 """
 class MatrixDFS:
     """
-    Giveaway: "change the color of the starting pixel and all connected pixels of
-    the same color" is literally describing a paint-bucket fill — the region to
-    change is defined by connectivity through matching neighbor values, which is
-    the exact shape of a flood-fill DFS on a grid.
-
     Perform flood fill starting from pixel (sr, sc). Change the color of the starting pixel and all connected pixels of the same color to the new color.
-    
+
     Connected = 4-directionally adjacent (up, down, left, right).
-    
+
     Example:
         image = [[1,1,1],
                  [1,1,0],
                  [1,0,1]]
         sr = 1, sc = 1, color = 2
-        
+
         Starting pixel is 1, all connected 1's become 2:
-        
+
         Output: [[2,2,2],
                  [2,2,0],
                  [2,0,1]]
-    
+
+    Giveaway: "change the color of the starting pixel and all connected pixels of
+    the same color" is literally describing a paint-bucket fill — the region to
+    change is defined by connectivity through matching neighbor values, which is
+    the exact shape of a flood-fill DFS on a grid.
+
     Steps:
     1. Save original_color = image[sr][sc]; if it already equals color, return early
     2. Call dfs(sr, sc) to start the fill from the starting pixel
@@ -721,17 +721,17 @@ partition problems, subsequence problems, house robber
 
 class CoinChange:  # LC 322
     """
+    Given coin denominations and target amount, return minimum coins needed.
+    Return -1 if impossible.
+
+    Example 1: coins = [1,2,5], amount = 11 → 3  (5+5+1)
+    Example 2: coins = [2], amount = 3 → -1      (impossible)
+
     Giveaway: "minimum number of coins" to hit a target, where you try every
     denomination at every remaining amount, produces the same sub-amount over and
     over from different coin orderings (e.g. 5 then 2 or 2 then 5) — that repeated,
     overlapping subproblem is the tell for caching DFS results instead of plain
     recursion.
-
-    Given coin denominations and target amount, return minimum coins needed.
-    Return -1 if impossible.
-    
-    Example 1: coins = [1,2,5], amount = 11 → 3  (5+5+1)
-    Example 2: coins = [2], amount = 3 → -1      (impossible)
     """
     
     def coinChange(self, coins: list[int], amount: int) -> int:

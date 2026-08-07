@@ -98,16 +98,16 @@ Applications: Group anagrams, valid anagram, find all anagrams, ransom note.
 
 class CharFrequency:
     """
-    Giveaway: "group all anagrams together" means the grouping key isn't the string
-    itself but its multiset of letters — converting each word into a fixed-size
-    letter-count signature (so order stops mattering) is what lets you bucket
-    strings into groups with a single hashmap pass.
-
     Problem: Given an array of strings, group all anagrams together.
 
     Example:
         strs = ["eat","tea","tan","ate","nat","bat"]
         Output: [["bat"],["nat","tan"],["ate","eat","tea"]]
+
+    Giveaway: "group all anagrams together" means the grouping key isn't the string
+    itself but its multiset of letters — converting each word into a fixed-size
+    letter-count signature (so order stops mattering) is what lets you bucket
+    strings into groups with a single hashmap pass.
 
     Steps:
     1. For each string, compute its frequency signature:
@@ -157,17 +157,17 @@ Applications: Valid palindrome, palindrome number, longest palindromic substring
 
 class PalindromeCheck:
     """
-    Giveaway: "return True if it is a palindrome" — reads the same forwards and
-    backwards — is directly a statement about the first and last characters
-    matching, then the next-inward pair, and so on, which is exactly what
-    converging two pointers from both ends checks in one O(n) pass.
-
     Problem: Given a string s, return True if it is a palindrome after converting to
     lowercase and removing all non-alphanumeric characters.
 
     Example:
         s = "A man, a plan, a canal: Panama" -> "amanaplanacanalpanama" -> True
         s = "race a car" -> "raceacar" -> False
+
+    Giveaway: "return True if it is a palindrome" — reads the same forwards and
+    backwards — is directly a statement about the first and last characters
+    matching, then the next-inward pair, and so on, which is exactly what
+    converging two pointers from both ends checks in one O(n) pass.
 
     Steps:
     1. Initialize left=0, right=len(s)-1
@@ -226,11 +226,6 @@ Applications: Reverse words in a string, reorder sentence, capitalize words.
 
 class StringParsing:
     """
-    Giveaway: "reverse the order of words" (as opposed to reversing characters) with
-    messy spacing ("no leading/trailing spaces and exactly one space between words")
-    is what points you to split-into-tokens, reorder the tokens, then rejoin, rather
-    than any in-place character-level pointer trick.
-
     Problem: Given an input string s, reverse the order of words. A word is a sequence
     of non-space characters. The output should have no leading/trailing spaces and
     exactly one space between words.
@@ -240,6 +235,11 @@ class StringParsing:
         Words: ["the","sky","is","blue"]
         Reversed: ["blue","is","sky","the"]
         Output: "blue is sky the"
+
+    Giveaway: "reverse the order of words" (as opposed to reversing characters) with
+    messy spacing ("no leading/trailing spaces and exactly one space between words")
+    is what points you to split-into-tokens, reorder the tokens, then rejoin, rather
+    than any in-place character-level pointer trick.
 
     Steps:
     1. s.split() — splits on any whitespace, strips edges, collapses internal spaces
@@ -279,11 +279,6 @@ Applications: String compression, run-length encoding, remove duplicates in-plac
 
 class StringCompression:
     """
-    Giveaway: "compress it in-place using run-length encoding" — replacing each run
-    of consecutive identical characters with the character plus its count — is what
-    calls for a read pointer that scans a run's length and a separate write pointer
-    that never overtakes it, keeping the whole transform to O(1) extra space.
-
     Problem: Given an array of characters chars, compress it in-place using run-length
     encoding. Groups of consecutive identical characters are replaced by the character
     followed by the group length (omit length if group size is 1). Return new length.
@@ -294,6 +289,11 @@ class StringCompression:
 
         chars = ['a']
         Output: 1 (single char, no count appended)
+
+    Giveaway: "compress it in-place using run-length encoding" — replacing each run
+    of consecutive identical characters with the character plus its count — is what
+    calls for a read pointer that scans a run's length and a separate write pointer
+    that never overtakes it, keeping the whole transform to O(1) extra space.
 
     Steps:
     1. write=0 (write position), i=0 (read position)

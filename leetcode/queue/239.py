@@ -78,7 +78,7 @@ class Solution:
 
     def maxSlidingWindow2(self, nums: List[int], k: int) -> List[int]: # Heap Version - more simple
             """
-            TC: O(n log n) - each of n pushes/pops does log n heap work
+            TC: O(n log n) - each of n pushes/pops does log n heap work due to restoring heap order
             SC: O(n) - stale entries can pile up in the heap before being popped
             """
             result = []
@@ -91,8 +91,8 @@ class Solution:
                 while heap[0][1] <= i - k: # compare index at top of heap to one before window start
                     heapq.heappop(heap)
 
-                if i >= k - 1:
-                    result.append(-heap[0][0])
+                if i >= k - 1: # once the window is full
+                    result.append(-heap[0][0]) # record the current max
 
             return result
 

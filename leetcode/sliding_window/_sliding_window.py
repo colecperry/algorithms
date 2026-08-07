@@ -99,11 +99,6 @@ Applications: Max/min sum of k elements, average of k elements, max product suba
 
 class FixedWindowNumeric:
     """
-    Giveaway: "the contiguous subarray of length k" with a fixed, given k and an
-    aggregate (average/sum) to optimize — a constant window size stated up
-    front is the signal for a fixed sliding window that adds one element and
-    drops one element per step, instead of resumming each window from scratch.
-
     Problem: Given an integer array nums and integer k, find the contiguous subarray
     of length k with the maximum average value. Return this maximum average.
 
@@ -111,6 +106,11 @@ class FixedWindowNumeric:
         nums = [1, 12, -5, -6, 50, 3], k = 4
         Windows: [1,12,-5,-6]=2, [12,-5,-6,50]=51, [-5,-6,50,3]=42
         Output: 51/4 = 12.75
+
+    Giveaway: "the contiguous subarray of length k" with a fixed, given k and an
+    aggregate (average/sum) to optimize — a constant window size stated up
+    front is the signal for a fixed sliding window that adds one element and
+    drops one element per step, instead of resumming each window from scratch.
 
     Steps:
     1. Compute sum of first k elements (initial window)
@@ -158,17 +158,17 @@ Applications: Find all anagrams, permutation in string, repeated DNA sequences.
 
 class FixedWindowFrequency:
     """
-    Giveaway: "return all start indices of p's anagrams in s" — anagram means
-    same character COUNTS in some order, and the window size is pinned to
-    len(p), which is the tell for a fixed-size sliding window compared via
-    character-frequency maps rather than checking permutations directly.
-
     Problem: Given strings s and p, return all start indices of p's anagrams in s.
     An anagram of p is any permutation of p's characters.
 
     Example:
         s = "cbaebabacd", p = "abc"
         "cba" at index 0, "bac" at index 6 -> Output: [0, 6]
+
+    Giveaway: "return all start indices of p's anagrams in s" — anagram means
+    same character COUNTS in some order, and the window size is pinned to
+    len(p), which is the tell for a fixed-size sliding window compared via
+    character-frequency maps rather than checking permutations directly.
 
     Steps:
     1. Build Counter for pattern p and for first len(p) characters of s
@@ -231,17 +231,17 @@ longest substring with at most k distinct characters.
 
 class VariableMaximize:
     """
-    Giveaway: "the length of the longest substring without any repeating
-    characters" — asking for the LONGEST contiguous run that keeps a validity
-    property (no dupes) true, with no fixed size given, is the signal to expand
-    the window until it breaks the rule, then shrink just enough to fix it,
-    rather than checking every substring.
-
     Problem: Find the length of the longest substring without any repeating characters.
 
     Example:
         s = "abcabcbb"
         Longest: "abc" -> Output: 3
+
+    Giveaway: "the length of the longest substring without any repeating
+    characters" — asking for the LONGEST contiguous run that keeps a validity
+    property (no dupes) true, with no fixed size given, is the signal to expand
+    the window until it breaks the rule, then shrink just enough to fix it,
+    rather than checking every substring.
 
     Steps:
     1. Initialize left=0, empty set for characters in window
@@ -298,18 +298,18 @@ Applications: Minimum window substring, smallest subarray with sum >= k.
 
 class VariableMinimize:
     """
-    Giveaway: "return the minimum window substring of s such that every
-    character in t is included" — asking for the SHORTEST window that satisfies
-    a coverage constraint (as opposed to the longest that avoids violating one)
-    is the tell to expand until valid, then shrink from the left while it stays
-    valid, the mirror image of the longest-window variant.
-
     Problem: Given strings s and t, return the minimum window substring of s such that
     every character in t (including duplicates) is included. Return "" if none exists.
 
     Example:
         s = "ADOBECODEBANC", t = "ABC"
         Minimum window: "BANC" (length 4) -> Output: "BANC"
+
+    Giveaway: "return the minimum window substring of s such that every
+    character in t is included" — asking for the SHORTEST window that satisfies
+    a coverage constraint (as opposed to the longest that avoids violating one)
+    is the tell to expand until valid, then shrink from the left while it stays
+    valid, the mirror image of the longest-window variant.
 
     Steps:
     1. Build frequency map for t; track required = number of unique chars needed

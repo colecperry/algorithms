@@ -378,14 +378,8 @@ Applications: Friend circles, network connectivity, island counting, clustering.
 
 class ConnectedComponents:
     """
-    Giveaway: "a province is a group of directly or indirectly connected
-    cities... return the total number of provinces" — needing to count how many
-    separate connected groups exist overall (not whether two specific nodes
-    connect) is what signals running DFS/BFS from every unvisited node and
-    counting how many times you had to start.
-
     Problem: There are n cities. Some are connected, some are not. If city a connects to city b, and city b connects to city c, then a indirectly connects to c.
-    
+
     A province is a group of directly or indirectly connected cities. Given an n x n matrix isConnected where isConnected[i][j] = 1 if cities i and j are connected, return the total number of provinces.
 
     # Example 1
@@ -395,7 +389,13 @@ class ConnectedComponents:
     [0,0,1]
     ]
     - Output: 2
-    
+
+    Giveaway: "a province is a group of directly or indirectly connected
+    cities... return the total number of provinces" — needing to count how many
+    separate connected groups exist overall (not whether two specific nodes
+    connect) is what signals running DFS/BFS from every unvisited node and
+    counting how many times you had to start.
+
     Steps:
     1. Treat each city as a node, using the isConnected matrix as an adjacency list
     2. For each unvisited city, increment the province count (new component found)
@@ -484,22 +484,22 @@ Applications: Minimum steps/transformations, shortest path in graphs, word ladde
 
 class BFSShortestPath:
     """
+    Problem: A gene string is represented by an 8-character string of 'A', 'C', 'G', 'T'.
+    A mutation is changing one character. Given a start gene, end gene, and a gene bank,
+    find the minimum number of mutations needed to mutate from start to end.
+    Each mutation must result in a gene from the bank. If no mutation sequence exists, return -1.
+
+    # Example
+    - Input: start = "AACCGGTT", end = "AAACGGTA", bank = ["AACCGGTA", "AACCGCTA", "AAACGGTA"]
+    - Output: 2
+    - Explanation: AACCGGTT → AACCGGTA → AAACGGTA
+
     Giveaway: "find the minimum number of mutations" needed to turn a start
     state into an end state, where each step is a single valid transformation —
     needing the fewest steps through an unweighted state-transition space is
     what signals BFS layer-by-layer exploration rather than DFS or brute-force
     path search.
 
-    Problem: A gene string is represented by an 8-character string of 'A', 'C', 'G', 'T'.
-    A mutation is changing one character. Given a start gene, end gene, and a gene bank, 
-    find the minimum number of mutations needed to mutate from start to end. 
-    Each mutation must result in a gene from the bank. If no mutation sequence exists, return -1.
-    
-    # Example
-    - Input: start = "AACCGGTT", end = "AAACGGTA", bank = ["AACCGGTA", "AACCGCTA", "AAACGGTA"]
-    - Output: 2
-    - Explanation: AACCGGTT → AACCGGTA → AAACGGTA
-    
     Steps:
     1. Return -1 immediately if endGene is not in the bank (unreachable)
     2. Initialize BFS queue with (startGene, 0 mutations) and mark startGene visited
@@ -584,14 +584,9 @@ Applications: Matching problems, scheduling conflicts, team assignments.
 
 class BipartiteCheck:
     """
-    Giveaway: the graph must be partitioned into two independent sets where
-    every edge connects across the sets and never within one — that specific
-    "split into two groups with no same-group edges" requirement is what
-    signals 2-coloring via BFS/DFS rather than plain reachability traversal.
-
     Problem: Given an undirected graph, return true if the graph is bipartite.
     A graph is bipartite if nodes can be partitioned into two independent sets A and B such that every edge connects a node in A to a node in B (no edges within a set).
-    
+
     Graph is given as adjacency list where graph[i] is array of nodes adjacent to node i.
 
     Example 1:
@@ -603,7 +598,12 @@ class BipartiteCheck:
     Input: graph = [[1,2,3],[0,2],[0,1,3],[0,2]]
     Output: false
     Explanation: Cannot partition nodes into two independent sets
-    
+
+    Giveaway: the graph must be partitioned into two independent sets where
+    every edge connects across the sets and never within one — that specific
+    "split into two groups with no same-group edges" requirement is what
+    signals 2-coloring via BFS/DFS rather than plain reachability traversal.
+
     Steps:
     1. Initialize a color array of -1 (unassigned) for all n nodes
     2. For each uncolored node (to handle disconnected components):
@@ -690,29 +690,29 @@ Applications: Course scheduling, task ordering, build systems, dependency resolu
 
 class TopologicalSort:
     """
+    Problem: There are numCourses courses labeled 0 to numCourses-1.
+    Given prerequisites where prerequisites[i] = [ai, bi], you must take course bi before ai.
+
+    Return true if you can finish all courses (no circular dependencies).
+
+    Example 1:
+    Input: numCourses = 2, prerequisites = [[1,0]]
+    Output: true
+    Explanation: There are a total of 2 courses to take.
+    To take course 1 you should have finished course 0. So it is possible.
+
+    Example 2:
+    Input: numCourses = 2, prerequisites = [[1,0],[0,1]]
+    Output: false
+    Explanation: There are a total of 2 courses to take.
+    To take course 1 you should have finished course 0, and to take course 0 you should also have finished course 1. So it is impossible.
+
     Giveaway: "you must take course b before a" — a dependency/prerequisite
     ordering where some tasks must finish before others, combined with needing
     to detect whether finishing everything is even possible (i.e. no cycle), is
     what signals in-degree tracking with Kahn's algorithm rather than plain
     DFS/BFS reachability.
 
-    Problem: There are numCourses courses labeled 0 to numCourses-1.
-    Given prerequisites where prerequisites[i] = [ai, bi], you must take course bi before ai.
-    
-    Return true if you can finish all courses (no circular dependencies).
-
-    Example 1:
-    Input: numCourses = 2, prerequisites = [[1,0]]
-    Output: true
-    Explanation: There are a total of 2 courses to take. 
-    To take course 1 you should have finished course 0. So it is possible.
-
-    Example 2:
-    Input: numCourses = 2, prerequisites = [[1,0],[0,1]]
-    Output: false
-    Explanation: There are a total of 2 courses to take. 
-    To take course 1 you should have finished course 0, and to take course 0 you should also have finished course 1. So it is impossible.
-    
     Steps:
     1. Build a directed graph (prereq -> course) and an in-degree array from the prerequisites list
     2. Enqueue all courses with in-degree 0 (no prerequisites needed)
@@ -820,14 +820,8 @@ Applications: Network connectivity, cycle detection, grouping elements, Kruskal'
 
 class UnionFindCycle: # LC 684
     """
-    Giveaway: a graph that "started as a tree" had one extra edge added, and you
-    must find which single edge to remove to restore the tree — needing to spot
-    the exact edge that first connects two nodes already in the same component,
-    while edges are added one at a time, is the classic tell for union-find
-    cycle detection instead of full graph traversal.
-
     In a graph that started as a tree with n nodes, one extra edge was added. Return the edge that can be removed to restore the tree structure. If multiple answers exist, return the last occurring edge.
-    
+
     Example 1:
 
     1---2
@@ -849,7 +843,13 @@ class UnionFindCycle: # LC 684
     Input: edges = [[1,2],[2,3],[3,4],[1,4],[1,5]]
     Output: [1,4]
     Explanation: [1,4] creates cycle in path 1-2-3-4
-    
+
+    Giveaway: a graph that "started as a tree" had one extra edge added, and you
+    must find which single edge to remove to restore the tree — needing to spot
+    the exact edge that first connects two nodes already in the same component,
+    while edges are added one at a time, is the classic tell for union-find
+    cycle detection instead of full graph traversal.
+
     Steps:
     1. Initialize parent array where each node is its own parent, and a rank array of 1s
     2. For each edge [u, v] in order:
@@ -956,14 +956,8 @@ Applications: GPS routing, network packet routing, shortest path in weighted gra
 
 class DijkstraShortestPath: # LC 743
     """
-    Giveaway: edges carry explicit travel times/weights and the question asks
-    for the minimum time for a signal to reach every node from one source —
-    needing shortest distance from one source to all nodes in a weighted graph
-    with non-negative weights is what signals Dijkstra's greedy min-heap
-    approach instead of plain BFS.
-
     You are given a network of n nodes, labeled from 1 to n. You are also given times, a list of travel times as directed edges times[i] = (ui, vi, wi), where ui is the source node, vi is the target node, and wi is the time it takes for a signal to travel from source to target.
-    
+
     We will send a signal from a given node k. Return the minimum time it takes for all the n nodes to receive the signal. If it is impossible for all the n nodes to receive the signal, return -1.
 
            2
@@ -975,22 +969,28 @@ class DijkstraShortestPath: # LC 743
               / 1
              /
             4
-    
+
     Example 1:
     Input: times = [[2,1,1],[2,3,1],[3,4,1]], n = 4, k = 2
     Output: 2
-    Explanation: 
+    Explanation:
     - Node 2 (source): 0 time
     - Node 1: 1 time (direct from 2)
     - Node 3: 1 time (direct from 2)
     - Node 4: 2 time (2→3→4)
     Max time is 2
-    
+
     Example 2:
     Input: times = [[1,2,1]], n = 2, k = 2
     Output: -1
     Explanation: Node 1 unreachable from node 2
-    
+
+    Giveaway: edges carry explicit travel times/weights and the question asks
+    for the minimum time for a signal to reach every node from one source —
+    needing shortest distance from one source to all nodes in a weighted graph
+    with non-negative weights is what signals Dijkstra's greedy min-heap
+    approach instead of plain BFS.
+
     Steps:
     1. Build a weighted adjacency list from the times edge list
     2. Initialize all distances to infinity; set distances[k] = 0 and push (0, k) onto a min-heap

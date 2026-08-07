@@ -285,11 +285,6 @@ class TreeNode:
 
 class TreeLevelOrderBFS: # PART A: TREE BFS
     """
-    Giveaway: the problem literally asks for values grouped "level by level" /
-    "from left to right" as a list of lists — needing every node's depth split into
-    its own sublist (not a flat traversal or a single min/max depth) is what signals
-    capturing level_size per queue iteration rather than plain DFS.
-
     Problem: Given the root of a binary tree, return the level order traversal of its nodes' values (i.e., from left to right, level by level).
 
     # Ex. 1
@@ -302,7 +297,12 @@ class TreeLevelOrderBFS: # PART A: TREE BFS
     #
     # Input: root = [3,9,20,null,null,15,7]
     # Output: [[3],[9,20],[15,7]]
-    
+
+    Giveaway: the problem literally asks for values grouped "level by level" /
+    "from left to right" as a list of lists — needing every node's depth split into
+    its own sublist (not a flat traversal or a single min/max depth) is what signals
+    capturing level_size per queue iteration rather than plain DFS.
+
     Steps:
     1. Initialize queue with root
     2. While queue not empty:
@@ -381,16 +381,16 @@ Examples: LC 1091, 542, 1926, 934, 317, 909
 
 class ShortestPathBFS: # PART B: GRID BFS (SHORTEST PATH)
     """
+    Problem: Given an n x n binary matrix grid, return the length of the shortest clear path from top-left (0,0) to bottom-right (n-1,n-1). A clear path has all cells = 0.
+
+    You can move in 8 directions (horizontal, vertical, diagonal).
+    If no path exists, return -1.
+
     Giveaway: "return the length of the shortest clear path" between a fixed start
     and end cell with unweighted moves — asking for the minimum number of steps to
     one specific destination is the classic BFS tell, since BFS's first arrival at
     a cell is guaranteed to be via the shortest route.
 
-    Problem: Given an n x n binary matrix grid, return the length of the shortest clear path from top-left (0,0) to bottom-right (n-1,n-1). A clear path has all cells = 0.
-    
-    You can move in 8 directions (horizontal, vertical, diagonal).
-    If no path exists, return -1.
-    
     Steps:
     1. Initialize queue with (0, 0, distance=1) and mark grid[0][0] as visited
     2. Mark start as visited immediately (reuse grid cell, set to 1)
@@ -473,20 +473,20 @@ Examples: LC 994, 286, 542, 1162, 934
 
 class MultiSourceBFS:
     """
+    Problem: You are given an m x n grid where:
+    - 0 = empty cell
+    - 1 = fresh orange
+    - 2 = rotten orange
+
+    Every minute, fresh oranges adjacent (4-directionally) to rotten oranges become rotten.
+    Return minimum minutes until no fresh oranges remain. Return -1 if impossible.
+
     Giveaway: "every minute, fresh oranges adjacent to rotten oranges become
     rotten" — many rotten cells all spread outward on the same clock at once, and
     the answer is "minimum minutes until none are left." That "starts from many
     places simultaneously, all growing in lockstep" phrasing signals seeding the
     BFS queue with every source at time 0 instead of running BFS once per source.
 
-    Problem: You are given an m x n grid where:
-    - 0 = empty cell
-    - 1 = fresh orange
-    - 2 = rotten orange
-    
-    Every minute, fresh oranges adjacent (4-directionally) to rotten oranges become rotten.
-    Return minimum minutes until no fresh oranges remain. Return -1 if impossible.
-    
     Steps:
     1. Initialize queue with ALL rotten oranges (value 2) as starting sources, and count all fresh oranges
     2. Mark all sources as visited by their initial value (2) — no extra marking needed
@@ -565,12 +565,6 @@ Applications: Lock combinations, collecting keys, obstacle elimination, turn lim
 
 class ExtendedStateBFS:
     """
-    Giveaway: "find shortest path ... you can eliminate AT MOST k obstacles" — path
-    length alone doesn't say whether a cell should be revisited, because reaching
-    the same cell with a different number of eliminations left is a genuinely
-    different situation. That extra budget riding along with position is the tell
-    that visited must key on (position, remaining) instead of position alone.
-
     Problem: Given m x n grid (0 = empty, 1 = obstacle), find shortest path from
     top-left to bottom-right. You can eliminate AT MOST k obstacles.
 
@@ -585,6 +579,12 @@ class ExtendedStateBFS:
     Explanation: 
     The shortest path without eliminating any obstacle is 10.
     The shortest path with one obstacle elimination at position (3,2) is 6. Such path is (0,0) -> (0,1) -> (0,2) -> (1,2) -> (2,2) -> (3,2) -> (4,2).
+
+    Giveaway: "find shortest path ... you can eliminate AT MOST k obstacles" — path
+    length alone doesn't say whether a cell should be revisited, because reaching
+    the same cell with a different number of eliminations left is a genuinely
+    different situation. That extra budget riding along with position is the tell
+    that visited must key on (position, remaining) instead of position alone.
 
     Steps:
     1. Define state as (row, col, remaining_eliminations); initialize queue with (0, 0, k, dist=0)
@@ -676,19 +676,19 @@ Applications: Word transformation, sliding puzzles, DNA mutation, string transfo
 
 class GraphBFS:
     """
-    Giveaway: "change one character at a time ... return minimum mutations
-    needed" between a start and end string, where each intermediate step must
-    exist in a bank — minimum single-step transformations between two states, with
-    valid next-states generated by a rule instead of handed to you as a graph, is
-    what signals BFS over an implicit graph.
-
     Problem: A gene string is an 8-character string from 'A', 'C', 'G', 'T'.
     To mutate from startGene to endGene, change one character at a time.
     Each intermediate mutation must be in the bank. Return minimum mutations needed, or -1.
 
     Input: startGene = "AACCGGTT", endGene = "AAACGGTA", bank = ["AACCGGTA","AACCGCTA","AAACGGTA"]
     Output: 2
-    
+
+    Giveaway: "change one character at a time ... return minimum mutations
+    needed" between a start and end string, where each intermediate step must
+    exist in a bank — minimum single-step transformations between two states, with
+    valid next-states generated by a rule instead of handed to you as a graph, is
+    what signals BFS over an implicit graph.
+
     Steps:
     1. Define each gene string as a "state" (node) in the implicit graph
     2. Initialize queue with (startGene, mutations=0) and a visited set containing startGene

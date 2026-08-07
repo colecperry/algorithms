@@ -171,11 +171,6 @@ counter, logger rate limiter.
 
 class RecentCounter:
     """
-    Giveaway: "count events/requests in the past X ms/seconds" with calls arriving
-    in increasing time order — you only ever need to drop stale entries off one
-    end, never compare values, which is the tell for a plain expiring queue
-    rather than a monotonic deque.
-
     Problem: Count the number of requests that have happened in the past 3000ms
     (inclusive), given that ping() is always called with a strictly increasing t.
 
@@ -185,6 +180,11 @@ class RecentCounter:
         ping(3001) -> 3   (requests in [1, 3001] = [1, 100, 3001])
         ping(3002) -> 3   (requests in [2, 3002] = [100, 3001, 3002], 1 expired)
 
+    Giveaway: "count events/requests in the past X ms/seconds" with calls arriving
+    in increasing time order — you only ever need to drop stale entries off one
+    end, never compare values, which is the tell for a plain expiring queue
+    rather than a monotonic deque.
+
     Steps:
     1. Maintain a deque of timestamps seen so far
     2. On each ping(t): append t (new pings are always the current max, so the
@@ -193,7 +193,7 @@ class RecentCounter:
     4. Return the deque's length — every remaining entry is within the window
     """
     def __init__(self):  # LC 933 - Number of Recent Calls
-        self.window = deque()
+        self.q = deque() # maintain a queue of timestamps seen so far
 
     def ping(self, t: int) -> int:
         """
@@ -205,21 +205,21 @@ class RecentCounter:
             - The deque stores at most N (3000) timestamps, leading to O(N) space.
             - However, in practice, it holds only pings within 3000ms, so it does not grow proportional to N -> O(1).
         """
-        # step 1). append the current call to the deque
-        self.window.append(t)
+        # step 1). append the current call to the deque - new pings are current max
+        self.q.append(t)
 
         # step 2). invalidate the outdated pings
-        while self.window[0] < t - 3000:
-            self.window.popleft() # Pop the oldest ele if outside window
+        while self.q[0] < t - 3000:
+            self.q.popleft() # Pop the oldest ele if outside window
 
-        return len(self.window) # Each ele = 1 second
+        return len(self.q) # Each ele = 1 second
 
     # Trace: ping(1), ping(100), ping(3001), ping(3002)
-    # ping(1):    window=[1],              front=1 >= 1-3000=-2999    -> return 1
-    # ping(100):  window=[1,100],          front=1 >= 100-3000=-2900  -> return 2
-    # ping(3001): window=[1,100,3001],     front=1 >= 3001-3000=1     -> return 3
-    # ping(3002): window=[1,100,3001,3002],front=1 < 3002-3000=2 -> evict 1
-    #             window=[100,3001,3002],  front=100 >= 2             -> return 3 ✓
+    # ping(1):    q=[1],              front=1 >= 1-3000=-2999    -> return 1
+    # ping(100):  q=[1,100],          front=1 >= 100-3000=-2900  -> return 2
+    # ping(3001): q=[1,100,3001],     front=1 >= 3001-3000=1     -> return 3
+    # ping(3002): q=[1,100,3001,3002],front=1 < 3002-3000=2      -> evict 1
+    #             q=[100,3001,3002],  front=100 >= 2             -> return 3 ✓
 
 rc = RecentCounter()
 print("Recent Calls:", [rc.ping(1), rc.ping(100), rc.ping(3001), rc.ping(3002)])  # [1, 2, 3, 3]
@@ -241,11 +241,6 @@ Dota2 senate, reveal cards in increasing order, find the winner of the circular 
 
 class QueueSimulation:
     """
-    Giveaway: the problem literally describes people/entities taking turns in a
-    line and going to the back if they still have work left — no distances or
-    graph edges involved, just "who goes next," which is the signal to simulate
-    with a plain queue instead of BFS.
-
     Problem: n people stand in line to buy tickets; tickets[i] is how many tickets
     person i wants. Each purchase takes 1 second, and a person who still has
     tickets left to buy goes to the back of the line instead of leaving. Return the
@@ -256,33 +251,32 @@ class QueueSimulation:
         [2,3,2] -> [3,2,1] -> [2,1,2] -> [1,2,1] -> [2,1] -> [1,1] -> [1]
         Output: 6
 
-    Steps:
-    1. Enqueue every person's INDEX (not their ticket count) so k stays trackable
-       as people cycle through the line
-    2. While queue not empty:
-       a. Increment time by 1 (one ticket purchase)
-       b. Dequeue the front index, decrement its ticket count
-       c. If this was person k and their tickets hit 0, return time
-       d. Otherwise, if tickets remain, requeue this index at the back
+
+    Giveaway: the problem literally describes people/entities taking turns in a
+    line and going to the back if they still have work left — no distances or
+    graph edges involved, just "who goes next," which is the signal to simulate
+    with a plain queue instead of BFS.
+
     """
     def timeRequiredToBuy(self, tickets: List[int], k: int) -> int:  # LC 2073
         """
         TC: O(sum(tickets)) - one iteration per ticket purchased across everyone
         SC: O(n) - queue holds at most n indices
         """
-        queue = deque(range(len(tickets)))
-        time = 0
+        queue = deque(range(len(tickets))) # queue maintains order while cycling
+        time = 0 # result = time it takes person k to buy all tickets
 
-        while queue:
+        while queue: # while there are still people that need to buy tix
             time += 1
-            i = queue.popleft()
-            tickets[i] -= 1
+            i = queue.popleft() # get the index of the person buying the ticket
+            tickets[i] -= 1 # buy a ticket
 
-            if i == k and tickets[i] == 0:
+            # check if person k & their tickets hit zero
+            if i == k and tickets[i] == 0: 
                 return time
 
-            if tickets[i] > 0:
-                queue.append(i)
+            if tickets[i] > 0: # if time remains (still need tickets)
+                queue.append(i) # requeue this index to the back of the q
 
         return time
 
@@ -316,10 +310,6 @@ Applications: Implement queue using stacks, implement stack using queues.
 
 class QueueWithStacks:
     """
-    Giveaway: the problem explicitly says "implement a queue using stacks" (or
-    vice versa) — it names the two ADTs directly, so the task is translating one
-    access order into the other rather than discovering a hidden pattern.
-
     Problem: Implement a FIFO queue using only two stacks. Support push, pop, peek,
     and empty in O(1) amortized time.
 
@@ -329,15 +319,13 @@ class QueueWithStacks:
         pop()   -> 1
         empty() -> False
 
-    Steps:
-    1. Two stacks: input_stack (accepts all pushes), output_stack (serves pops/peeks)
-    2. push: append to input_stack — O(1)
-    3. pop/peek: if output_stack empty, transfer everything from input_stack
-       Each element crosses input -> output at most once -> amortized O(1)
+    Giveaway: the problem explicitly says "implement a queue using stacks" (or
+    vice versa) — it names the two ADTs directly, so the task is translating one
+    access order into the other rather than discovering a hidden pattern.
     """
     def __init__(self):  # LC 232 - Implement Queue using Stacks
-        self.input_stack = []
-        self.output_stack = []
+        self.input_stack = [] # input stack (accepts all pushes)
+        self.output_stack = [] # output stack (serves pops/peeks)
 
     def push(self, x: int) -> None:
         """TC: O(1)"""
@@ -345,12 +333,12 @@ class QueueWithStacks:
 
     def pop(self) -> int:
         """TC: O(1) amortized"""
-        self._transfer()
-        return self.output_stack.pop()
+        self._transfer() # make input stack (LIFO) into output stack (FIFO)
+        return self.output_stack.pop() # pop from top of output_stack (which holds front of queue)
 
     def peek(self) -> int:
         """TC: O(1) amortized"""
-        self._transfer()
+        self._transfer() # make input stack (LIFO) into output stack (FIFO)
         return self.output_stack[-1]
 
     def empty(self) -> bool:
@@ -358,8 +346,13 @@ class QueueWithStacks:
         return not self.input_stack and not self.output_stack
 
     def _transfer(self):
-        if not self.output_stack:
-            while self.input_stack:
+        """
+        Transfers all items from input_stack to output_stack, but only when
+        output_stack is empty. This reverses their order once, so the oldest
+        item (front of queue) ends up on top of output_stack.
+        """
+        if not self.output_stack: # if output stack is empty, items are not in FIFO order
+            while self.input_stack: # transfer everything from input stack (LIFO -> FIFO)
                 self.output_stack.append(self.input_stack.pop())
 
     # Trace: push(1), push(2), peek(), pop()
@@ -392,12 +385,8 @@ back queue, any fixed-size ring buffer.
 
 class MyCircularQueue:
     """
-    Giveaway: the problem says "design a circular queue/deque" with a fixed
-    capacity k — a bounded size plus required O(1) worst-case (not amortized)
-    ops signals a fixed array with wraparound indices, not a growable deque.
-
     Problem: Design a circular queue with fixed capacity k supporting enQueue,
-    deQueue, Front, Rear, isEmpty, and isFull, all in O(1).
+    deQueue, Front, Rear, isEmpty, and isFull, all in O(1) without using the built in queue data structure.
 
     Example:
         q = MyCircularQueue(3)
@@ -408,33 +397,32 @@ class MyCircularQueue:
         q.enQueue(4) -> True     (reuses the freed slot via wraparound)
         q.Rear()     -> 4
 
-    Steps:
-    1. Track capacity, a fixed array of size k, front_idx, and a running count
-       (count replaces the need for a "rear" pointer and disambiguates full vs empty)
-    2. enQueue: if full, fail; else write to (front_idx + count) % capacity, count += 1
-    3. deQueue: if empty, fail; else front_idx = (front_idx + 1) % capacity, count -= 1
-    4. Front/Rear: read at front_idx / (front_idx + count - 1) % capacity
+    Giveaway: the problem says "design a circular queue/deque" with a fixed
+    capacity k — a bounded size plus required O(1) worst-case (not amortized)
+    ops signals a fixed array with wraparound indices, not a growable deque.
+
     """
     def __init__(self, k: int):  # LC 622 - Design Circular Queue
-        self.capacity = k
-        self.queue = [0] * k
-        self.front_idx = 0
-        self.count = 0
-
+            self.capacity = k # max number of elements the queue can hold
+            self.queue = [0] * k # fixed-size backing array
+            self.front_idx = 0 # index of the current front element
+            self.count = 0 # running count replaces need for a rear pointer
+    
     def enQueue(self, value: int) -> bool:
         """TC: O(1)"""
-        if self.isFull():
+        if self.isFull(): # Early exit -> queue is full
             return False
-        rear_idx = (self.front_idx + self.count) % self.capacity
-        self.queue[rear_idx] = value
+        rear_idx = (self.front_idx + self.count) % self.capacity # get next open slot, wrapping around
+        self.queue[rear_idx] = value # assign that value to the open slot (rear index)
         self.count += 1
         return True
 
     def deQueue(self) -> bool:
         """TC: O(1)"""
-        if self.isEmpty():
+        if self.isEmpty(): # Operation not successful -> Return False
             return False
-        self.front_idx = (self.front_idx + 1) % self.capacity
+        self.front_idx = (self.front_idx + 1) % self.capacity # advance front index, wrapping around
+        self.queue[self.front_idx - 1] = 'EMPTY' # Just for visual/debugging effect
         self.count -= 1
         return True
 
@@ -442,13 +430,13 @@ class MyCircularQueue:
         """TC: O(1)"""
         if self.isEmpty():
             return -1
-        return self.queue[self.front_idx]
+        return self.queue[self.front_idx] # element at front_idx is the front
 
     def Rear(self) -> int:
         """TC: O(1)"""
         if self.isEmpty():
             return -1
-        rear_idx = (self.front_idx + self.count - 1) % self.capacity
+        rear_idx = (self.front_idx + self.count - 1) % self.capacity # get last filled slot, wrapping around
         return self.queue[rear_idx]
 
     def isEmpty(self) -> bool:

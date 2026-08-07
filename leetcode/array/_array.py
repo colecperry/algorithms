@@ -166,18 +166,18 @@ Applications: Majority element, majority element II (>n/3), finding elements wit
 
 class BooyerMoore:
     """
+    Problem: Given array of size n, find the majority element. The majority element is the element that appears more than ⌊n/2⌋ times. You may assume the majority element always exists.
+
+    Example 1:
+    Input: nums = [3,2,3]
+    Output: 3
+
     Giveaway: the problem guarantees a majority element that appears more than
     ⌊n/2⌋ times — that guarantee (not just "find the most frequent element") is
     what licenses a cancellation/voting scheme instead of a frequency-count hash
     map, since a true majority is structurally certain to survive naive vote
     cancelling in a way a merely-most-common element could not.
 
-    Problem: Given array of size n, find the majority element. The majority element is the element that appears more than ⌊n/2⌋ times. You may assume the majority element always exists.
-    
-    Example 1:
-    Input: nums = [3,2,3]
-    Output: 3
-    
     How it works:
     1. Think of it as a voting system where majority "cancels out" 
     minorities
@@ -228,19 +228,19 @@ non-overlapping intervals, interval list intersections.
 """
 class MergeIntervals:
     """
-    Giveaway: the input is a list of [start, end] ranges and the task is literally
-    "merge all overlapping intervals" — whenever ranges can overlap and need to be
-    fused into non-overlapping pieces, sorting by start and sweeping once is the
-    tell, rather than comparing every pair of intervals.
-
     Problem: Given array of intervals [start, end], merge all overlapping intervals and return array of non-overlapping intervals.
 
         Example 1:
         Input: intervals = [[1,3],[2,6],[8,10],[15,18]]
         Output: [[1,6],[8,10],[15,18]]
-        Explanation: Since intervals [1,3] and [2,6] overlap, merge them 
+        Explanation: Since intervals [1,3] and [2,6] overlap, merge them
         into [1,6].
-        
+
+        Giveaway: the input is a list of [start, end] ranges and the task is literally
+        "merge all overlapping intervals" — whenever ranges can overlap and need to be
+        fused into non-overlapping pieces, sorting by start and sweeping once is the
+        tell, rather than comparing every pair of intervals.
+
         How it works:
         1. Sort intervals by start time
         2. Compare each interval with last merged interval
@@ -289,11 +289,6 @@ shift operations.
 class RotateArray:
     def rotate(self, nums: List[int], k: int) -> None: # LC 189
         """
-        Giveaway: "rotate the array... in-place with O(1) extra space" — the
-        explicit ban on allocating a second array while every element still needs
-        to shift by k is what points to the three-reversal trick instead of
-        building a rotated copy.
-
         Problem: Given an integer array, rotate the array to the right by k steps where k is non-negative. Modify the array in-place with O(1) extra space.
 
         Example 1:
@@ -306,7 +301,12 @@ class RotateArray:
 
         TC: O(n) - three reversals, each O(n)
         SC: O(1) - only swap operations
-        
+
+        Giveaway: "rotate the array... in-place with O(1) extra space" — the
+        explicit ban on allocating a second array while every element still needs
+        to shift by k is what points to the three-reversal trick instead of
+        building a rotated copy.
+
         How it works (Reversal Method):
         1. Normalize k to handle k > len(nums)
         2. Reverse entire array: [1,2,3,4,5] → [5,4,3,2,1]

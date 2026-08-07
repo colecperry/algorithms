@@ -98,11 +98,6 @@ Applications: Valid parentheses, HTML tag matching, balanced bracket expressions
 
 class MatchingPairs:
     """
-    Giveaway: "determine if the brackets are validly matched and nested" is the
-    tell for plain stack matching — every closing symbol must pair with the MOST
-    RECENTLY opened one, and LIFO order is exactly what guarantees that without
-    tracking positions or nesting levels explicitly.
-
     Problem: Given a string of brackets '(', ')', '{', '}', '[', ']', determine
     if the brackets are validly matched and nested.
 
@@ -110,6 +105,11 @@ class MatchingPairs:
         s = "([])"  -> True
         s = "([)]"  -> False (wrong nesting order)
         s = "((("   -> False (unclosed openers)
+
+    Giveaway: "determine if the brackets are validly matched and nested" is the
+    tell for plain stack matching — every closing symbol must pair with the MOST
+    RECENTLY opened one, and LIFO order is exactly what guarantees that without
+    tracking positions or nesting levels explicitly.
 
     Steps:
     1. Map each closing bracket to its expected opening bracket
@@ -166,12 +166,6 @@ Applications: Daily temperatures, next greater element, stock span, largest rect
 
 class MonotonicStack:
     """
-    Giveaway: "how many days until a warmer temperature" needed for EVERY index in
-    one pass is the tell for a monotonic stack — you need the answer at every
-    position, not just one, so instead of rescanning forward from each day you keep
-    a decreasing stack of unresolved days and resolve them the moment a bigger
-    value shows up.
-
     Problem: Given an array of daily temperatures, return an array where answer[i]
     is the number of days you have to wait after day i for a warmer temperature.
     If no warmer day exists, answer[i] = 0.
@@ -179,6 +173,12 @@ class MonotonicStack:
     Example:
         temperatures = [73, 74, 75, 71, 69, 72, 76, 73]
         Output: [1, 1, 4, 2, 1, 1, 0, 0]
+
+    Giveaway: "how many days until a warmer temperature" needed for EVERY index in
+    one pass is the tell for a monotonic stack — you need the answer at every
+    position, not just one, so instead of rescanning forward from each day you keep
+    a decreasing stack of unresolved days and resolve them the moment a bigger
+    value shows up.
 
     Steps:
     1. Initialize result array of zeros, empty stack (stores indices)
@@ -236,17 +236,17 @@ Applications: Evaluate RPN, basic calculator, expression parsing.
 
 class ExpressionEval:
     """
-    Giveaway: "Reverse Polish Notation" (or any postfix expression), where operators
-    trail their operands, is the signal for a stack — each number gets pushed, and
-    hitting an operator means the two most recently seen values are exactly the
-    ones it applies to, which a stack retrieves in the right order automatically.
-
     Problem: Evaluate the value of an arithmetic expression in Reverse Polish Notation.
     Valid operators: '+', '-', '*', '/'. Division truncates toward zero.
 
     Example:
         tokens = ["2","1","+","3","*"] -> (2+1)*3 = 9
         tokens = ["4","13","5","/","+"] -> 4+(13/5) = 4+2 = 6
+
+    Giveaway: "Reverse Polish Notation" (or any postfix expression), where operators
+    trail their operands, is the signal for a stack — each number gets pushed, and
+    hitting an operator means the two most recently seen values are exactly the
+    ones it applies to, which a stack retrieves in the right order automatically.
 
     Steps:
     1. For each token:
@@ -301,12 +301,6 @@ Applications: Decode string, parse nested expressions, directory paths.
 
 class NestedDecode:
     """
-    Giveaway: "k[s] means string s repeated k times" with encodings allowed to NEST
-    inside each other is the tell for save/restore-context stacking — entering a
-    bracket means you must park the in-progress string and count somewhere before
-    diving into the inner one, and a stack lets you resume exactly where you left
-    off when it closes.
-
     Problem: Given an encoded string where k[s] means string s repeated k times,
     decode and return the full string. Encodings can be nested.
 
@@ -315,6 +309,12 @@ class NestedDecode:
         Inner: 2[c] -> "cc"
         Outer: 3["a" + "cc"] = 3["acc"] -> "accaccacc"
         Output: "accaccacc"
+
+    Giveaway: "k[s] means string s repeated k times" with encodings allowed to NEST
+    inside each other is the tell for save/restore-context stacking — entering a
+    bracket means you must park the in-progress string and count somewhere before
+    diving into the inner one, and a stack lets you resume exactly where you left
+    off when it closes.
 
     Steps:
     1. Track curr_str (current decoded segment) and curr_num (pending repeat count)
@@ -376,12 +376,6 @@ Applications: Remove adjacent duplicates, backspace string compare, simplify pat
 
 class StringConstruction:
     """
-    Giveaway: "repeatedly remove adjacent duplicate letters until none remain" is
-    the tell for a stack buffer — removing one pair can expose a brand-new adjacent
-    pair further back (cascading), and checking only the stack's top against the
-    incoming character handles that cascade for free instead of rescanning the
-    string after each removal.
-
     Problem: Given a string s, repeatedly remove adjacent duplicate letters until
     no adjacent duplicates remain. Return the final string.
 
@@ -391,6 +385,12 @@ class StringConstruction:
 
         s = "azxxzy" -> remove "xx" -> "azzy" -> remove "zz" -> "ay"
         Output: "ay"
+
+    Giveaway: "repeatedly remove adjacent duplicate letters until none remain" is
+    the tell for a stack buffer — removing one pair can expose a brand-new adjacent
+    pair further back (cascading), and checking only the stack's top against the
+    incoming character handles that cascade for free instead of rescanning the
+    string after each removal.
 
     Steps:
     1. Initialize empty stack

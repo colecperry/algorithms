@@ -123,17 +123,17 @@ Applications: Range sum queries, immutable array sum, any repeated range calcula
 
 class RangeSumQuery:
     """
-    Giveaway: "handle multiple sumRange(left, right) queries" on a fixed/immutable
-    array is the signal — repeated range-sum requests on data that never changes is
-    exactly what prefix sums are built for, trading one O(n) preprocessing pass for
-    O(1) per query.
-
     Problem: Given an int array, handle multiple sumRange(left, right) queries.
 
     Example:
         nums = [1, 2, 3, 4, 5]
         sumRange(0, 2) → 6    # [1,2,3]
         sumRange(1, 4) → 14   # [2,3,4,5]
+
+    Giveaway: "handle multiple sumRange(left, right) queries" on a fixed/immutable
+    array is the signal — repeated range-sum requests on data that never changes is
+    exactly what prefix sums are built for, trading one O(n) preprocessing pass for
+    O(1) per query.
 
     Steps:
     1. Build prefix where prefix[i] = sum(nums[0..i-1]), prefix[0] = 0
@@ -198,16 +198,16 @@ Applications: subarray sum = k, subarray sum divisible by k,
 
 class SubarraySumHashMap:
     """
-    Giveaway: "count subarrays whose sum equals k" (or is divisible by k, or has equal
-    counts of two values) is the tell — checking every subarray's sum is naturally
-    O(n^2), but tracking running totals in a hashmap turns it into a single O(n) pass
-    by looking up curSum - k instead of resumming.
-
     Problem: Count subarrays whose sum equals k.
 
     Example:
         nums = [1, 2, 3], k = 3
         [1, 2] sums to 3, [3] sums to 3 → return 2
+
+    Giveaway: "count subarrays whose sum equals k" (or is divisible by k, or has equal
+    counts of two values) is the tell — checking every subarray's sum is naturally
+    O(n^2), but tracking running totals in a hashmap turns it into a single O(n) pass
+    by looking up curSum - k instead of resumming.
 
     Steps:
     1. Maintain a running prefix_sum and a freq map of {prefix_sum: count}
@@ -302,11 +302,6 @@ image area calculations.
 
 class RangeSumQuery2D:
     """
-    Giveaway: "handle multiple sumRegion(r1, c1, r2, c2) queries" on a static 2D
-    matrix is the 2D analogue of the range-sum tell — repeated rectangle-sum
-    requests on an unchanging grid mean it's worth precomputing a running-total
-    table so each query becomes four lookups instead of rescanning the rectangle.
-
     Problem: Given a 2D matrix, handle multiple sumRegion(r1, c1, r2, c2) queries.
 
     Example:
@@ -316,6 +311,11 @@ class RangeSumQuery2D:
                   [4,1,0,1,7],
                   [1,0,3,0,5]]
         sumRegion(2, 1, 4, 3) → 8
+
+    Giveaway: "handle multiple sumRegion(r1, c1, r2, c2) queries" on a static 2D
+    matrix is the 2D analogue of the range-sum tell — repeated rectangle-sum
+    requests on an unchanging grid mean it's worth precomputing a running-total
+    table so each query becomes four lookups instead of rescanning the rectangle.
 
     Steps:
     1. Build 2D prefix where prefix[r][c] = sum of rectangle (0,0) to (r-1,c-1)
@@ -396,12 +396,6 @@ Applications: Range addition, car pooling, corporate flight bookings,
 
 class DifferenceArray:
     """
-    Giveaway: "k update operations, each adding a value to every element in a range" —
-    followed by wanting only the final array after all updates — is the tell for a
-    difference array: applying every update directly costs O(n) each, but marking
-    just the start/end of each range and summing once at the end reconstructs the
-    same result in O(n + k).
-
     Problem: Array of length n initialized with all 0's and k update operations [startIndex, endIndex, inc].
     Each operation increments every element of A[startIndex..endIndex] (inclusive) by inc.
     Return the modified array after all k operations were executed.
@@ -411,6 +405,12 @@ class DifferenceArray:
         Output: [-2,0,3,5,3]
 
     NOTE: diff[endIndex+1] -= inc needs a sentinel slot, so the diff array is length n+1 (endIndex can be n-1).
+
+    Giveaway: "k update operations, each adding a value to every element in a range" —
+    followed by wanting only the final array after all updates — is the tell for a
+    difference array: applying every update directly costs O(n) each, but marking
+    just the start/end of each range and summing once at the end reconstructs the
+    same result in O(n + k).
     """
     def getModifiedArray(self, length: int, updates: List[List[int]]) -> List[int]:  # LC 370 - Range Addition
         """

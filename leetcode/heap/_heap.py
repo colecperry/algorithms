@@ -228,11 +228,6 @@ Applications: Kth largest/smallest, k most frequent elements, k closest points t
 
 class TopKPattern:
     """
-    Giveaway: "return the k most frequent elements" — needing just the top k by
-    frequency (not a full ranking) out of a large unsorted collection is the
-    classic signal for a size-capped heap that evicts its weakest member,
-    instead of sorting all n frequencies.
-
     Problem: Given an integer array nums and integer k, return the k most frequent elements.
 
     Example:
@@ -241,6 +236,11 @@ class TopKPattern:
 
         Frequencies: {1:3, 2:2, 3:1}
         We want the 2 elements with highest frequency -> 1 and 2
+
+    Giveaway: "return the k most frequent elements" — needing just the top k by
+    frequency (not a full ranking) out of a large unsorted collection is the
+    classic signal for a size-capped heap that evicts its weakest member,
+    instead of sorting all n frequencies.
 
     Steps:
     1. Create empty heap
@@ -296,11 +296,6 @@ class ListNode:
 
 class KWayMergePattern: # LC 23
     """
-    Giveaway: "merge k sorted linked lists... return as one sorted list" — you
-    already have k independently-sorted streams and need the global minimum
-    across all of them repeatedly, which is the tell for keeping one candidate
-    per list in a min heap rather than concatenating and re-sorting everything.
-
     Problem: Merge k sorted linked lists and return as one sorted list.
 
     Example:
@@ -308,6 +303,11 @@ class KWayMergePattern: # LC 23
         Output: [1,1,2,3,4,4,5,6]
 
         Merge three sorted lists into one sorted list.
+
+    Giveaway: "merge k sorted linked lists... return as one sorted list" — you
+    already have k independently-sorted streams and need the global minimum
+    across all of them repeatedly, which is the tell for keeping one candidate
+    per list in a min heap rather than concatenating and re-sorting everything.
 
     Steps:
     1. Initialize heap with first element from each source
@@ -375,12 +375,6 @@ Applications: Last stone weight, task scheduler, pick gifts, IPO, reorganize str
 
 class GreedyHeapPattern:
     """
-    Giveaway: "each turn smash the two heaviest stones together" — the problem
-    itself defines the operation as repeatedly acting on the current two
-    largest values and feeding a new value back in, which is exactly what a max
-    heap (extract-extract-reinsert) is built for, as opposed to sorting once
-    up front.
-
     Problem: Given array 'stones', each turn smash the two heaviest stones together.
     If weights x <= y: both destroyed if equal, else stone of weight y-x remains.
     Return weight of last remaining stone, or 0 if none remain.
@@ -392,6 +386,12 @@ class GreedyHeapPattern:
         Smash 8,7 -> 1 remains. Smash 4,2 -> 2 remains.
         Smash 2,1 -> 1 remains. Smash 1,1 -> both destroyed.
         Last stone: 1
+
+    Giveaway: "each turn smash the two heaviest stones together" — the problem
+    itself defines the operation as repeatedly acting on the current two
+    largest values and feeding a new value back in, which is exactly what a max
+    heap (extract-extract-reinsert) is built for, as opposed to sorting once
+    up front.
 
     Steps:
     1. Build max heap from all stones
@@ -442,12 +442,6 @@ Applications: Meeting rooms, car pooling, minimum platforms, CPU scheduling.
 
 class IntervalPattern:
     """
-    Giveaway: "return minimum conference rooms required" for a list of meeting
-    intervals — needing the maximum number of intervals overlapping AT THE SAME
-    TIME (not just whether any overlap) is the tell for tracking active end
-    times in a heap so you can cheaply evict any meeting that's already
-    finished before adding a new one.
-
     Problem: Given meeting intervals [start, end], return minimum conference rooms required.
 
     Example:
@@ -457,6 +451,12 @@ class IntervalPattern:
         [0,30] overlaps with [5,10] -> need 2 rooms.
         [15,20] starts after [5,10] ends -> reuses that room.
         Max concurrent = 2.
+
+    Giveaway: "return minimum conference rooms required" for a list of meeting
+    intervals — needing the maximum number of intervals overlapping AT THE SAME
+    TIME (not just whether any overlap) is the tell for tracking active end
+    times in a heap so you can cheaply evict any meeting that's already
+    finished before adding a new one.
 
     Steps:
     1. Sort intervals by start time

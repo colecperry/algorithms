@@ -291,21 +291,21 @@ Applications: Arranging elements, generating orderings, scheduling problems, TSP
 
 class PermutationsPattern: # LC 46: Permutations
     """
-    Giveaway: the problem asks for every distinct ORDERING of a full set of distinct
-    elements, where [1,2,3] and [3,2,1] count as different answers. That combination
-    of "use every element exactly once" plus "order matters" signals trying all
-    still-unused elements at every position, not just building forward-only groups.
-
     Problem: Given array nums of distinct integers, return all possible permutations.
-    
+
     Example:
         Input: nums = [1,2,3]
         Output: [[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]
         Explanation: All 3! = 6 ways to arrange 3 distinct elements
-    
+
     Key insight:
     - Try ALL elements at each position (unlike combinations which only try remaining)
     - Track used elements with boolean array to stop you from using the same element twice
+
+    Giveaway: the problem asks for every distinct ORDERING of a full set of distinct
+    elements, where [1,2,3] and [3,2,1] count as different answers. That combination
+    of "use every element exactly once" plus "order matters" signals trying all
+    still-unused elements at every position, not just building forward-only groups.
 
     Steps:
     1. Initialize result list and backtrack helper with empty path and all-False used array
@@ -420,20 +420,20 @@ Applications: Lottery combinations, team selection, choosing items from menu, su
 
 class CombinationsPattern:
     """
-    Giveaway: "choose k numbers" where the problem explicitly says order doesn't
-    matter (so [1,2] and [2,1] are the same combination, counted once) is the tell —
-    it forces a forward-only start index during backtracking instead of trying every
-    unused element at each step the way permutations does.
-
     Problem: Given two integers n and k, return all possible combinations of
     k numbers chosen from range [1, n].
-    
+
     Example:
         Input: n=4, k=2
         Output: [[1,2],[1,3],[1,4],[2,3],[2,4],[3,4]]
         Explanation: Choose 2 numbers from [1,2,3,4]
             [1,2] and [2,1] are the SAME combination (order doesn't matter)
             So we only generate [1,2] by always moving forward
+
+    Giveaway: "choose k numbers" where the problem explicitly says order doesn't
+    matter (so [1,2] and [2,1] are the same combination, counted once) is the tell —
+    it forces a forward-only start index during backtracking instead of trying every
+    unused element at each step the way permutations does.
 
     Steps:
     1. Initialize result list and backtrack helper with start=1 and empty path
@@ -527,27 +527,27 @@ Applications: Power set generation, finding all subsequences, feature selection,
 
 class SubsetsPattern: # LC 78: Subsets
     """
-    Giveaway: "return all possible subsets (the power set)" of unique elements, where
-    the empty set and every partial grouping count as valid answers (not just
-    fixed-size ones), signals backtracking that saves the current path at EVERY node
-    of the recursion — unlike combinations, which only saves once len(path) == k.
-
     Problem: Given integer array nums of unique elements, return all possible
     subsets (the power set).
-    
+
     Example:
         Input: nums=[1,2,3]
         Output: [[],[1],[1,2],[1,2,3],[1,3],[2],[2,3],[3]]
         Explanation: Power set has 2^3 = 8 subsets
             Each element: include (1) or exclude (0)
-            000=[], 001=[3], 010=[2], 011=[2,3], 
+            000=[], 001=[3], 010=[2], 011=[2,3],
             100=[1], 101=[1,3], 110=[1,2], 111=[1,2,3]
-    
+
     Key insight:
     - CRITICAL difference from combinations: save at EVERY level!
     - Combinations: save only when len(path) == k
     - Subsets: save immediately on entering function
     - Empty subset [] is valid, as are all partial builds [1], [1,2], etc.
+
+    Giveaway: "return all possible subsets (the power set)" of unique elements, where
+    the empty set and every partial grouping count as valid answers (not just
+    fixed-size ones), signals backtracking that saves the current path at EVERY node
+    of the recursion — unlike combinations, which only saves once len(path) == k.
 
     Steps:
     1. Initialize result list and backtrack helper with start=0 and empty path
@@ -649,11 +649,6 @@ Applications: Coin change variations, resource allocation, making change, fillin
 
 class CombinationSumPattern:
     """
-    Giveaway: "the same number may be chosen unlimited times" combined with needing
-    every way to hit an exact target sum is the tell for combination-sum-style
-    backtracking — recursing with the same index i (instead of i+1) is what allows
-    reuse, while still keeping a start index so duplicate orderings aren't generated.
-
     Problem: Given array of distinct integers candidates and target integer,
     return all unique combinations where chosen numbers sum to target. 
     Same number may be chosen unlimited times.
@@ -673,6 +668,11 @@ class CombinationSumPattern:
     - Prevent duplicates: still use start index (no backwards)
     - [2,2,3] generated, but [2,3,2] not generated (would need to go backwards)
     - Pruning: sum > target base case returns early
+
+    Giveaway: "the same number may be chosen unlimited times" combined with needing
+    every way to hit an exact target sum is the tell for combination-sum-style
+    backtracking — recursing with the same index i (instead of i+1) is what allows
+    reuse, while still keeping a start index so duplicate orderings aren't generated.
 
     Steps:
     1. Initialize result list and backtrack helper with start=0, empty path, and current_sum=0
@@ -780,11 +780,6 @@ Applications: Palindrome partitioning, word break, splitting into valid chunks, 
 
 class PartitioningPattern:
     """
-    Giveaway: "partition s such that every substring is a palindrome" and return
-    every valid way to split it — not just one — is the signal for backtracking over
-    cut positions: try every possible substring starting at the current index,
-    validate it against the constraint, and only recurse past cuts that pass.
-
     Problem: Given string s, partition s such that every substring is a
     palindrome. Return all possible palindrome partitionings.
     
@@ -801,6 +796,11 @@ class PartitioningPattern:
     - Only proceed if substring before cut is valid (palindrome)
     - Unlike previous patterns (try elements), here we try partition endpoints
     - Start index tracks "what part of string is unpartitioned"
+
+    Giveaway: "partition s such that every substring is a palindrome" and return
+    every valid way to split it — not just one — is the signal for backtracking over
+    cut positions: try every possible substring starting at the current index,
+    validate it against the constraint, and only recurse past cuts that pass.
 
     Steps:
     1. Initialize result list and backtrack helper with i=0 and empty path
@@ -905,12 +905,6 @@ Applications: Word search, pathfinding, maze solving, island problems, connected
 
 class GridBacktrackingPattern:
     """
-    Giveaway: "word exists in grid" built from SEQUENTIALLY ADJACENT cells, with
-    "same cell cannot be used twice in same path," is the tell for grid
-    backtracking — explore all 4 directions from a starting cell, temporarily mark
-    visited cells so a single path can't reuse one, then unmark on backtrack so
-    other paths (or other starting cells) can still use that cell.
-
     Problem: Given m*n board and word, return true if word exists in grid.
     Word constructed from sequentially adjacent cells (horizontal or vertical).
     Same cell cannot be used twice in same path.
@@ -933,6 +927,12 @@ class GridBacktrackingPattern:
     - Mark cell with special character during exploration (e.g., '#')
     - Unmark when backtracking so other paths can use it
     - Try all 4 directions: if ANY succeeds, entire search succeeds
+
+    Giveaway: "word exists in grid" built from SEQUENTIALLY ADJACENT cells, with
+    "same cell cannot be used twice in same path," is the tell for grid
+    backtracking — explore all 4 directions from a starting cell, temporarily mark
+    visited cells so a single path can't reuse one, then unmark on backtrack so
+    other paths (or other starting cells) can still use that cell.
 
     Steps:
     1. Iterate through every cell (r, c) in the board as a potential starting position

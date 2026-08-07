@@ -95,17 +95,17 @@ Applications: Reverse integer (LC 7), palindrome number (LC 9), happy number dig
 
 class DigitManipulationPattern:
     """
-    Giveaway: "return x with its digits reversed" plus an explicit overflow
-    check against a 32-bit range — needing to peel off and rebuild individual
-    digits (not the number as a whole) is what signals % 10 / // 10 digit
-    extraction instead of string-reversal tricks.
-
     Problem: Given a signed 32-bit integer x, return x with its digits reversed. If reversing causes overflow outside [-2^31, 2^31 - 1], return 0.
 
     Example:
         Input: x = 123    Output: 321
         Input: x = -123   Output: -321
         Input: x = 120    Output: 21
+
+    Giveaway: "return x with its digits reversed" plus an explicit overflow
+    check against a 32-bit range — needing to peel off and rebuild individual
+    digits (not the number as a whole) is what signals % 10 / // 10 digit
+    extraction instead of string-reversal tricks.
 
     Steps (Reverse Integer - LC 7):
     1. Record sign; work with abs(x)
@@ -160,16 +160,16 @@ divisibility, common periods, or repeating structure.
 
 class GCDPattern:
     """
-    Giveaway: the problem asks directly for the greatest common divisor of
-    specific numbers — that wording is the tell for the Euclidean algorithm
-    (repeatedly replacing (a,b) with (b, a%b)) rather than checking every
-    divisor up to min(a,b).
-
     Problem: Return the GCD of the smallest and largest element in nums.
 
     Example:
         Input: nums = [2, 5, 6, 9, 10]   Output: 2
             min=2, max=10 → gcd(2, 10) = 2
+
+    Giveaway: the problem asks directly for the greatest common divisor of
+    specific numbers — that wording is the tell for the Euclidean algorithm
+    (repeatedly replacing (a,b) with (b, a%b)) rather than checking every
+    divisor up to min(a,b).
 
     Steps (GCD of Array - LC 1979):
     1. a, b = min(nums), max(nums)
@@ -215,18 +215,18 @@ import math
 
 class PrimeSievePattern:
     """
-    Giveaway: "return the number of primes strictly less than n" — needing prime
-    status for every number up to a bound, not just testing one specific number,
-    is what signals sieving out multiples once instead of trial-dividing each
-    number individually.
-
     Problem: Given an integer n, return the number of prime numbers strictly less than n.
-    
+
     NOTE: A prime number is a number greater than 1 that has no positive divisors other than 1 and itself.
 
     Example:
         Input: n = 10   Output: 4   (primes: 2, 3, 5, 7)
         Input: n = 1    Output: 0
+
+    Giveaway: "return the number of primes strictly less than n" — needing prime
+    status for every number up to a bound, not just testing one specific number,
+    is what signals sieving out multiples once instead of trial-dividing each
+    number individually.
 
     Steps (Prime Sieve Algorithm):
     1. If n < 2, return 0
@@ -282,16 +282,16 @@ Super Pow (LC 372), any problem computing large powers efficiently.
 
 class FastExponentiationPattern:
     """
-    Giveaway: "implement pow(x, n)" where n can be large — computing a big power
-    efficiently, implying naive repeated multiplication is too slow, is the
-    signal for halving the exponent via repeated squaring instead of multiplying
-    x by itself n times.
-
     Problem: Implement pow(x, n), which computes x raised to the power n.
 
     Example:
         Input: x = 2.0, n = 10   Output: 1024.0
         Input: x = 2.0, n = -2   Output: 0.25
+
+    Giveaway: "implement pow(x, n)" where n can be large — computing a big power
+    efficiently, implying naive repeated multiplication is too slow, is the
+    signal for halving the exponent via repeated squaring instead of multiplying
+    x by itself n times.
 
     Steps (Pow(x,n) - LC 50):
     1. Handle negative n: x = 1/x, n = -n
@@ -342,16 +342,16 @@ any "big number" problem where int conversion is off-limits.
 
 class StringArithmeticPattern:
     """
-    Giveaway: numbers are given as strings with an explicit "must not convert
-    inputs to integers directly" — that ban, combined with needing an exact
-    digit-by-digit sum, is what signals simulating grade-school column
-    arithmetic instead of using built-in int conversion.
-
     Problem: Given two non-negative integers as strings, return their sum as a string. Must not convert inputs to integers directly.
 
     Example:
         Input: num1 = "456", num2 = "77"   Output: "533"
         Input: num1 = "11",  num2 = "123"  Output: "134"
+
+    Giveaway: numbers are given as strings with an explicit "must not convert
+    inputs to integers directly" — that ban, combined with needing an exact
+    digit-by-digit sum, is what signals simulating grade-school column
+    arithmetic instead of using built-in int conversion.
 
     Steps (Add Strings - LC 415):
     1. i, j = last index of num1, num2; carry = 0

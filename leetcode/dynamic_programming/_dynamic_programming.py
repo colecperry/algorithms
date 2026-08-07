@@ -324,22 +324,22 @@ Applications: House robber, climbing stairs, min cost climbing, decode ways.
 
 class LinearDP:
     """
-    Giveaway: "adjacent houses... alerting the police" — a linear sequence where
-    each decision (rob or skip) is constrained only by your immediate previous
-    choice, and you want the max total, is the tell for 1D DP where dp[i]
-    depends on just dp[i-1] and dp[i-2], rather than needing to look arbitrarily
-    far back.
-
     Problem: You are a robber planning to rob houses along a street. Each house has a certain amount of money. Adjacent houses have security systems connected - if two adjacent houses are robbed on the same night, the police are automatically called.
-    
-    Given an integer array nums representing the amount of money of each house, return the maximum amount of money you can rob without alerting the police. 
+
+    Given an integer array nums representing the amount of money of each house, return the maximum amount of money you can rob without alerting the police.
 
     # Example 1:
     # Input: nums = [1,2,3,1]
     # Output: 4
     # Explanation: Rob house 1 (money = 1) and then rob house 3 (money = 3).
     # Total amount you can rob = 1 + 3 = 4.
-    
+
+    Giveaway: "adjacent houses... alerting the police" — a linear sequence where
+    each decision (rob or skip) is constrained only by your immediate previous
+    choice, and you want the max total, is the tell for 1D DP where dp[i]
+    depends on just dp[i-1] and dp[i-2], rather than needing to look arbitrarily
+    far back.
+
     Steps:
     1. Define dp[i] = max money robbing from first i houses; set dp[0] = 0, dp[1] = nums[0]
     2. For each house i from 2 to n, apply the recurrence:
@@ -398,20 +398,20 @@ square.
 
 class GridDP:
     """
+    Problem: A robot is located at the top-left corner of an m x n grid. The robot can only move either down or right at any point in time. The robot is trying to reach the bottom-right corner.
+
+    How many possible unique paths are there?
+
+    Ex. 1
+    Input: m = 3, n = 7
+    Output: 28
+
     Giveaway: "robot... can only move either down or right" on a grid, asking
     how many paths exist to a fixed destination — movement restricted to two
     directions on a 2D grid, where each cell's count is just the sum of the
     cell above and the cell to the left, is the tell for filling a 2D table
     top-left to bottom-right.
 
-    Problem: A robot is located at the top-left corner of an m x n grid. The robot can only move either down or right at any point in time. The robot is trying to reach the bottom-right corner.
-    
-    How many possible unique paths are there?
-
-    Ex. 1
-    Input: m = 3, n = 7
-    Output: 28
-    
     Steps:
     1. Define dp[i][j] = number of unique paths to reach cell (i, j)
     2. Initialize base cases:
@@ -501,21 +501,21 @@ Applications: Partition equal subset, target sum, subset sum, coin change (count
 
 class KnapsackDP:
     """
-    Giveaway: "partition the array into two subsets such that the sum... is
-    equal" — needing to know, for a fixed target total, which sums are
-    reachable by picking a subset of numbers where EACH number is used at most
-    once, is the tell for 0/1 knapsack (a boolean array over achievable sums,
-    updated backwards per item) instead of trying every subset.
-
     Problem: Given an integer array nums, return true if you can partition
-    the array into two subsets such that the sum of elements in both subsets 
+    the array into two subsets such that the sum of elements in both subsets
     is equal.
 
     Example 1:
     Input: nums = [1,5,11,5]
     Output: true
     Explanation: The array can be partitioned as [1, 5, 5] and [11].
-    
+
+    Giveaway: "partition the array into two subsets such that the sum... is
+    equal" — needing to know, for a fixed target total, which sums are
+    reachable by picking a subset of numbers where EACH number is used at most
+    once, is the tell for 0/1 knapsack (a boolean array over achievable sums,
+    updated backwards per item) instead of trying every subset.
+
     Steps:
     1. If total sum is odd, return False immediately (can't partition equally)
     2. Set target = total // 2
@@ -599,23 +599,23 @@ Applications: LIS, Russian doll envelopes, maximum length of pair chain.
 
 class LISDP:
     """
-    Giveaway: "longest strictly increasing subsequence" — elements may be
-    skipped (subsequence, not subarray) but must stay in relative order and
-    increase, which forces you to compare each position against every earlier
-    position to see what it can extend, the tell for the O(n^2) "look back at
-    all previous indices" DP rather than a single linear scan.
-
     Problem: Given an integer array nums, return the length of the
     longest strictly increasing subsequence.
-    
-    A subsequence is an array derived from another array by deleting some 
+
+    A subsequence is an array derived from another array by deleting some
     or no elements without changing the order of the remaining elements.
 
     Example 1:
     Input: nums = [10,9,2,5,3,7,101,18]
     Output: 4
     Explanation: The longest increasing subsequence is [2,3,7,101], therefore the length is 4.
-    
+
+    Giveaway: "longest strictly increasing subsequence" — elements may be
+    skipped (subsequence, not subarray) but must stay in relative order and
+    increase, which forces you to compare each position against every earlier
+    position to see what it can extend, the tell for the O(n^2) "look back at
+    all previous indices" DP rather than a single linear scan.
+
     Steps:
     1. Initialize dp array of size n with all 1s (each element is its own subsequence)
     2. For each position i from 1 to n-1, check all previous positions j < i:
@@ -689,6 +689,15 @@ Applications: LCS, edit distance, shortest common supersequence, diff tools.
 
 class LCSDP:
     """
+    Problem: Given two strings text1 and text2, return the length of their longest common subsequence. If there is no common subsequence, return 0.
+
+    A subsequence is a string generated from the original string by deleting some (or no) characters without changing the relative order of the remaining characters.
+
+    Example 1:
+    Input: text1 = "abcde", text2 = "ace"
+    Output: 3
+    Explanation: The longest common subsequence is "ace" and its length is 3.
+
     Giveaway: "given two strings... return the length of their longest common
     subsequence" — comparing TWO independent sequences (not one) for a shared
     subsequence, where characters can be skipped in either string, is the tell
@@ -696,15 +705,6 @@ class LCSDP:
     forward the better of the two neighbors, rather than the single-sequence
     LIS recurrence.
 
-    Problem: Given two strings text1 and text2, return the length of their longest common subsequence. If there is no common subsequence, return 0.
-    
-    A subsequence is a string generated from the original string by deleting some (or no) characters without changing the relative order of the remaining characters.
-
-    Example 1:
-    Input: text1 = "abcde", text2 = "ace" 
-    Output: 3  
-    Explanation: The longest common subsequence is "ace" and its length is 3.
-    
     Steps:
     1. Define dp[i][j] = LCS length of text1[0:i] and text2[0:j]; initialize all cells to 0
     2. For each character pair (i, j) starting at (1, 1):
@@ -825,31 +825,31 @@ decisions.
 
 class StateMachineDP:
     """
-    Giveaway: "after you sell... you cannot buy on the next day (cooldown)" — an
-    extra rule that makes the profit on a given day depend on which of several
-    distinct MODES you were in the day before (holding, just sold, resting),
-    rather than just yesterday's best profit, is the tell for tracking parallel
-    dp values per state with explicit transitions between them.
-
     Problem: You are given an array prices where prices[i] is the price of a stock on day i. You can complete as many transactions as you like with the following restrictions: After you sell your stock, you cannot buy stock on the next day (cooldown 1 day)
-    
+
     Return the maximum profit you can achieve.
 
     Example 1:
     Input: prices = [1,2,3,0,2]
     Output: 3
     Explanation: transactions = [buy, sell, cooldown, buy, sell]
-    
+
     States:
     - hold: currently holding stock
     - sold: just sold stock today
     - rest: not holding, not in cooldown
-    
+
     Transitions:
     - hold: either already holding or buy today from rest
     - sold: must have been holding, sell today
     - rest: either already resting or cooldown from sold
-    
+
+    Giveaway: "after you sell... you cannot buy on the next day (cooldown)" — an
+    extra rule that makes the profit on a given day depend on which of several
+    distinct MODES you were in the day before (holding, just sold, resting),
+    rather than just yesterday's best profit, is the tell for tracking parallel
+    dp values per state with explicit transitions between them.
+
     Steps:
     1. Identify the three states: hold (own stock), sold (just sold today), rest (no stock, no cooldown)
     2. Initialize base cases for day 0:

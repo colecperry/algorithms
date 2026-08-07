@@ -185,11 +185,6 @@ Applications: Anagrams, most frequent elements, valid parentheses, character fre
 
 class FrequencyCounting:
     """
-    Giveaway: checking whether two strings are anagrams of each other — needing
-    to compare the exact count of every character between two strings (not just
-    membership) is the signal for building frequency maps and comparing them,
-    rather than sorting or a single hash set.
-
     Problem 1: Check if two strings are anagrams.
 
     Example:
@@ -197,6 +192,11 @@ class FrequencyCounting:
         Output: True
 
         Both have: a(3), n(1), g(1), r(1), m(1)
+
+    Giveaway: checking whether two strings are anagrams of each other — needing
+    to compare the exact count of every character between two strings (not just
+    membership) is the signal for building frequency maps and comparing them,
+    rather than sorting or a single hash set.
 
     Steps:
     1. Create two hash tables (one per string)
@@ -239,22 +239,22 @@ Applications: Two sum, three sum, four sum, pair with target, subarray sum.
 
 class LookupPattern:
     """
+    Problem 1: Find two numbers that add up to target.
+
+    Example:
+        Input: nums = [2,7,11,15], target = 9
+        Output: [0,1]
+
+        nums[0] + nums[1] = 2 + 7 = 9
+
+    TC: O(n) - single pass
+    SC: O(n) - hash table storage
+
     Giveaway: "find two numbers that add up to target" — needing a complementary
     value (target - current) for each element in one pass is what signals storing
     seen elements in a hash map for O(1) complement lookup instead of nested
     loops.
 
-    Problem 1: Find two numbers that add up to target.
-    
-    Example:
-        Input: nums = [2,7,11,15], target = 9
-        Output: [0,1]
-        
-        nums[0] + nums[1] = 2 + 7 = 9
-    
-    TC: O(n) - single pass
-    SC: O(n) - hash table storage
-    
     Steps:
     1. Create a hash table to store seen elements (value -> index)
     2. For each number:
@@ -310,11 +310,6 @@ Applications: Longest substring, minimum window, character replacement.
 
 class SlidingWindowHash:
     """
-    Giveaway: "longest substring without repeating characters" — needing the
-    longest contiguous run under a no-duplicates constraint means tracking what's
-    currently in a window and shrinking it from the left the moment a repeat
-    appears, which is the hash-set-plus-two-pointers tell.
-
     Problem 1: Longest substring without repeating characters.
 
     Example:
@@ -322,6 +317,11 @@ class SlidingWindowHash:
         Output: 3
 
         "abc" has length 3 with no repeats
+
+    Giveaway: "longest substring without repeating characters" — needing the
+    longest contiguous run under a no-duplicates constraint means tracking what's
+    currently in a window and shrinking it from the left the moment a repeat
+    appears, which is the hash-set-plus-two-pointers tell.
 
     Steps:
     1. Initialize a hash set to track characters in the current window and two pointers (left, right)
@@ -398,19 +398,19 @@ Applications: Group anagrams, group by pattern, categorize strings/numbers.
 
 class GroupingPattern:
     """
+    Problem 1: Group anagrams together.
+
+    Example:
+        Input: strs = ["eat","tea","tan","ate","nat","bat"]
+        Output: [["bat"],["nat","tan"],["ate","eat","tea"]]
+
+        "eat", "tea", "ate" are anagrams (same characters)
+
     Giveaway: "group anagrams together" — needing to bucket many strings by a
     shared property (same letters, different order) is what signals computing a
     canonical key per element and using a hash map of key -> list to route each
     element into its group.
 
-    Problem 1: Group anagrams together.
-    
-    Example:
-        Input: strs = ["eat","tea","tan","ate","nat","bat"]
-        Output: [["bat"],["nat","tan"],["ate","eat","tea"]]
-        
-        "eat", "tea", "ate" are anagrams (same characters)
-    
     Steps:
     1. Initialize a defaultdict(list) to hold groups
     2. For each string:
@@ -478,23 +478,23 @@ Applications: Fibonacci, climbing stairs, LRU cache, memoization.
 
 class CachingPattern:
     """
-    Giveaway: the recursion revisits the same starting index through multiple
-    different word-splitting paths (repeatedly asking "can the rest of the
-    string be segmented from here?") — those repeated overlapping subproblems,
-    not just any recursion, are what signal memoizing results in a hash map
-    instead of recomputing every branch.
-
     Check if string can be segmented into words from dictionary.
-        
+
         Example 1:
             Input: s = "catsandog", wordDict = ["cats","dog","sand","and","cat"]
             Output: False
-        
-        Example 2: 
+
+        Example 2:
             Input: s = "leetcode", wordDict = ["leet","code"]
             Output: true
             Explanation: Return true because "leetcode" can be segmented as "leet code".
-        
+
+        Giveaway: the recursion revisits the same starting index through multiple
+        different word-splitting paths (repeatedly asking "can the rest of the
+        string be segmented from here?") — those repeated overlapping subproblems,
+        not just any recursion, are what signal memoizing results in a hash map
+        instead of recomputing every branch.
+
         Steps:
         1. Convert wordDict to a set for O(1) lookups and create a memo cache
         2. Define recursive helper canSegmentFrom(start):

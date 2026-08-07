@@ -302,17 +302,17 @@ Applications: Search, find insertion point, find successor/predecessor, navigate
 
 class BSTSearch:
     """
+    Problem: Given the root of a binary search tree and an integer "val", find the node
+    in the BST that equals "val" and return the subtree rooted with that node. If such node doesn't exist, return null.
+
+    TC: O(h) where h = height (log n average, n worst case for skewed tree)
+    SC: O(h) for recursive call stack, O(1) for iterative
+
     Giveaway: given a binary search tree (not just a "binary tree") and asked to
     find the node equal to val — calling it out as a search tree instead of a plain
     tree is the tell to compare val against root.val and go left/right, rather than
     searching both subtrees like you would in an unordered tree.
 
-    Problem: Given the root of a binary search tree and an integer "val", find the node
-    in the BST that equals "val" and return the subtree rooted with that node. If such node doesn't exist, return null.
-    
-    TC: O(h) where h = height (log n average, n worst case for skewed tree)
-    SC: O(h) for recursive call stack, O(1) for iterative
-    
     Steps:
     1. If root is null, return None (base case — val not found)
     2. If root.val == val, return root (found the node)
@@ -379,18 +379,18 @@ Applications: Get sorted array, kth smallest, validate ordering, find pairs, mod
 
 class InOrderPattern:
     """
+    Problem: Given the root of a Binary Search Tree, return the minimum difference
+    between the values of any two different nodes in the tree.
+
+    TC: O(n) - visit each node once in in-order traversal
+    SC: O(n) for storing values + O(h) average for recursion stack
+
     Giveaway: "minimum difference between the values of any two different nodes"
     in a BST — because in-order traversal of a BST yields sorted values, the true
     minimum difference can only ever occur between two adjacent elements in that
     sorted order, which is what points to an in-order walk instead of comparing
     every pair of nodes.
 
-    Problem: Given the root of a Binary Search Tree, return the minimum difference
-    between the values of any two different nodes in the tree.
-    
-    TC: O(n) - visit each node once in in-order traversal
-    SC: O(n) for storing values + O(h) average for recursion stack
-    
     Steps:
     1. Run in-order traversal (left → root → right) to collect node values in sorted order
     2. After traversal, the minimum difference must be between adjacent elements in the sorted list
@@ -453,21 +453,21 @@ Applications: Validate BST, count valid nodes, enforce constraints, range valida
 
 class ValidationPattern:
     """
+    Problem: Given the root of a binary tree, determine if it is a valid binary search tree.
+
+    A valid BST is defined as follows:
+    - The left subtree of a node contains only nodes with keys less than the node's key
+    - The right subtree contains only nodes with keys greater than the node's key
+    - Both left and right subtrees must also be binary search trees
+
+    TC: O(n) - visit each node once
+    SC: O(h) - recursion stack depth
+
     Giveaway: "determine if it is a valid binary search tree" — checking a global
     ordering property across the whole tree, not just a node against its immediate
     children, is what signals passing down a shrinking (min, max) bound through the
     recursion instead of only comparing a node to its direct children.
 
-    Problem: Given the root of a binary tree, determine if it is a valid binary search tree.
-    
-    A valid BST is defined as follows:
-    - The left subtree of a node contains only nodes with keys less than the node's key
-    - The right subtree contains only nodes with keys greater than the node's key
-    - Both left and right subtrees must also be binary search trees
-    
-    TC: O(n) - visit each node once
-    SC: O(h) - recursion stack depth
-    
     Steps:
     1. Call validate(root, -inf, +inf) — root is unconstrained initially
     2. At each node, check if node.val is within (min_val, max_val); return False if not
@@ -539,11 +539,6 @@ Applications: Range sum, range count, range search, delete in range, collect ran
 
 class RangeQueryPattern:
     """
-    Giveaway: "return the sum of ... all nodes with a value in the inclusive range
-    [low, high]" on a search tree — an explicit numeric range combined with the BST
-    ordering guarantee is the tell that whole subtrees can be skipped (go right only
-    if too small, left only if too large) instead of visiting every node.
-
     Problem: Given the root of a binary search tree and two integers low and high,
     return the sum of values of all nodes with a value in the inclusive range [low, high].
 
@@ -555,7 +550,12 @@ class RangeQueryPattern:
     #               3   7    18
     #
     # Range: [7, 15]
-    
+
+    Giveaway: "return the sum of ... all nodes with a value in the inclusive range
+    [low, high]" on a search tree — an explicit numeric range combined with the BST
+    ordering guarantee is the tell that whole subtrees can be skipped (go right only
+    if too small, left only if too large) instead of visiting every node.
+
     Steps:
     1. If root is null, return 0 (base case)
     2. If root.val < low, prune the left subtree and recurse only right
@@ -629,18 +629,18 @@ Applications: Convert sorted array to BST, flatten BST, serialize/deserialize, r
 
 class BSTConstructionPattern:
     """
+    Problem: Given an integer array nums where the elements are sorted in ascending order,
+    convert it to a height-balanced binary search tree.
+
+    A height-balanced BST is a binary tree in which the depth of the two subtrees of every
+    node never differs by more than one.
+
     Giveaway: "elements ... sorted in ascending order, convert it to a
     height-balanced binary search tree" — being told the input is already sorted
     and the output must be height-balanced is what signals recursively picking the
     middle element as root, rather than inserting values one at a time, which can
     skew the tree.
 
-    Problem: Given an integer array nums where the elements are sorted in ascending order,
-    convert it to a height-balanced binary search tree.
-    
-    A height-balanced BST is a binary tree in which the depth of the two subtrees of every
-    node never differs by more than one.
-    
     Steps:
     1. Compute mid = (left + right) // 2 and create a TreeNode with nums[mid] as root
     2. Recursively call buildTree(left, mid - 1) and assign the result to root.left

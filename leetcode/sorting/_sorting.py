@@ -407,25 +407,25 @@ SORTING PATTERNS
 
 class CustomComparator:
     """
-    Giveaway: wording like "sort by length, then alphabetically if tied" or "arrange
-    these numbers to form the largest number" signals a custom comparator — a plain
-    value sort won't respect the multi-part or non-numeric ordering rule, so you need
-    a key function (or pairwise concatenation compare) that encodes it directly.
-
     Problem 1: Sort array of strings by length, then lexicographically if same length.
-    
+
     Example:
         Input: ["apple", "pie", "a", "banana", "cat"]
         Output: ["a", "cat", "pie", "apple", "banana"]
-        
+
         Explanation:
         - Length 1: "a"
         - Length 3: "cat", "pie" (alphabetical)
         - Length 5: "apple"
         - Length 6: "banana"
-    
+
     TC: O(n log n) - sorting dominates
     SC: O(n) - for sorted() output or O(1) for sort()
+
+    Giveaway: wording like "sort by length, then alphabetically if tied" or "arrange
+    these numbers to form the largest number" signals a custom comparator — a plain
+    value sort won't respect the multi-part or non-numeric ordering rule, so you need
+    a key function (or pairwise concatenation compare) that encodes it directly.
 
     Steps:
     1. Identify sorting criteria: primary = string length, secondary = alphabetical
@@ -580,22 +580,22 @@ print("Sort Colors:", nums)
 
 class QuickSelect:
     """
+    Problem 1: Find kth largest element in unsorted array.
+
+    Example:
+        Input: nums = [3,2,1,5,6,4], k = 2
+        Output: 5
+
+        Explanation: Sorted = [1,2,3,4,5,6]
+        2nd largest = 5
+
+    TC: O(n) average, O(n²) worst
+    SC: O(1) - in-place
+
     Giveaway: the problem asks only for the kth largest/smallest value (or the top-k
     most frequent elements) — not the fully sorted order — which is the tell that a
     full O(n log n) sort is wasteful and you can partition down to just the one
     target position instead.
-
-    Problem 1: Find kth largest element in unsorted array.
-    
-    Example:
-        Input: nums = [3,2,1,5,6,4], k = 2
-        Output: 5
-        
-        Explanation: Sorted = [1,2,3,4,5,6]
-        2nd largest = 5
-    
-    TC: O(n) average, O(n²) worst
-    SC: O(1) - in-place
 
     Steps:
     1. Convert kth largest to (n-k)th smallest index
@@ -739,20 +739,20 @@ print("Top K Frequent (Heap):", sol.topKFrequent_heap([1,1,1,2,2,3], 2))  # [1, 
 
 class LinearTimeSorting:
     """
+    Problem 1: Sort array where elements are in range [0, k].
+
+    Example:
+        Input: nums = [4, 2, 2, 8, 3, 3, 1], k = 10
+        Output: [1, 2, 2, 3, 3, 4, 8]
+
+    TC: O(n + k) - count occurrences + rebuild
+    SC: O(k) - count array
+
     Giveaway: the values are explicitly bounded to a small range (e.g. "elements are
     in range [0, k]") or the problem demands O(n) time for something that looks like
     it needs sorting (e.g. maximum gap after sorting) — an explicit range or an O(n)
     requirement beyond the O(n log n) comparison-sort limit is what points to
     counting/bucket sort instead of a general sort.
-
-    Problem 1: Sort array where elements are in range [0, k].
-    
-    Example:
-        Input: nums = [4, 2, 2, 8, 3, 3, 1], k = 10
-        Output: [1, 2, 2, 3, 3, 4, 8]
-    
-    TC: O(n + k) - count occurrences + rebuild
-    SC: O(k) - count array
 
     Steps:
     1. Find min and max values to determine range size
@@ -922,23 +922,23 @@ print("Maximum Gap:", sol.maximumGap([3,6,9,1]))  # 3
 
 class SortAndGreedy:
     """
+    Problem 1: Minimum number of meeting rooms needed.
+
+    Example:
+        Input: intervals = [[0,30],[5,10],[15,20]]
+        Output: 2
+
+        Explanation:
+        [0,30] and [5,10] overlap → need 2 rooms
+        [15,20] can reuse a room
+
+    TC: O(n log n) - sorting dominates
+    SC: O(n) - for heap
+
     Giveaway: "minimum number of meeting rooms" (or any interval-overlap resource
     question) tells you to sort intervals by start time and greedily track end times —
     the moment a problem is about scheduling/allocating against overlapping ranges,
     sorting-then-greedy is the play.
-
-    Problem 1: Minimum number of meeting rooms needed.
-    
-    Example:
-        Input: intervals = [[0,30],[5,10],[15,20]]
-        Output: 2
-        
-        Explanation:
-        [0,30] and [5,10] overlap → need 2 rooms
-        [15,20] can reuse a room
-    
-    TC: O(n log n) - sorting dominates
-    SC: O(n) - for heap
 
     Steps:
     1. Sort intervals by start time
@@ -1124,11 +1124,6 @@ print("Merge Sorted Array:", nums1)  # [1,2,2,3,5,6]
 
 def findDuplicates(nums: List[int]) -> List[int]: # LC 442
     """
-    Giveaway: n numbers whose values are constrained to exactly the range [1, n] (or
-    [0, n-1]), combined with an O(1)-extra-space requirement, is the signal for
-    cyclic sort — each value maps to exactly one "correct" index, so you can place
-    everything with swaps instead of hashing or sorting.
-
     Problem: Given array of n integers where 1 ≤ nums[i] ≤ n, some elements
     appear twice and others once. Find all elements that appear twice.
     Do this in O(n) time and O(1) space (output array doesn't count).
@@ -1136,9 +1131,14 @@ def findDuplicates(nums: List[int]) -> List[int]: # LC 442
     Example 1:
     Input: nums = [4,3,2,7,8,2,3,1]
     Output: [2,3]
-    
+
     TC: O(n) - each number swapped at most once to correct position
     SC: O(1) - only swap operations, output doesn't count
+
+    Giveaway: n numbers whose values are constrained to exactly the range [1, n] (or
+    [0, n-1]), combined with an O(1)-extra-space requirement, is the signal for
+    cyclic sort — each value maps to exactly one "correct" index, so you can place
+    everything with swaps instead of hashing or sorting.
 
     Steps:
     1. Iterate with pointer i; compute correct_idx = nums[i] - 1
@@ -1191,19 +1191,19 @@ class ListNode:
 
 class MergeSorted:
     """
+    Problem 1: Merge k sorted linked lists.
+
+    Example:
+        Input: lists = [[1,4,5],[1,3,4],[2,6]]
+        Output: [1,1,2,3,4,4,5,6]
+
+    TC: O(n log k) where n = total nodes, k = number of lists
+    SC: O(k) - heap size
+
     Giveaway: "merge k sorted lists" (or find the kth smallest across several
     rows/lists that are each already sorted, like a sorted matrix) is the tell —
     with more than two sorted sequences to combine, a pairwise two-pointer merge no
     longer scales, so you keep one pointer per sequence in a min-heap instead.
-
-    Problem 1: Merge k sorted linked lists.
-    
-    Example:
-        Input: lists = [[1,4,5],[1,3,4],[2,6]]
-        Output: [1,1,2,3,4,4,5,6]
-    
-    TC: O(n log k) where n = total nodes, k = number of lists
-    SC: O(k) - heap size
 
     Steps:
     1. Push (node.val, list_index, node) for each non-null head into min heap
@@ -1403,19 +1403,19 @@ print("Kth Smallest in Matrix:", sol.kthSmallest([[1,5,9],[10,11,13],[12,13,15]]
 
 class SortTwoPointers:
     """
+    Problem 1: Find all unique triplets that sum to zero.
+
+    Example:
+        Input: nums = [-1,0,1,2,-1,-4]
+        Output: [[-1,-1,2],[-1,0,1]]
+
+    TC: O(n²) - O(n log n) sort + O(n²) two pointers
+    SC: O(1) excluding output
+
     Giveaway: "find all triplets/pairs that sum to a target" (or "container that
     holds the most water") is the signal — sorting first turns the remaining search
     into a two-pointer scan from both ends, instead of checking every pair/triplet
     combination.
-
-    Problem 1: Find all unique triplets that sum to zero.
-    
-    Example:
-        Input: nums = [-1,0,1,2,-1,-4]
-        Output: [[-1,-1,2],[-1,0,1]]
-    
-    TC: O(n²) - O(n log n) sort + O(n²) two pointers
-    SC: O(1) excluding output
 
     Steps:
     1. Sort nums

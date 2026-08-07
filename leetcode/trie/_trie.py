@@ -112,11 +112,6 @@ Applications: Spell checker, word validator, autocomplete prefix check.
 
 class Trie:
     """
-    Giveaway: being asked to "implement" insert/search/startsWith as three distinct
-    operations over a growing set of words is the tell for a trie — needing
-    prefix-aware lookup (startsWith) as a first-class operation is something a hash
-    set of whole words can't give you in O(word length).
-
     Problem: Implement a Trie with insert, search, and startsWith operations.
 
     Example:
@@ -126,6 +121,11 @@ class Trie:
         trie.startsWith("app") -> True
         trie.insert("app")
         trie.search("app")     -> True
+
+    Giveaway: being asked to "implement" insert/search/startsWith as three distinct
+    operations over a growing set of words is the tell for a trie — needing
+    prefix-aware lookup (startsWith) as a first-class operation is something a hash
+    set of whole words can't give you in O(word length).
 
     Steps:
     Insert:
@@ -201,11 +201,6 @@ Applications: Word dictionary with wildcards, regex-like prefix matching.
 
 class WordDictionary:
     """
-    Giveaway: "search can use '.' as a wildcard that matches any single letter" is
-    the tell — needing letter-exact trie search PLUS an escape hatch to branch over
-    every possible character at certain positions signals a trie with a
-    DFS-based search that fans out at '.' instead of following one fixed path.
-
     Problem: Design a data structure that supports addWord and search, where search
     can use '.' as a wildcard that matches any single letter.
 
@@ -214,6 +209,11 @@ class WordDictionary:
         search("pad") -> False
         search(".ad") -> True   (matches "bad", "dad", or "mad")
         search("b..") -> True   (matches "bad")
+
+    Giveaway: "search can use '.' as a wildcard that matches any single letter" is
+    the tell — needing letter-exact trie search PLUS an escape hatch to branch over
+    every possible character at certain positions signals a trie with a
+    DFS-based search that fans out at '.' instead of following one fixed path.
 
     Steps:
     1. addWord: same as basic trie insert
@@ -278,12 +278,6 @@ Applications: Word Search II (Boggle), find multiple words in a grid.
 
 class WordSearchTrie:
     """
-    Giveaway: "find all words that can be formed by sequentially adjacent cells" for
-    a whole LIST of target words, not just one, is the signal to combine a trie
-    built from all the words with grid DFS — the trie lets every cell's DFS prune
-    the instant no word shares the prefix seen so far, instead of rerunning a
-    separate grid search per word.
-
     Problem: Given a 2D board of characters and a list of words, find all words
     that can be formed by sequentially adjacent cells (horizontal/vertical).
     Each cell may be used at most once per word.
@@ -295,6 +289,12 @@ class WordSearchTrie:
                  ['i','f','l','v']]
         words = ["oath","pea","eat","rain"]
         Output: ["eat","oath"]
+
+    Giveaway: "find all words that can be formed by sequentially adjacent cells" for
+    a whole LIST of target words, not just one, is the signal to combine a trie
+    built from all the words with grid DFS — the trie lets every cell's DFS prune
+    the instant no word shares the prefix seen so far, instead of rerunning a
+    separate grid search per word.
 
     Steps:
     1. Build trie from all words; store word string at each end node
@@ -375,11 +375,6 @@ Applications: Replace words with roots, abbreviation matching, shortest prefix q
 
 class ReplaceWords:
     """
-    Giveaway: "replace ... with the shortest root ... that is a prefix of the word"
-    is the tell — needing the SHORTEST matching prefix among many dictionary
-    entries is exactly what a trie gives for free: walk the word and stop at the
-    very first node marked as a complete root.
-
     Problem: Given a dictionary of roots and a sentence, replace each word in the sentence
     with the shortest root from the dictionary that is a prefix of the word.
     If no root is a prefix, keep the original word.
@@ -388,6 +383,11 @@ class ReplaceWords:
         dictionary = ["cat","bat","rat"]
         sentence = "the cattle was rattled by the battery"
         Output: "the cat was rat by the bat"
+
+    Giveaway: "replace ... with the shortest root ... that is a prefix of the word"
+    is the tell — needing the SHORTEST matching prefix among many dictionary
+    entries is exactly what a trie gives for free: walk the word and stop at the
+    very first node marked as a complete root.
 
     Steps:
     1. Build trie from dictionary roots; mark each root's end node with is_end=True

@@ -126,13 +126,6 @@ Example: [[1,3], [2,6]] → MUST merge to [1,6] (deterministic, no choice)
 
 class IntervalSelection:
     """
-    Giveaway: the problem says a pair "follows" another only if it starts after
-    the previous one ends, and asks for the longest such chain you can build by
-    choosing freely among all pairs — that "select as many non-overlapping items
-    as possible" phrasing, with no requirement to use every interval, is the tell
-    for sorting by end time and greedily grabbing what doesn't overlap, rather
-    than a DP over all subsets.
-
     You are given an array of n pairs pairs where pairs[i] = [lefti, righti] and lefti < righti. A pair p2 = [c, d] follows a pair p1 = [a, b] if b < c. A chain of pairs can be formed in this fashion.
 
     Return the length longest chain which can be formed. You do not need to use up all the given intervals. You can select pairs in any order.
@@ -146,7 +139,14 @@ class IntervalSelection:
     Input: pairs = [[1,2],[7,8],[4,5]]
     Output: 3
     Explanation: The longest chain is [1,2] -> [4,5] -> [7,8].
-    
+
+    Giveaway: the problem says a pair "follows" another only if it starts after
+    the previous one ends, and asks for the longest such chain you can build by
+    choosing freely among all pairs — that "select as many non-overlapping items
+    as possible" phrasing, with no requirement to use every interval, is the tell
+    for sorting by end time and greedily grabbing what doesn't overlap, rather
+    than a DP over all subsets.
+
     Steps:
     1. Sort pairs by end time (greedy choice: earliest ending first)
     2. Select the first pair, set last_end to its end value
@@ -196,14 +196,8 @@ Applications: Jump game, minimum jumps, gas station variants.
 
 class JumpGame:
     """
-    Giveaway: "each element represents your maximum jump length" combined with a
-    yes/no reachability question (not the minimum number of jumps) signals you
-    only need to track the farthest index reachable so far — there's no cost to
-    overshoot, so there's no benefit to trying every possible jump length, which
-    is what makes this greedy instead of BFS/DP.
-
     You are given an integer array nums. You are initially positioned at the array's first index, and each element in the array represents your maximum jump length at that position.
-    
+
     Return true if you can reach the last index, or false otherwise.
 
     Example 1:
@@ -215,7 +209,13 @@ class JumpGame:
     Input: nums = [3,2,1,0,4]
     Output: false
     Explanation: You will always arrive at index 3 no matter what. Its maximum jump length is 0, which makes it impossible to reach the last index.
-    
+
+    Giveaway: "each element represents your maximum jump length" combined with a
+    yes/no reachability question (not the minimum number of jumps) signals you
+    only need to track the farthest index reachable so far — there's no cost to
+    overshoot, so there's no benefit to trying every possible jump length, which
+    is what makes this greedy instead of BFS/DP.
+
     Steps:
     1. Initialize farthest = 0 to track max reachable index
     2. For each position i in nums:
@@ -261,16 +261,9 @@ Applications: Container with most water, trapping rain water, two sum in sorted 
 
 class TwoPointerGreedy:
     """
-    Giveaway: "find two lines that... form a container that holds the most
-    water" — the area is capped by the SHORTER of the two chosen lines, so
-    moving the pointer at the taller line can only ever keep or reduce the
-    water, never increase it. That one-directional bottleneck (only the shorter
-    side can improve the answer) is what signals moving inward from both ends
-    instead of checking every pair.
-
     Problem: You are given an integer array height of length n. There are n vertical lines
     where the two endpoints of the ith line are (i, 0) and (i, height[i]).
-    
+
     Find two lines that together with the x-axis form a container that holds the most water.
     Return the maximum amount of water a container can store.
 
@@ -278,7 +271,14 @@ class TwoPointerGreedy:
     Input: height = [1,8,6,2,5,4,8,3,7]
     Output: 49
     Explanation: The above vertical lines are represented by array [1,8,6,2,5,4,8,3,7]. In this case, the max area of water (blue section) the container can contain is 49 goes from index 1 (8) to index 8 (7).
-    
+
+    Giveaway: "find two lines that... form a container that holds the most
+    water" — the area is capped by the SHORTER of the two chosen lines, so
+    moving the pointer at the taller line can only ever keep or reduce the
+    water, never increase it. That one-directional bottleneck (only the shorter
+    side can improve the answer) is what signals moving inward from both ends
+    instead of checking every pair.
+
     Steps:
     1. Initialize left = 0, right = len(height) - 1, max_water = 0
     2. While left < right:
@@ -341,14 +341,6 @@ Applications: Resource allocation, task scheduling, k-way merges, capital optimi
 
 class HeapGreedy:
     """
-    Giveaway: two interchangeable-but-different resources (unlimited-height
-    ladders that are LIMITED IN COUNT, vs. bricks that are limited in total
-    quantity) where you must decide in real time which climbs deserve the
-    scarcer resource — that "spend the best resource optimally, but you might
-    have committed wrong earlier" setup is the tell for making an optimistic
-    greedy choice and using a heap to swap out the worst past decision when
-    resources run out.
-
     Problem: You are climbing buildings. To go from building i to i+1:
     - If heights[i+1] <= heights[i]: free (going down or same)
     - If heights[i+1] > heights[i]: need bricks OR a ladder for the climb
@@ -367,7 +359,15 @@ class HeapGreedy:
     - 2→3: down (free)  
     - 3→4: climb 3, use bricks (5-3=2 left)
     - 4→5: climb 5, need 5 bricks but only have 2 ❌
-    
+
+    Giveaway: two interchangeable-but-different resources (unlimited-height
+    ladders that are LIMITED IN COUNT, vs. bricks that are limited in total
+    quantity) where you must decide in real time which climbs deserve the
+    scarcer resource — that "spend the best resource optimally, but you might
+    have committed wrong earlier" setup is the tell for making an optimistic
+    greedy choice and using a heap to swap out the worst past decision when
+    resources run out.
+
     Steps:
     1. For each upward climb between buildings:
        a. Push the climb height onto a min heap (use ladder optimistically)
@@ -460,18 +460,18 @@ Applications: Assign cookies, distribute candies, task assignment with constrain
 
 class DistributionGreedy:
     """
+    Problem: Assume you are a parent trying to give cookies to children. Each child i has
+    a greed factor g[i] (minimum cookie size they'll be content with). Each cookie j has
+    size s[j]. You can only give one cookie to each child.
+
+    Return maximum number of content children.
+
     Giveaway: "each child i has a minimum greed factor... each cookie has a
     size... give one cookie to each child" to maximize the count satisfied —
     matching two independent lists against each other by a threshold condition,
     where using a bigger resource than necessary wastes it, is the tell for
     sorting both sides and greedily pairing smallest-to-smallest.
 
-    Problem: Assume you are a parent trying to give cookies to children. Each child i has
-    a greed factor g[i] (minimum cookie size they'll be content with). Each cookie j has
-    size s[j]. You can only give one cookie to each child.
-    
-    Return maximum number of content children.
-    
     Steps:
     1. Sort greed factors g and cookie sizes s in ascending order
     2. Initialize child pointer = 0
@@ -524,6 +524,10 @@ Applications: Partition labels, split array into consecutive subsequences, strin
 
 class StringPartitioning:
     """
+    Problem: You are given a string s. Partition s into as many parts as possible so that
+    each letter appears in at most one part. Return a list of integers representing the
+    size of these parts.
+
     Giveaway: "partition s... so that each letter appears in at most one part" —
     since a letter's occurrences can be far apart, the problem forces every
     partition to stretch out to cover the LAST occurrence of anything it
@@ -531,10 +535,6 @@ class StringPartitioning:
     closing a partition only when the current index catches up to it, rather
     than any kind of window or DP.
 
-    Problem: You are given a string s. Partition s into as many parts as possible so that
-    each letter appears in at most one part. Return a list of integers representing the
-    size of these parts.
-    
     Steps:
     1. Precompute last occurrence index for every character in s
     2. Initialize partition_start = 0, partition_end = 0

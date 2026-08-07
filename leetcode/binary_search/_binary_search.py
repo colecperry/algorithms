@@ -194,17 +194,17 @@ Applications: Insert into sorted array, find lower/upper bound, first/last occur
 
 class InsertionPositionPattern:
     """
-    Giveaway: "return the index where target would be inserted" to keep an already
-    sorted array sorted is the signal for binary search — you don't need to find
-    the target, just the boundary it belongs at, which is exactly where a normal
-    binary search's left pointer lands when the loop ends without a match.
-
     Problem: Given sorted array and target, return index where target would be inserted
     to maintain sorted order. If target exists, return its current index.
 
     Example 1:
         Input: nums = [1,3,5,6], target = 5
         Output: 2
+
+    Giveaway: "return the index where target would be inserted" to keep an already
+    sorted array sorted is the signal for binary search — you don't need to find
+    the target, just the boundary it belongs at, which is exactly where a normal
+    binary search's left pointer lands when the loop ends without a match.
 
     Steps:
     1. Initialize left=0, right=len(nums)-1
@@ -259,16 +259,16 @@ Applications: Search rotated sorted array, find minimum in rotated array.
 
 class RotatedArrayPattern:
     """
-    Giveaway: "sorted array rotated at an unknown pivot" is the tell — the array
-    isn't fully sorted anymore, but splitting at mid still guarantees one side is
-    properly ordered, so you can still eliminate half the search space each step by
-    checking which half is sorted and whether the target falls in its range.
-
     Problem: Search for target in sorted array rotated at unknown pivot. Original: [0,1,2,4,5,6,7] rotated to [4,5,6,7,0,1,2]
 
     Example 1:
     - Input: nums = [4,5,6,7,0,1,2], target = 0
     - Output: 4
+
+    Giveaway: "sorted array rotated at an unknown pivot" is the tell — the array
+    isn't fully sorted anymore, but splitting at mid still guarantees one side is
+    properly ordered, so you can still eliminate half the search space each step by
+    checking which half is sorted and whether the target falls in its range.
 
     Steps:
     1. Compare nums[left] with nums[mid] to identify sorted half
@@ -347,12 +347,6 @@ import math
 
 class AnswerSpacePattern:
     """
-    Giveaway: asking for the MINIMUM (or maximum) value of some parameter — here
-    Koko's eating speed k — that still satisfies a checkable condition ("finish
-    within h hours") is the signal to binary search over the range of POSSIBLE
-    ANSWERS themselves, testing each candidate speed with a feasibility function,
-    rather than searching for a value inside an array.
-
     Problem: Koko loves to eat bananas. There are n piles of bananas, the ith pile has piles[i] bananas. The guards have gone and will come back in h hours.
     
     Koko can decide her bananas-per-hour eating speed of k. Each hour, she chooses some pile of bananas and eats k bananas from that pile. If the pile has less than k bananas, she eats all of them instead and will not eat any more bananas during this hour.
@@ -364,7 +358,13 @@ class AnswerSpacePattern:
     Example 1:
     Input: piles = [3,6,7,11], h = 8
     Output: 4
-    
+
+    Giveaway: asking for the MINIMUM (or maximum) value of some parameter — here
+    Koko's eating speed k — that still satisfies a checkable condition ("finish
+    within h hours") is the signal to binary search over the range of POSSIBLE
+    ANSWERS themselves, testing each candidate speed with a feasibility function,
+    rather than searching for a value inside an array.
+
     Steps:
     1. Define answer range: [1, max(piles)]
        a. Minimum speed: 1 banana/hour
@@ -440,16 +440,16 @@ Applications: 2D matrix search, grid search with sorted property.
 
 class MatrixSearchPattern:
     """
+    Problem: Search target in m*n matrix where:
+    - Each row sorted in ascending order
+    - First integer of each row > last integer of previous row
+
     Giveaway: a matrix described as row-sorted where "the first integer of each row
     is greater than the last integer of the previous row" is really one long sorted
     list in disguise — that specific guarantee is what lets a single binary search
     run over the whole grid via index-to-row/col conversion, instead of doing a
     separate search per row.
 
-    Problem: Search target in m*n matrix where:
-    - Each row sorted in ascending order
-    - First integer of each row > last integer of previous row
-    
     Steps:
     1. Treat matrix as 1D array with rows*cols elements
     2. Binary search on range [0, rows*cols - 1]
@@ -539,11 +539,6 @@ Applications: Find peak, find local maximum, bitonic array search.
 
 class PeakElementPattern:
     """
-    Giveaway: "find a peak element" (greater than both neighbors) in an array that
-    is NOT stated to be sorted is the tell for this binary search variant —
-    comparing mid to just its next neighbor still reveals which direction is
-    "uphill," letting you discard half the array each step with no global ordering.
-
     Problem: Find peak element where nums[i] > nums[i-1] and nums[i] > nums[i+1] and return it's index.
 
     Neighbors of out-of-bound indices are -infinity.
@@ -552,6 +547,11 @@ class PeakElementPattern:
     - Input: nums = [1,2,3,1]
     - Output: 2
     - Explanation: 3 is a peak element and your function should return the index number 2.
+
+    Giveaway: "find a peak element" (greater than both neighbors) in an array that
+    is NOT stated to be sorted is the tell for this binary search variant —
+    comparing mid to just its next neighbor still reveals which direction is
+    "uphill," letting you discard half the array each step with no global ordering.
 
     Steps:
     1. Compare nums[mid] with nums[mid+1] to determine slope direction

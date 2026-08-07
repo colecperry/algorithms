@@ -168,13 +168,13 @@ Applications: Top K frequent, sort by frequency, frequency ranking.
 
 class FrequencyBucketPattern:
     """
+    Problem: Given an integer array nums and an integer k, return the k most frequent elements.
+
     Giveaway: "return the k most frequent elements" — needing to rank by how
     often values occur rather than by the values themselves, combined with the fact
     that frequency is naturally bounded between 0 and n, is what signals using
     frequency as a bucket index instead of sorting by count with a comparison sort.
 
-    Problem: Given an integer array nums and an integer k, return the k most frequent elements.
-    
     How it works:
     1. Count frequency of each element
     2. Use frequency as bucket index
@@ -242,17 +242,17 @@ Applications: Maximum gap, range-based grouping.
 
 class MaxGapPattern:
     """
+    Problem: Find max difference between successive elements in sorted form.
+    Must run in O(n) time.
+
+    Input: [3, 6, 9, 1] → sorted: [1, 3, 6, 9]
+    Output: 3 (gap between 3→6 or 6→9)
+
     Giveaway: "find max difference between successive elements in sorted form ...
     must run in O(n) time" — asking for a value that normally requires fully
     sorting first, but under an explicit linear-time constraint, is what signals
     distributing into range buckets sized so the answer must span a bucket
     boundary, instead of actually sorting.
-
-    Problem: Find max difference between successive elements in sorted form.
-    Must run in O(n) time.
-    
-    Input: [3, 6, 9, 1] → sorted: [1, 3, 6, 9]
-    Output: 3 (gap between 3→6 or 6→9)
     """
     def maximumGap(self, nums: List[int]) -> int:  # LC 164
         """

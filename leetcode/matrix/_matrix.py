@@ -200,11 +200,6 @@ Applications: Number of islands, flood fill, surrounded regions, word search.
 
 class MatrixDFSBFS:
     """
-    Giveaway: "return the number of islands" formed by connecting adjacent '1's is
-    asking you to count separate connected blobs in a grid — needing to fully mark
-    off one blob before moving to the next unvisited land cell is what signals
-    DFS/BFS with a visited set rather than a simple per-cell scan.
-
     Problem: Given an m x n 2D binary grid which represents a map of '1's (land) and
     '0's (water), return the number of islands. An island is surrounded by water and
     formed by connecting adjacent lands horizontally or vertically.
@@ -217,6 +212,11 @@ class MatrixDFSBFS:
             ["0","0","0","1","1"]
         ]
         Output: 3
+
+    Giveaway: "return the number of islands" formed by connecting adjacent '1's is
+    asking you to count separate connected blobs in a grid — needing to fully mark
+    off one blob before moving to the next unvisited land cell is what signals
+    DFS/BFS with a visited set rather than a simple per-cell scan.
 
     Steps:
     1. Iterate through every cell in the grid
@@ -372,11 +372,6 @@ flipping/mirroring images, any problem requiring in-place matrix rotation.
 
 class MatrixTransformation:
     """
-    Giveaway: "rotate the image by 90 degrees... in-place" rules out building a new
-    matrix, and a rotation being expressible as mirroring across the diagonal plus
-    reversing rows is the specific insight that turns "rotate" into the
-    transpose-then-reverse recipe rather than a from-scratch coordinate remap.
-
     Problem: You are given an n x n 2D matrix representing an image. Rotate the image
     by 90 degrees clockwise in-place.
 
@@ -394,6 +389,11 @@ class MatrixTransformation:
 
     - TC: O(n²) - touch each cell once for transpose, once for reverse
     - SC: O(1) - in-place transformation
+
+    Giveaway: "rotate the image by 90 degrees... in-place" rules out building a new
+    matrix, and a rotation being expressible as mirroring across the diagonal plus
+    reversing rows is the specific insight that turns "rotate" into the
+    transpose-then-reverse recipe rather than a from-scratch coordinate remap.
 
     Steps:
     1. Transpose the matrix in-place:
@@ -456,11 +456,6 @@ Applications: Search a 2D Matrix II (LC 240), find k-th smallest in sorted matri
 
 class MatrixSearch:
     """
-    Giveaway: "each row is sorted left to right and each column is sorted top to
-    bottom" (rather than the whole matrix being one sorted sequence) is the specific
-    detail that rules out binary search and instead points to starting at a corner
-    where every step can confidently eliminate a whole row or column.
-
     Problem: Search for a target in an m x n matrix where each row is sorted
     left to right and each column is sorted top to bottom.
 
@@ -483,6 +478,11 @@ class MatrixSearch:
 
     - TC: O(m + n) - each step eliminates one row or column
     - SC: O(1)
+
+    Giveaway: "each row is sorted left to right and each column is sorted top to
+    bottom" (rather than the whole matrix being one sorted sequence) is the specific
+    detail that rules out binary search and instead points to starting at a corner
+    where every step can confidently eliminate a whole row or column.
 
     Steps:
     1. Start at top-right corner: r=0, c=cols-1
@@ -531,33 +531,33 @@ Applications: Unique paths, minimum path sum, dungeon game, triangle paths.
 
 class GridDP:
     """
+    Problem: Given an m x n grid filled with non-negative numbers, find a path from
+    top-left to bottom-right which minimizes the sum of numbers along the path.
+    You can only move down or right at each step.
+
+    Example:
+        grid = [[1,3,1],
+                [1,5,1],
+                [4,2,1]]
+
+        Minimum path: 1→3→1→1→1 = 7
+        (Not 1→1→4→2→1 = 9 or 1→1→5→1→1 = 9)
+
+        DP table shows minimum sum to reach each cell:
+        [[1, 4, 5],
+         [2, 7, 6],
+         [6, 8, 7]]
+
+        Output: 7
+
+    TC: O(m * n) - fill entire grid once
+    SC: O(m * n) - DP table (can optimize to O(min(m,n)))
+
     Giveaway: "find a path... which minimizes the sum" with movement restricted to
     only down or right means every cell's best value depends only on the cell above
     and the cell to the left — that top-left-to-bottom-right dependency is what
     signals filling a grid DP table instead of exploring every path with DFS.
 
-    Problem: Given an m x n grid filled with non-negative numbers, find a path from
-    top-left to bottom-right which minimizes the sum of numbers along the path.
-    You can only move down or right at each step.
-    
-    Example:
-        grid = [[1,3,1],
-                [1,5,1],
-                [4,2,1]]
-        
-        Minimum path: 1→3→1→1→1 = 7
-        (Not 1→1→4→2→1 = 9 or 1→1→5→1→1 = 9)
-        
-        DP table shows minimum sum to reach each cell:
-        [[1, 4, 5],
-         [2, 7, 6],
-         [6, 8, 7]]
-        
-        Output: 7
-    
-    TC: O(m * n) - fill entire grid once
-    SC: O(m * n) - DP table (can optimize to O(min(m,n)))
-    
     Steps:
     1. Create a dp table of the same size as grid
     2. Set dp[0][0] = grid[0][0] as the base case

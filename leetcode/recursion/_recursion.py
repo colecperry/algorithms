@@ -95,16 +95,16 @@ Applications: Factorial, power, sum array, reverse string, recursive search.
 
 class LinearRecursion:
     """
-    Giveaway: a definition like "n! = n x (n-1) x ... x 1" — where the answer is
-    explicitly the current value combined with the same computation on one smaller
-    input — is the tell for straightforward linear recursion instead of any
-    looping/multi-branch technique.
-
     Problem: Compute n! = n x (n-1) x ... x 2 x 1.
 
     Example:
         factorial(5) = 120
         factorial(0) = 1
+
+    Giveaway: a definition like "n! = n x (n-1) x ... x 1" — where the answer is
+    explicitly the current value combined with the same computation on one smaller
+    input — is the tell for straightforward linear recursion instead of any
+    looping/multi-branch technique.
 
     Steps:
     1. Base case: if n <= 1, return 1  (0! = 1! = 1)
@@ -153,11 +153,6 @@ class TreeNode:
 
 class TreeDFSRecursion:
     """
-    Giveaway: "maximum depth of a binary tree" (or any question phrased in terms of a
-    node's left and right subtrees) signals tree DFS recursion — the answer at each
-    node depends on combining results from both children, so you recurse into both
-    and combine on the way back up.
-
     Problem: Find the maximum depth of a binary tree (number of nodes along
     the longest path from root to a leaf node).
 
@@ -169,6 +164,11 @@ class TreeDFSRecursion:
                 15   7
 
         Output: 3
+
+    Giveaway: "maximum depth of a binary tree" (or any question phrased in terms of a
+    node's left and right subtrees) signals tree DFS recursion — the answer at each
+    node depends on combining results from both children, so you recurse into both
+    and combine on the way back up.
 
     Steps:
     1. Base case: if node is None, return 0 (null contributes 0 depth)
@@ -217,17 +217,17 @@ Applications: Subsets, permutations, combinations, N-Queens, word search, Sudoku
 
 class Backtracking:
     """
-    Giveaway: "return all possible subsets" (the power set) is the tell — needing
-    every combination of include/exclude choices, not just one valid answer, is what
-    calls for backtracking: choose an element, recurse, then undo it before trying
-    the next.
-
     Problem: Given an integer array nums of unique elements, return all possible subsets
     (the power set). The solution set must not contain duplicate subsets.
 
     Example:
         Input: [1, 2, 3]
         Output: [[], [1], [1,2], [1,2,3], [1,3], [2], [2,3], [3]]
+
+    Giveaway: "return all possible subsets" (the power set) is the tell — needing
+    every combination of include/exclude choices, not just one valid answer, is what
+    calls for backtracking: choose an element, recurse, then undo it before trying
+    the next.
 
     Steps:
     1. At each call, snapshot the current path as a valid subset (every prefix is valid)
@@ -286,17 +286,17 @@ Applications: Fibonacci, climbing stairs, coin change, longest common subsequenc
 
 class MemoRecursion:
     """
-    Giveaway: "in how many distinct ways can you reach the top" with a recurrence
-    like ways(n) = ways(n-1) + ways(n-2) is the tell for memoization — the same
-    smaller subproblems (like ways(3)) get recomputed many times in plain recursion,
-    so caching turns O(2^n) into O(n).
-
     Problem: You are climbing a staircase with n steps. Each time you can climb
     1 or 2 steps. In how many distinct ways can you reach the top?
 
     Example:
         climbStairs(3) = 3
         Paths: [1,1,1], [1,2], [2,1]
+
+    Giveaway: "in how many distinct ways can you reach the top" with a recurrence
+    like ways(n) = ways(n-1) + ways(n-2) is the tell for memoization — the same
+    smaller subproblems (like ways(3)) get recomputed many times in plain recursion,
+    so caching turns O(2^n) into O(n).
 
     Steps:
     1. Base case: n <= 2 -> return n  (1 way for 1 step, 2 ways for 2 steps)
